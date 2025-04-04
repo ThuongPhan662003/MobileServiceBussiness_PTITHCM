@@ -1,0 +1,487 @@
+{% extends 'admin_home/admin_base.html' %}
+
+{% block title %}Quản lý Nhóm Quyền{% endblock %}
+
+{% block content %}
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f5f6fa;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    h1 span {
+        margin-right: 10px;
+    }
+
+    .container {
+        width: 80%;
+        margin: 40px auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+        padding: 14px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .toggle-btn {
+        cursor: pointer;
+        transition: transform 0.3s;
+        font-size: 1.2rem;
+    }
+
+    .toggle-btn.active {
+        transform: rotate(180deg);
+    }
+
+    .staff-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .staff-table th,
+    .staff-table td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+    }
+
+    .staff-table th {
+        background-color: #f1f1f1;
+        color: #333;
+    }
+
+    .staff-table td {
+        color: #333;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 50%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .modal-header button {
+        background: transparent;
+        border: none;
+        color: #f44336;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .modal-content button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .modal-content button:hover {
+        background-color: #45a049;
+    }
+
+    .modal-content .close {
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px;
+    }
+
+    .staff-table {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .staff-table thead,
+    .staff-table tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .flashes {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .flashes li {
+        background: #ffdddd;
+        border-left: 4px solid #f44336;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">👥</span> Danh sách Nhóm Quyền
+    </h1>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Mã Nhóm</th>
+                    <th>Tên Nhóm Quyền</th>
+                    <th>Số nhân viên</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in role_groups %}
+                <tr>
+                    <td>
+                        <button onclick="toggleRow('{{ role.id }}')" id="toggle-btn-{{ role.id }}" class="toggle-btn">
+                            <!-- Sử dụng hình tam giác Unicode -->
+                            <span id="triangle-{{ role.id }}" class="triangle-down">▼</span>
+                        </button>
+                    </td>
+                    <td>{{ role.id }}</td>
+                    <td class="font-semibold">{{ role.role_name }}</td>
+                    <td id="staff-count-{{ role.id }}">-</td>
+                    <td>
+                        <button onclick="openAddModal('{{ role.id }}')"
+                            class="bg-green-500 text-white px-3 py-1 rounded">➕ Thêm</button>
+                        <button onclick="openPermissionModal('{{ role.id }}')"
+                            class="bg-blue-500 text-white px-3 py-1 rounded">🔧 Quản lý quyền</button>
+                    </td>
+                </tr>
+                <tr id="row{{ role.id }}" class="hidden">
+                    <td colspan="5">
+                        <div id="staff-list-{{ role.id }}" class="text-gray-500 italic"></div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Thêm Nhân Viên -->
+<div id="addStaffModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-semibold">Thêm Nhân Viên</h3>
+            <button onclick="closeModal('addStaffModal')" class="close">&times;</button>
+        </div>
+        <ul id="staffList" class="mt-4"></ul>
+        <button onclick="confirmAddStaff()" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Thêm</button>
+    </div>
+</div>
+
+<!-- Modal Quản lý Quyền -->
+<div id="permissionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-semibold text-center">🎛️ Quản lý chức năng nhóm</h3>
+            <button onclick="closeModal('permissionModal')" class="close">&times;</button>
+        </div>
+        <h4 class="mt-4 font-semibold">🔹 Chức năng hiện tại:</h4>
+        <div class="staff-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tên chức năng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="roleFunctionsList">
+                    <tr>
+                        <td colspan="2" class="text-gray-500 italic">Đang tải...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h4 class="mt-4 font-semibold">➕ Chọn quyền bổ sung:</h4>
+        <div id="permissionList" class="p-2 bg-gray-100 rounded-lg" style="max-height: 200px; overflow-y: auto;">
+            <!-- Các quyền bổ sung sẽ hiển thị dưới dạng mỗi quyền chiếm một dòng -->
+        </div>
+        <button onclick="savePermissions()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mt-4 w-full"
+            style="margin-top: 10px;">💾 Lưu thay đổi</button>
+    </div>
+</div>
+
+<script>
+    let selectedRoleId = null;
+
+    function toggleRow(roleId) {
+        let row = document.getElementById('row' + roleId);
+        let button = document.getElementById('toggle-btn-' + roleId);
+        let staffList = document.getElementById('staff-list-' + roleId);
+        let staffCount = document.getElementById('staff-count-' + roleId);
+
+        if (row.style.display === "none" || row.style.display === "") {
+            row.style.display = "table-row";
+            button.classList.add("active");
+
+            if (!staffList.dataset.loaded) {
+                staffList.innerHTML = 'Đang tải...';
+                fetch(`/role_groups/staffsByRoleGroup/${roleId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Dữ liệu từ API:", data);
+                        if (data.length > 0) {
+                            staffList.innerHTML = `
+                            <table class='staff-table'>
+                                <thead>
+                                    <tr>
+                                        <th>Tên Nhân Viên</th>
+                                        <th>Email</th>
+                                        <th>Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.map(staff => `
+                                        <tr>
+                                            <td>${staff.full_name}</td>
+                                            <td>${staff.email}</td>
+                                            <td><button onclick="removeStaff(${staff.id}, ${roleId})" class='text-red-500'>❌</button></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>`;
+                            staffCount.innerText = data.length;  // Cập nhật số lượng nhân viên
+                        } else {
+                            staffList.innerHTML = '<p class="text-gray-500 italic">Chưa có nhân viên trong nhóm này.</p>';
+                            staffCount.innerText = '0';
+                        }
+                        staffList.dataset.loaded = "true";
+                    })
+                    .catch(error => {
+                        staffList.innerHTML = '<p class="text-red-500">Lỗi tải dữ liệu.</p>';
+                    });
+            }
+        } else {
+            row.style.display = "none";
+            button.classList.remove("active");
+        }
+    }
+
+    function removeStaff(staffId, roleId) {
+        fetch(`/admin/roles/removeStaff/${roleId}/${staffId}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(() => toggleRow(roleId));
+    }
+
+    function openAddModal(roleId) {
+        selectedRoleId = roleId;
+        document.getElementById('addStaffModal').style.display = 'flex';
+        let staffList = document.getElementById('staffList');
+        staffList.innerHTML = 'Đang tải...';
+
+        fetch('/role_groups/etAvailableStaffs')
+            .then(response => response.json())
+            .then(data => {
+                staffList.innerHTML = data.staffs.map(staff =>
+                    `<li><input type='checkbox' value='${staff.id}'> ${staff.full_name} (${staff.email})</li>`
+                ).join('');
+            });
+    }
+
+    function confirmAddStaff() {
+        let selectedStaffs = Array.from(document.querySelectorAll('#staffList input:checked')).map(cb => cb.value);
+        fetch(`/admin/staffs/addStaff/${selectedRoleId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ staff_ids: selectedStaffs })
+        }).then(() => {
+            closeModal('addStaffModal');
+            toggleRow(selectedRoleId);
+        });
+    }
+
+    function openPermissionModal(roleId) {
+        selectedRoleId = roleId;
+        document.getElementById('permissionModal').style.display = 'flex';
+        let permissionList = document.getElementById('permissionList');
+        let roleFunctionsList = document.getElementById('roleFunctionsList');
+
+        permissionList.innerHTML = '<p class="text-gray-500 italic">Đang tải...</p>';
+        roleFunctionsList.innerHTML = '<tr><td colspan="3" class="text-gray-500 italic">Đang tải...</td></tr>';
+
+        fetch(`/role_groups/functions/${roleId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Dữ liệu từ API:", data);
+
+                // Xử lý danh sách quyền đã được gán
+                let assignedFunctions = data.assigned_functions; // Sử dụng assigned_functions
+                roleFunctionsList.innerHTML = assignedFunctions.length > 0
+                    ? assignedFunctions.map((perm, index) => `
+                <tr>
+                    <td>${perm.id}</td>
+                    <td>${perm.function_name || 'N/A'}</td>
+                    <td><button onclick="removeFunction(${perm.id}, ${roleId})" class='text-red-500'>❌</button></td>
+                </tr>
+            `).join('')
+                    : `<tr><td colspan="2" class="text-gray-500 italic">Nhóm này chưa có quyền.</td></tr>`;
+
+                // Xử lý danh sách quyền chưa được gán
+                let unassignedFunctions = data.unassigned_functions; // Sử dụng unassigned_functions
+                permissionList.innerHTML = unassignedFunctions.length > 0
+                    ? unassignedFunctions.map(perm => `
+                <div class="flex items-center bg-white p-2 rounded shadow-sm border cursor-pointer mb-2">
+                    <input type="checkbox" value="${perm.id}" class="mr-2">
+                    ${perm.function_name}
+                </div>
+            `).join('')
+                    : '<p class="text-gray-500 italic">Không có quyền nào có thể thêm.</p>';
+            })
+            .catch(error => {
+                console.error("Lỗi Fetch API:", error);
+                permissionList.innerHTML = '<p class="text-red-500">Lỗi tải dữ liệu!</p>';
+                roleFunctionsList.innerHTML = '<tr><td colspan="2" class="text-red-500">Lỗi tải dữ liệu!</td></tr>';
+            });
+
+    }
+    function removeFunction(functionId, roleId) {
+        // Hiển thị hộp thoại xác nhận
+        const confirmation = confirm("Bạn có chắc chắn muốn xóa chức năng này?");
+
+        if (!confirmation) {
+            // Nếu người dùng nhấn "Cancel", hủy bỏ thao tác xóa
+            return;
+        }
+
+        fetch(`/role_groups/remove_function/${roleId}/${functionId}`, { method: 'DELETE' })
+            .then(response => {
+                // Kiểm tra nếu phản hồi là hợp lệ (HTTP status 200-299)
+                if (!response.ok) {
+                    throw new Error('Lỗi khi xóa chức năng');
+                }
+                return response.json(); // Chuyển đổi phản hồi thành JSON nếu hợp lệ
+            })
+            .then(data => {
+                console.log("Dữ liệu trả về từ API:", data);
+                // Kiểm tra nếu dữ liệu trả về có thuộc tính message
+                if (data.message) {
+                    alert(data.message);  // Hiển thị thông báo trả về từ API
+                    openPermissionModal(selectedRoleId); // Cập nhật lại danh sách quyền
+                    // Cập nhật giao diện sau khi xóa chức năng
+                    // (Có thể là ẩn, xóa hoặc cập nhật lại danh sách chức năng)
+                } else {
+                    alert('Có lỗi xảy ra khi xóa chức năng');
+                }
+            })
+            .catch(error => {
+                // Xử lý lỗi nếu không thể kết nối hoặc dữ liệu không hợp lệ
+                console.error("Lỗi Fetch API:", error);
+                alert("Đã xảy ra lỗi khi xóa chức năng.");
+            });
+    };
+
+    function savePermissions() {
+        // Lấy danh sách các permission_ids đã chọn
+        let selectedPermissions = Array.from(document.querySelectorAll('#permissionList input:checked'))
+            .map(cb => cb.value);
+
+        // Kiểm tra nếu không có quyền nào được chọn
+        if (selectedPermissions.length === 0) {
+            alert("Bạn chưa chọn quyền nào để thêm.");
+            return;
+        }
+
+        // Chuyển mảng các ID thành chuỗi JSON
+        let permissionIdsJSON = JSON.stringify(selectedPermissions.map(id => parseInt(id))); // Chuyển các giá trị thành kiểu số nếu cần
+        console.log("Các permission_ids đã chọn:", permissionIdsJSON);
+
+        // Gửi request POST tới server với chuỗi permission_ids trong định dạng JSON
+        fetch(`/role_groups/add_funcs/${selectedRoleId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ permission_ids: permissionIdsJSON })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Dữ liệu trả về từ API:", data);
+                // Kiểm tra kết quả trả về từ API
+                if (data.success) {
+                    closeModal('permissionModal');  // Đóng modal khi thành công
+                    openPermissionModal(selectedRoleId); // Cập nhật lại danh sách quyền
+                    alert("Cập nhật quyền thành công!");
+                } else {
+                    alert(data.error || "Lỗi xảy ra khi lưu thay đổi."); // Nếu có lỗi trả về từ API
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi :", error);
+                console.error("Lỗi Fetch API:", error);
+                alert("Đã xảy ra lỗi khi lưu thay đổi.");
+            });
+    }
+
+
+    function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+</script>
+{% endblock %}

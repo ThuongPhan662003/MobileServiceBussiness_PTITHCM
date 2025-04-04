@@ -1,0 +1,5 @@
+Flask
+python-dotenv
+PyMySQL
+flask_login
+flask_wtf

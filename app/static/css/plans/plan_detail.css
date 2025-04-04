@@ -1,0 +1,93 @@
+.plan-details {
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+.card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.plan-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.plan-description {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.plan-info {
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.plan-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.plan-info li {
+    font-size: 16px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+.plan-info i {
+    margin-right: 8px;
+    color: #007bff;
+}
+
+.price {
+    font-size: 22px;
+    color: #28a745;
+    font-weight: bold;
+}
+
+.actions {
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin: 5px;
+    transition: 0.3s;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}

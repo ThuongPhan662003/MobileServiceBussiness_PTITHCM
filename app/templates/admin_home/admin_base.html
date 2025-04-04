@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - Flask Business{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f6fa;
+            color: #333;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, #343a40, #6c757d);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-btn {
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 20px;
+            color: white;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .layout {
+            display: flex;
+            height: 100vh;
+            padding-top: 60px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2f353a;
+            color: white;
+            height: calc(100vh - 60px);
+            position: fixed;
+            top: 60px;
+            left: 0;
+            padding: 20px;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar.collapsed h2 {
+            display: none;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #eee;
+            text-decoration: none;
+            padding: 10px 12px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .submenu {
+            display: none;
+            padding-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        .submenu a {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+            background: white;
+            min-height: calc(100vh - 60px);
+        }
+
+        .content.collapsed {
+            margin-left: 60px;
+        }
+
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .flashes li {
+            background: #ffdddd;
+            border-left: 4px solid #f44336;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #222;
+            color: white;
+            font-size: 14px;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed a {
+            font-size: 0;
+            /* Ẩn text */
+            padding: 12px 0;
+            /* tăng chiều cao để dễ căn giữa */
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 48px;
+            /* đảm bảo mỗi dòng a đều có cùng chiều cao */
+        }
+
+        .sidebar.collapsed a i {
+            font-size: 18px;
+            display: block;
+            margin: 0;
+            color: white;
+        }
+
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+            }
+
+            .sidebar.collapsed {
+                left: 0;
+                width: 250px;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .content.collapsed {
+                margin-left: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <span class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></span>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <h2>Admin Menu</h2>
+            <a href="#" onclick="toggleMenu('usersMenu')"><i class="fas fa-users"></i> Users</a>
+            <div class="submenu" id="usersMenu">
+                <a href="#">View Users</a>
+                <a href="#">Add User</a>
+            </div>
+            <a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-users-cog"></i> Roles</a>
+
+            <a href="#" onclick="toggleMenu('plansMenu')"><i class="fas fa-list"></i> Plans</a>
+            <div class="submenu" id="plansMenu">
+                <a href="#">View Plans</a>
+                <a href="#">Create Plan</a>
+            </div>
+            <a href="#" onclick="toggleMenu('reportsMenu')"><i class="fas fa-chart-line"></i> Reports</a>
+            <div class="submenu" id="reportsMenu">
+                <a href="#">Sales Report</a>
+                <a href="#">User Activity</a>
+            </div>
+            <a href="#"><i class="fas fa-cogs"></i> Settings</a>
+        </aside>
+
+        <main class="content" id="contentArea">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Flask Business. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('contentArea');
+            const allSubmenus = document.querySelectorAll('.submenu');
+
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+
+            // Khi sidebar bị thu gọn → ẩn hết submenu
+            if (sidebar.classList.contains('collapsed')) {
+                allSubmenus.forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        }
+
+        function toggleMenu(menuId) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('collapsed')) return; // Nếu sidebar đang thu gọn, không mở submenu
+
+            const menu = document.getElementById(menuId);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+        window.onload = function () {
+            toggleSidebar(); // Đảm bảo sidebar đóng khi trang vừa tải
+        }
+    </script>
+
+</body>
+
+</html>
