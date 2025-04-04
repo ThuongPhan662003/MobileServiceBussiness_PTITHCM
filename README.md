@@ -34,7 +34,32 @@ pip install -r [requirements.txt](http://_vscodecontentref_/2)
 
 ### Chạy ứng dụng
 
-## Đảm bảo bạn đang ở trong môi trường ảo.
+## Thêm file .env
+
+```bash
+FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=your_secret_key_here
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=thuong
+DB_NAME=mobileservice_n7
+SECRET_KEY=supersecret
+FLASK_ENV=development
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+# MAIL_USE_SSL=False
+MAIL_USERNAME=phanthuong2468@gmail.com
+# MAIL_PASSWORD=crazyscientist(hawk)
+MAIL_PASSWORD=huyg yjon pmqv vgvs
+MAIL_DEFAULT_SENDER=phanthuong2468@gmail.com
+ADMINS=your_email@gmail.com
+VNPAY_URL = https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_TMNCODE = VNPAY_TMN_CODE
+VNPAY_SECRET_KEY = sRRRSC223@@#sdSD1225DS4F2SF_@
+VNPAY_HASHSECRET = VNPARRSC223@@###sdS__ET
+```
 
 ## Chạy ứng dụng Flask:
 
