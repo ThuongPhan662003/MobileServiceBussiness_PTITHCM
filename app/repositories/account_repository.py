@@ -24,6 +24,16 @@ class AccountRepository:
             return []
 
     @staticmethod
+    def check_login_by_username_and_password(username, password):
+        sql = "CALL sp_account_check_login(%s, %s)"
+        result = db_instance.execute(sql, (username, password), fetchone=True)
+        print("result", result)
+        if not result:
+            return None
+        user = AccountRepository.get_by_id(result.get("id"))
+        return user
+
+    @staticmethod
     def get_by_id(account_id):
         try:
             result = db_instance.execute(
@@ -35,7 +45,7 @@ class AccountRepository:
                 account.id = result.get("id")
                 account.username = result.get("username")
                 account.password = result.get("password")
-                account.is_active = result.get("is_active")
+                account.is_active = True if result.get("is_active") else False
                 return account
             return None
         except Exception as e:

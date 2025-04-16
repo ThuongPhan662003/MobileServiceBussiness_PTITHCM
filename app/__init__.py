@@ -7,6 +7,8 @@ from app.models.account import Account
 from app.services.account_service import AccountService
 from config import Config
 from app.database import db_instance
+import paypalrestsdk
+from app.utils import vnpay, ip
 
 
 def create_app():
@@ -36,6 +38,7 @@ def create_app():
     app.register_blueprint(permission_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_main_bp)
+    app.register_blueprint(payment_api_bp)
     # Register error handlers
     app.register_blueprint(exceptions)
     app.register_blueprint(auth)
@@ -43,6 +46,13 @@ def create_app():
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     login_manager.init_app(app)
+    paypalrestsdk.configure(
+        {
+            "mode": app.config["PAYPAL_MODE"],
+            "client_id": app.config["PAYPAL_CLIENT_ID"],
+            "client_secret": app.config["PAYPAL_CLIENT_SECRET"],
+        }
+    )
 
     @login_manager.user_loader
     def load_user(id):

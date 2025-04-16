@@ -36,29 +36,28 @@ class Database:
         if not self.connection:
             raise Exception("Chưa kết nối tới database")
 
-        with self.connection.cursor() as cursor:
+        with self.connection.cursor(self.cursor_class) as cursor:
             cursor.execute(sql, params or ())
 
-            results = []  # Danh sách lưu tất cả kết quả trả về
-            # Nếu không có kết quả và yêu cầu commit, thì thực hiện commit
+            # Nếu có thay đổi dữ liệu (INSERT, UPDATE, DELETE)
             if commit:
                 self.connection.commit()
-            # Lấy kết quả đầu tiên nếu fetchall = True
-            if fetchall:
-                results.append(cursor.fetchall())
+                print("oke commit")
 
-            # Nếu có nhiều kết quả, sử dụng nextset để lấy các kết quả tiếp theo
-            while cursor.nextset():  # Tiến tới kết quả tiếp theo
-                if fetchall:
-                    results.append(cursor.fetchall())
-
-            # Nếu chỉ cần lấy một kết quả duy nhất, sử dụng fetchone
+            # Nếu chỉ cần lấy một dòng (fetchone)
             if fetchone:
                 result = cursor.fetchone()
+                # Nếu có nhiều result sets, tìm result đầu tiên có dữ liệu
+                while not result and cursor.nextset():
+                    result = cursor.fetchone()
                 return result
 
-            # Nếu muốn lấy tất cả kết quả, trả về danh sách results
+            # Nếu muốn lấy tất cả dữ liệu từ tất cả result sets
             if fetchall:
+                results = []
+                results.append(cursor.fetchall())
+                while cursor.nextset():
+                    results.append(cursor.fetchall())
                 return results
 
             return None

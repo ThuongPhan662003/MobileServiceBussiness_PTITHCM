@@ -22,6 +22,10 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
 
     VNPAY_URL = os.getenv("VNPAY_URL")
-    VNPAY_TMNCODE = os.getenv("VNPAY_TMNCODE")
+    VNPAY_TMN_CODE = os.getenv("VNPAY_TMN_CODE")
     VNPAY_SECRET_KEY = os.getenv("VNPAY_SECRET_KEY")
-    VNPAY_HASHSECRET = os.getenv("VNPAY_HASHSECRET")
+    VNPAY_HASH_SECRET = os.getenv("VNPAY_HASH_SECRET")
+    VNPAY_RETURN_URL = os.getenv("VNPAY_RETURN_URL")
+    PAYPAL_MODE = os.getenv("PAYPAL_MODE", "sandbox")  # sandbox hoặc live
+    PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+    PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")

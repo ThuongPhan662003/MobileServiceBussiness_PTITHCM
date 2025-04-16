@@ -46,10 +46,11 @@ class ServiceService:
     @staticmethod
     def delete_service(service_id):
         try:
-            result = ServiceRepository.delete(service_id)
+            result, message = ServiceRepository.delete(service_id)
+            print("delete_service", result, message)
             if result is True:
                 return {"success": True}
             else:
-                return {"error": result}
+                return {"error": message}
         except Exception as e:
             return {"error": str(e)}

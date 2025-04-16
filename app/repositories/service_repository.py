@@ -8,14 +8,15 @@ class ServiceRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_services", fetchall=True)
             services = []
-
-            for row in result:
+            print("resultdd", result)
+            for row in result[0]:
+                print("row", row)
                 service = Service()
                 service.id = row.get("id")
                 service.service_name = row.get("service_name")
                 service.parent_id = row.get("parent_id")
                 service.coverage_area = True if row.get("coverage_area") else False
-                services.append(service.to_dict())
+                services.append(service)
 
             return services
         except Exception as e:
@@ -33,7 +34,7 @@ class ServiceRepository:
                 service.id = result.get("id")
                 service.service_name = result.get("service_name")
                 service.parent_id = result.get("parent_id")
-                service.coverage_area = result.get("coverage_area")
+                service.coverage_area = True if result.get("coverage_area") else False
                 return service
             return None
         except Exception as e:
@@ -42,15 +43,21 @@ class ServiceRepository:
 
     @staticmethod
     def insert(data: Service):
+        results = None
+        print("start")
         try:
+
             result = db_instance.execute(
                 "CALL AddService(%s, %s, %s)",
                 (data.service_name, data.parent_id, data.coverage_area),
                 fetchone=True,
+                commit=True,
             )
+
             if result.get("error"):
                 print(f"Lỗi khi thêm dịch vụ: {result['error']}")
                 return result["error"]
+            print("oke")
             return True
         except Exception as e:
             print(f"Lỗi khi thêm dịch vụ: {e}")
@@ -76,12 +83,14 @@ class ServiceRepository:
     def delete(service_id):
         try:
             result = db_instance.execute(
-                "CALL DeleteService(%s)", (service_id,), fetchone=True
+                "CALL DeleteService(%s)", (service_id,), fetchone=True, commit=True
             )
-            if result.get("error"):
-                print(f"Lỗi khi xóa dịch vụ: {result['error']}")
-                return result["error"]
-            return True
+            print("delete,ddd", result)
+
+            if not result.get("success"):
+                print(f"Lỗi khi xóa dịch vụ: {result['message']}")
+                return False, result["message"]
+            return True, ""
         except Exception as e:
             print(f"Lỗi khi xóa dịch vụ: {e}")
-            return False
+            return False, e

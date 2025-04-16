@@ -1,7 +1,9 @@
 from typing import Optional, List
 
+from flask_login import UserMixin
 
-class Account:
+
+class Account(UserMixin):
     __id: Optional[int]
     __username: Optional[str]
     __password: Optional[str]
@@ -23,6 +25,9 @@ class Account:
     def id(self):
         return self.__id
 
+    def get_id(self):
+        return self.__id
+
     @id.setter
     def id(self, value):
         if value is not None and not isinstance(value, int):
@@ -38,6 +43,9 @@ class Account:
         if value is not None and not isinstance(value, str):
             raise ValueError("username must be a string")
         self.__username = value
+
+    def get_full_name(self):
+        return self.__full_name
 
     @property
     def password(self):

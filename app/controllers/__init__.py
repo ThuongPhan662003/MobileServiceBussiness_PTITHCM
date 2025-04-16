@@ -22,3 +22,4 @@ from app.controllers.network_controller import network_bp
 from app.controllers.country_controller import country_bp
 from app.controllers.home_controller import main_bp
 from app.controllers.admin_home_controller import admin_main_bp
+from app.controllers.api_payments import payment_api_bp

@@ -9,20 +9,15 @@ class LoginForm(FlaskForm):
     email = StringField(
         "Email",
         validators=[
-            DataRequired(message="Email không được để trống"),
-            Length(min=6, max=120, message="Độ dài email từ 6 đến 120 ký tự"),
-            Email(),
+            # DataRequired(message="Email không được để trống"),
+            # Length(min=6, max=120, message="Độ dài email từ 6 đến 120 ký tự"),
+            # Email(),
         ],
     )
     password = PasswordField(
         "Password", validators=[DataRequired(message="Mật khẩu không được để trống")]
     )
     submit = SubmitField("Login")
-
-    def validate_email(self, email):
-        user = Account.query.filter_by(email=email.data).first()
-        if 1:
-            raise ValidationError("Email không tồn tại.")
 
 
 class RegistrationForm(FlaskForm):
