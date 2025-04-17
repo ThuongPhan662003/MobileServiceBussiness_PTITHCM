@@ -21,7 +21,7 @@ from app.utils import vnpay
 from app.utils.ip import get_client_ip
 
 
-payment_api_bp = Blueprint("payment", __name__, url_prefix="/pay-process")
+payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process")
 
 
 @payment_api_bp.route("/", methods=["GET"])
@@ -124,8 +124,12 @@ def pay_paypal():
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
             "redirect_urls": {
-                "return_url": url_for("payment_bp.payment_execute", _external=True),
-                "cancel_url": url_for("payment_bp.payment_cancel", _external=True),
+                "return_url": url_for(
+                    "payment_api_bp.payment_paypal_execute", _external=True
+                ),
+                "cancel_url": url_for(
+                    "payment_api_bp.payment_paypal_cancel", _external=True
+                ),
             },
             "transactions": [
                 {
@@ -154,11 +158,11 @@ def pay_paypal():
                 return redirect(link.href)
     else:
         flash("Tạo payment thất bại: " + payment.error["message"])
-        return redirect(url_for("payment_bp.index"))
+        return redirect(url_for("payment_api_bp.index"))
 
 
 @payment_api_bp.route("/execute")
-def payment__paypal_execute():
+def payment_paypal_execute():
     payment_id = request.args.get("paymentId")
     payer_id = request.args.get("PayerID")
     payment = paypalrestsdk.Payment.find(payment_id)
@@ -186,7 +190,7 @@ def payment__paypal_execute():
 
 
 @payment_api_bp.route("/cancel")
-def payment__paypal_cancel():
+def payment_paypal_cancel():
     # Người dùng hủy thanh toán
     return render_template(
         "payments/user/payment_result.html", status="cancel", provider="PayPal"

@@ -11,18 +11,25 @@ from . import auth
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-
-    if current_user.is_authenticated:
-        return redirect(url_for("main_bp.index"))
+    # logout_user()
+    print("cus", current_user)
+    # if current_user:
+    #     return redirect(url_for("main_bp.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = AccountService.check_login(form.email.data, form.password.data)
-        print("login_success", user)
-        if user:
+        result = AccountService.check_login(form.email.data, form.password.data)
+        print("🧾 Kết quả đăng nhập:", result.get("data"))
+
+        if result.get("success"):
+            user = result["data"]
+            print("use", user.to_dict(), current_user)
             login_user(user)
+            flash(result.get("message"), "success")
             return redirect(url_for("main_bp.index"))
-        flash("Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
+        else:
+            flash(result.get("message"), "danger")
+
     return render_template("auth/login.html", form=form)
 
 
