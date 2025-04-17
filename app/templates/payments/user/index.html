@@ -1,0 +1,17 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Trang thanh toán{% endblock %}
+
+{% block content %}
+<h1 class="mb-4" style="margin-top: 300px;">Chọn phương thức thanh toán</h1>
+
+<div class="d-flex justify-content-center gap-3">
+    <a href="{{ url_for('payment.pay_paypal') }}" class="btn btn-primary btn-lg">
+        Thanh toán với PayPal ($10)
+    </a>
+    <a href="{{ url_for('payment.vnpay_pay') }}" class="btn btn-success btn-lg">
+        Thanh toán với VNPAY (100.000₫)
+    </a>
+</div>
+{% endblock %}

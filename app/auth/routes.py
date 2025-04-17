@@ -11,25 +11,25 @@ from . import auth
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+
     if current_user.is_authenticated:
         return redirect(url_for("main_bp.index"))
-    print("login start")
-    flash("Email hoặc mật khẩu không đúng.", "danger")
-    form = LoginForm()
 
+    form = LoginForm()
     if form.validate_on_submit():
-        print("login")
-        user = Account.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(1, remember=form.remember.data)
-        return redirect(url_for("main_bp.index"))
-        # flash("Invalid email or password")
+        user = AccountService.check_login(form.email.data, form.password.data)
+        print("login_success", user)
+        if user:
+            login_user(user)
+            return redirect(url_for("main_bp.index"))
+        flash("Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
     return render_template("auth/login.html", form=form)
 
 
 @auth.route("/logout")
 @login_required
 def logout():
+    print("logout", current_user)
     logout_user()
     return redirect(url_for("main_bp.index"))
 

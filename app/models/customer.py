@@ -1,13 +1,15 @@
 from typing import Optional, List
 
 
+
+
 class Customer:
     __id: Optional[int]
     __full_name: Optional[str]
     __is_active: Optional[bool]
     __account_id: Optional[int]
     __card_id: Optional[str]
-    __subscribers: Optional[List]
+    __subscribers: Optional[List["Subscriber"]]
 
     def __init__(
         self,

@@ -1,10 +1,13 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, flash, redirect, render_template, request, jsonify, url_for
+import paypalrestsdk
 from app.services.payment_service import PaymentService
 
-payment_bp = Blueprint("payment", __name__, url_prefix="/payments")
+payment_bp = Blueprint("payment_bp", __name__, url_prefix="/payments")
 
 
-@payment_bp.route("/", methods=["GET"])
+
+
+@payment_bp.route("/getallpays", methods=["GET"])
 def get_all_payments():
     payments = PaymentService.get_all_payments()
     return jsonify(payments), 200
@@ -42,3 +45,5 @@ def delete_payment(payment_id):
     if result.get("success"):
         return jsonify({"message": "Payment deleted successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
+
+

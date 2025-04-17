@@ -28,7 +28,7 @@ class RoleGroupRepository:
             # Gọi stored procedure 'GetStaffsByRoleGroupId' với tham số là role_group_id
             query = "CALL GetStaffsByRoleGroupId(%s)"
             result = db_instance.execute(query, (role_group_id,), fetchall=True)
-
+            print(result)
             staffs = []
             for row in result[0]:
                 staff = Staff()

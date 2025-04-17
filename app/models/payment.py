@@ -2,10 +2,11 @@ from typing import Optional
 from decimal import Decimal
 from datetime import datetime
 
+from . import *
 
 class Payment:
     __id: Optional[int]
-    __subscription_id: Optional[int]
+    __subscription_id: Optional["Subscription"]
     __payment_date: Optional[datetime]
     __total_amount: Optional[Decimal]
     __payment_method: Optional[str]
@@ -46,8 +47,8 @@ class Payment:
 
     @subscription_id.setter
     def subscription_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("subscription_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("subscription_id must be an integer")
         self.__subscription_id = value
 
     @property
@@ -103,7 +104,7 @@ class Payment:
     def to_dict(self):
         return {
             "id": self.id,
-            "subscription_id": self.subscription_id,
+            "subscription_id": self.subscription_id.to_dict(),
             "payment_date": (
                 self.payment_date.isoformat() if self.payment_date else None
             ),

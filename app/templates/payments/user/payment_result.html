@@ -1,0 +1,40 @@
+<!-- templates/payment_result.html -->
+{% extends "base.html" %}
+
+{% block title %}
+{% if status == 'success' %}Thanh toán thành công{% elif status == 'cancel' %}Thanh toán bị hủy{% else %}Thanh toán thất
+bại{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if status == 'success' %}
+<div class="icon text-success">✔️</div>
+<h1 class="mt-3">Thanh toán {{ provider }} thành công!</h1>
+{% elif status == 'cancel' %}
+<div class="icon text-warning">⚠️</div>
+<h1 class="mt-3">Bạn đã hủy thanh toán {{ provider }}</h1>
+{% else %}
+<div class="icon text-danger">❌</div>
+<h1 class="mt-3">Thanh toán {{ provider }} thất bại</h1>
+{% endif %}
+
+{% if message %}
+<p class="mt-3 text-{{ 'success' if status=='success' else 'danger' }}">{{ message }}</p>
+{% endif %}
+
+{% if details %}
+<div class="card mx-auto mt-4" style="max-width: 600px; text-align: left;">
+    <div class="card-header">Chi tiết giao dịch</div>
+    <ul class="list-group list-group-flush">
+        {% for key, value in details.items() %}
+        <li class="list-group-item">
+            <strong>{{ key|replace('_',' ')|title }}:</strong>
+            {{ value }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<a href="{{ url_for('payment.index') }}" class="btn btn-primary mt-4">Quay về trang chủ</a>
+{% endblock %}

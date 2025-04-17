@@ -1,9 +1,10 @@
 from typing import Optional
 
+from . import *
 
 class RoleGroupDetail:
-    __role_group_id: Optional[int]
-    __function_id: Optional[int]
+    __role_group_id: Optional["RoleGroup"]
+    __function_id: Optional["Function"]
 
     def __init__(self, role_group_id=None, function_id=None):
         self.role_group_id = role_group_id
@@ -15,8 +16,8 @@ class RoleGroupDetail:
 
     @role_group_id.setter
     def role_group_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("role_group_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("role_group_id must be an integer")
         self.__role_group_id = value
 
     @property
@@ -25,9 +26,12 @@ class RoleGroupDetail:
 
     @function_id.setter
     def function_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("function_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("function_id must be an integer")
         self.__function_id = value
 
     def to_dict(self):
-        return {"role_group_id": self.role_group_id, "function_id": self.function_id}
+        return {
+            "role_group_id": self.role_group_id.to_dict(),
+            "function_id": self.function_id.to_dict(),
+        }

@@ -1,10 +1,11 @@
 from typing import Optional
 from decimal import Decimal
 
+from . import *
 
 class PaymentDetail:
     __id: Optional[int]
-    __payment_id: Optional[int]
+    __payment_id: Optional["Payment"]
     __free_data: Optional[Decimal]
     __free_ON_a_call: Optional[Decimal]
     __free_OffN_a_call: Optional[Decimal]
@@ -57,8 +58,8 @@ class PaymentDetail:
 
     @payment_id.setter
     def payment_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("payment_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("payment_id must be an integer")
         self.__payment_id = value
 
     @property
@@ -140,7 +141,7 @@ class PaymentDetail:
     def to_dict(self):
         return {
             "id": self.id,
-            "payment_id": self.payment_id,
+            "payment_id": self.payment_id.to_dict(),
             "free_data": float(self.free_data) if self.free_data is not None else None,
             "free_ON_a_call": (
                 float(self.free_ON_a_call) if self.free_ON_a_call is not None else None

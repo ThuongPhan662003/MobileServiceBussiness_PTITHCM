@@ -4,8 +4,8 @@ from datetime import datetime, date
 
 class Subscription:
     __id: Optional[int]
-    __plan_id: Optional[int]
-    __subscriber_id: Optional[int]
+    __plan_id: Optional["Plan"]
+    __subscriber_id: Optional["Subscriber"]
     __created_at: Optional[datetime]
     __expiration_date: Optional[datetime]
     __renewal_total: Optional[int]
@@ -51,8 +51,8 @@ class Subscription:
 
     @plan_id.setter
     def plan_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("plan_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("plan_id must be an integer")
         self.__plan_id = value
 
     @property
@@ -61,8 +61,8 @@ class Subscription:
 
     @subscriber_id.setter
     def subscriber_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("subscriber_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("subscriber_id must be an integer")
         self.__subscriber_id = value
 
     @property
@@ -128,8 +128,8 @@ class Subscription:
     def to_dict(self):
         return {
             "id": self.id,
-            "plan_id": self.plan_id,
-            "subscriber_id": self.subscriber_id,
+            "plan_id": self.plan_id.to_dict(),
+            "subscriber_id": self.subscriber_id.to_dict(),
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "expiration_date": (
                 self.expiration_date.isoformat() if self.expiration_date else None

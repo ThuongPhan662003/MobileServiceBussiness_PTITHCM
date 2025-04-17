@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.repositories.contract_repository import ContractRepository
 from app.models.contract import Contract
 
@@ -17,7 +18,6 @@ class ContractService:
             contract = Contract(
                 contents=data.get("contents"),
                 title=data.get("title"),
-                subscriber=data.get("subscriber"),
                 start_date=data.get("start_date"),
                 end_date=data.get("end_date"),
                 is_active=data.get("is_active", True),
@@ -34,12 +34,12 @@ class ContractService:
     @staticmethod
     def update_contract(contract_id, data: dict):
         try:
+            start_date = datetime.strptime(data.get("start_date"), "%Y-%m-%d").date()
             contract = Contract(
                 contents=data.get("contents"),
                 title=data.get("title"),
-                subscriber=data.get("subscriber"),
-                start_date=data.get("start_date"),
-                end_date=data.get("end_date"),
+                start_date=start_date,
+                end_date=None,
                 is_active=data.get("is_active", True),
                 subscriber_id=data.get("subscriber_id"),
             )

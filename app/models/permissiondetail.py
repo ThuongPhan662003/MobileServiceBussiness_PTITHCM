@@ -1,9 +1,10 @@
 from typing import Optional
 
+from . import *
 
 class PermissionDetail:
-    __role_group_id: Optional[int]
-    __account_id: Optional[int]
+    __role_group_id: Optional["RoleGroup"]
+    __account_id: Optional["Account"]
 
     def __init__(self, role_group_id=None, account_id=None):
         self.role_group_id = role_group_id
@@ -15,8 +16,8 @@ class PermissionDetail:
 
     @role_group_id.setter
     def role_group_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("role_group_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("role_group_id must be an integer")
         self.__role_group_id = value
 
     @property
@@ -25,14 +26,14 @@ class PermissionDetail:
 
     @account_id.setter
     def account_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("account_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("account_id must be an integer")
         self.__account_id = value
 
     def to_dict(self):
         return {
-            "role_group_id": self.role_group_id,
-            "account_id": self.account_id,
+            "role_group_id": self.role_group_id.to_dict(),
+            "account_id": self.account_id.to_dict(),
         }
 
     @staticmethod

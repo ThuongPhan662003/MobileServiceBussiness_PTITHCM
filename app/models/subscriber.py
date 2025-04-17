@@ -10,12 +10,11 @@ class Subscriber:
     __activation_date: Optional[date]
     __expiration_date: Optional[date]
     __is_active: Optional[bool]
-    __customer_id: Optional[int]
+    __customer_id: Optional["Customer"]
     __warning_date: Optional[datetime]
-    __is_messaged: Optional[bool]
-    __contracts: Optional[List]
-    __subscriptions: Optional[List]
-    __usage_logs: Optional[List]
+    __contracts: Optional[List["Contract"]]
+    __subscriptions: Optional[List["Subscription"]]
+    __usage_logs: Optional[List["UsageLog"]]
 
     def __init__(
         self,
@@ -111,8 +110,8 @@ class Subscriber:
 
     @customer_id.setter
     def customer_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("customer_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("customer_id must be an integer")
         self.__customer_id = value
 
     @property
@@ -141,8 +140,8 @@ class Subscriber:
 
     @contracts.setter
     def contracts(self, value):
-        if value is not None and not isinstance(value, list):
-            raise ValueError("contracts must be a list")
+        # if value is not None and not isinstance(value, list):
+        #     raise ValueError("contracts must be a list")
         self.__contracts = value
 
     @property
@@ -177,7 +176,7 @@ class Subscriber:
                 self.expiration_date.isoformat() if self.expiration_date else None
             ),
             "is_active": self.is_active,
-            "customer_id": self.customer_id,
+            "customer_id": self.customer_id.to_dict(),
             "warning_date": (
                 self.warning_date.isoformat() if self.warning_date else None
             ),

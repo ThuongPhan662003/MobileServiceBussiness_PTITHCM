@@ -12,6 +12,12 @@ class AccountService:
         return AccountRepository.get_by_id(account_id)
 
     @staticmethod
+    def check_login(username, password):
+        return AccountRepository.check_login_by_username_and_password(
+            username, password
+        )
+
+    @staticmethod
     def create_account(data: dict):
         try:
             account = Account(

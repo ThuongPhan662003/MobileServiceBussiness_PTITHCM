@@ -1,14 +1,16 @@
 from typing import Optional
 from datetime import datetime
 
-
 class UsageLog:
     __id: Optional[int]
     __type: Optional[str]
     __usage_value: Optional[int]
-    __subscriber_id: Optional[int]
+    __subscriber_id: Optional["Subscriber"]
     __start_date: Optional[datetime]
     __end_date: Optional[datetime]
+    __by_from: Optional[str]
+    __to: Optional[str]
+    __contents: Optional[str]
 
     def __init__(
         self,
@@ -18,6 +20,9 @@ class UsageLog:
         subscriber_id=None,
         start_date=None,
         end_date=None,
+        by_from=None,
+        to=None,
+        contents=None,
     ):
         self.id = id
         self.type = type
@@ -25,6 +30,9 @@ class UsageLog:
         self.subscriber_id = subscriber_id
         self.start_date = start_date
         self.end_date = end_date
+        self.by_from = by_from
+        self.to = to
+        self.contents = contents
 
     @property
     def id(self):
@@ -47,6 +55,36 @@ class UsageLog:
         self.__type = value
 
     @property
+    def by_from(self):
+        return self.__by_from
+
+    @type.setter
+    def by_from(self, value):
+        if value is not None and not isinstance(value, str):
+            raise ValueError("by_from must be a string")
+        self.__by_from = value
+
+    @property
+    def to(self):
+        return self.__to
+
+    @type.setter
+    def to(self, value):
+        if value is not None and not isinstance(value, str):
+            raise ValueError("to must be a string")
+        self.__to = value
+
+    @property
+    def contents(self):
+        return self.__contents
+
+    @type.setter
+    def contents(self, value):
+        if value is not None and not isinstance(value, str):
+            raise ValueError("contents must be a string")
+        self.__contents = value
+
+    @property
     def usage_value(self):
         return self.__usage_value
 
@@ -62,8 +100,8 @@ class UsageLog:
 
     @subscriber_id.setter
     def subscriber_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("subscriber_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("subscriber_id must be an integer")
         self.__subscriber_id = value
 
     @property
@@ -91,7 +129,10 @@ class UsageLog:
             "id": self.id,
             "type": self.type,
             "usage_value": self.usage_value,
-            "subscriber_id": self.subscriber_id,
+            "subscriber_id": self.subscriber_id.to_dict(),
             "start_date": self.start_date.isoformat() if self.start_date else None,
             "end_date": self.end_date.isoformat() if self.end_date else None,
+            "by_from": self.by_from,
+            "to": self.to,
+            "contents": self.contents,
         }
