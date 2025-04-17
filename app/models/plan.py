@@ -2,13 +2,14 @@ from typing import Optional
 from decimal import Decimal
 from datetime import datetime
 
+from . import *
 
 class Plan:
     __id: Optional[int]
     __code: Optional[str]
     __price: Optional[Decimal]
     __description: Optional[str]
-    __service_id: Optional[int]
+    __service_id: Optional["Service"]
     __is_active: Optional[bool]
     __renewal_syntax: Optional[str]
     __registration_syntax: Optional[str]
@@ -21,7 +22,7 @@ class Plan:
     __free_off_network_call: Optional[int]
     __free_off_network_SMS: Optional[int]
     __auto_renew: Optional[bool]
-    __staff_id: Optional[int]
+    __staff_id: Optional["Staff"]
     __created_at: Optional[datetime]
     __updated_at: Optional[datetime]
     __maximum_on_network_call: Optional[int]
@@ -120,8 +121,8 @@ class Plan:
 
     @service_id.setter
     def service_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("service_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("service_id must be an integer")
         self.__service_id = value
 
     @property
@@ -230,8 +231,8 @@ class Plan:
 
     @staff_id.setter
     def staff_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("staff_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("staff_id must be an integer")
         self.__staff_id = value
 
     @property
@@ -270,7 +271,7 @@ class Plan:
             "code": self.code,
             "price": float(self.price) if self.price else 0,
             "description": self.description,
-            "service_id": self.service_id,
+            "service_id": self.service_id.to_dict(),
             "is_active": self.is_active,
             "renewal_syntax": self.renewal_syntax,
             "registration_syntax": self.registration_syntax,
@@ -283,7 +284,7 @@ class Plan:
             "free_off_network_call": self.free_off_network_call,
             "free_off_network_SMS": self.free_off_network_SMS,
             "auto_renew": self.auto_renew,
-            "staff_id": self.staff_id,
+            "staff_id": self.staff_id.to_dict(),
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "maximum_on_network_call": self.maximum_on_network_call,

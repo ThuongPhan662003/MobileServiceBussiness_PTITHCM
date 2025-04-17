@@ -1,8 +1,9 @@
 from typing import Optional
 
+from . import *
 
 class PlanDetail:
-    __plan_id: Optional[int]
+    __plan_id: Optional["Plan"]
     __object_type: Optional[str]
     __duration: Optional[int]
 
@@ -17,8 +18,8 @@ class PlanDetail:
 
     @plan_id.setter
     def plan_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("plan_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("plan_id must be an integer")
         self.__plan_id = value
 
     @property
@@ -43,7 +44,7 @@ class PlanDetail:
 
     def to_dict(self):
         return {
-            "plan_id": self.plan_id,
+            "plan_id": self.plan_id.to_dict(),
             "object_type": self.object_type,
             "duration": self.duration,
         }

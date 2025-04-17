@@ -1,10 +1,12 @@
 from typing import Optional, List
 
 
+
+
 class Country:
     __id: Optional[int]
     __country_name: Optional[str]
-    __networks: Optional[List]
+    __networks: Optional[List["Network"]]
 
     def __init__(self, id=None, country_name=None, networks=None):
         self.id = id

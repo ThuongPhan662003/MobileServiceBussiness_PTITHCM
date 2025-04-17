@@ -1,17 +1,21 @@
 from typing import Optional
 from datetime import datetime, date
 
+from app.models.subscriber import Subscriber
+
+
+
 
 class Contract:
+
     __id: Optional[int]
     __created_at: Optional[datetime]
     __contents: Optional[str]
     __title: Optional[str]
-    __subscriber: Optional[int]
     __start_date: Optional[date]
     __end_date: Optional[date]
     __is_active: Optional[bool]
-    __subscriber_id: Optional[int]
+    __subscriber_id: Optional["Subscriber"] 
 
     def __init__(
         self,
@@ -19,7 +23,6 @@ class Contract:
         created_at=None,
         contents=None,
         title=None,
-        subscriber=None,
         start_date=None,
         end_date=None,
         is_active=True,
@@ -29,7 +32,6 @@ class Contract:
         self.created_at = created_at or datetime.utcnow()
         self.contents = contents
         self.title = title
-        self.subscriber = subscriber
         self.start_date = start_date
         self.end_date = end_date
         self.is_active = is_active
@@ -76,16 +78,6 @@ class Contract:
         self.__title = value
 
     @property
-    def subscriber(self):
-        return self.__subscriber
-
-    @subscriber.setter
-    def subscriber(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("subscriber must be an integer")
-        self.__subscriber = value
-
-    @property
     def start_date(self):
         return self.__start_date
 
@@ -121,8 +113,7 @@ class Contract:
 
     @subscriber_id.setter
     def subscriber_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("subscriber_id must be an integer")
+
         self.__subscriber_id = value
 
     def to_dict(self):
@@ -131,9 +122,8 @@ class Contract:
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "contents": self.contents,
             "title": self.title,
-            "subscriber": self.subscriber,
             "start_date": self.start_date.isoformat() if self.start_date else None,
             "end_date": self.end_date.isoformat() if self.end_date else None,
             "is_active": self.is_active,
-            "subscriber_id": self.subscriber_id,
+            "subscriber_id": self.subscriber_id.to_dict(),
         }

@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import date
 
 
+
 class Voucher:
     __id: Optional[int]
     __code: Optional[str]
@@ -12,7 +13,7 @@ class Voucher:
     __usage_limit: Optional[int]
     __remaining_count: Optional[int]
     __is_active: Optional[bool]
-    __staff_id: Optional[int]
+    __staff_id: Optional["Staff"]
     __packages: Optional[str]
 
     def __init__(
@@ -137,8 +138,8 @@ class Voucher:
 
     @staff_id.setter
     def staff_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("staff_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("staff_id must be an integer")
         self.__staff_id = value
 
     @property
@@ -162,6 +163,6 @@ class Voucher:
             "usage_limit": self.usage_limit,
             "remaining_count": self.remaining_count,
             "is_active": self.is_active,
-            "staff_id": self.staff_id,
+            "staff_id": self.staff_id.to_dict(),
             "packages": self.packages,
         }

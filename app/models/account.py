@@ -3,6 +3,8 @@ from typing import Optional, List
 from flask_login import UserMixin
 
 
+
+
 class Account(UserMixin):
     __id: Optional[int]
     __username: Optional[str]

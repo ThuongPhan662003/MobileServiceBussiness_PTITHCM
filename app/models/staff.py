@@ -1,6 +1,7 @@
 from typing import Optional, List
 from datetime import date
 
+from . import *
 
 class Staff:
     __id: Optional[int]
@@ -11,7 +12,7 @@ class Staff:
     __is_active: Optional[bool]
     __gender: Optional[str]
     __birthday: Optional[date]
-    __account_id: Optional[int]
+    __account_id: Optional["Account"]
 
     def __init__(
         self,
@@ -121,8 +122,8 @@ class Staff:
 
     @account_id.setter
     def account_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("account_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("account_id must be an integer")
         self.__account_id = value
 
     def to_dict(self):
@@ -135,7 +136,7 @@ class Staff:
             "is_active": self.is_active,
             "gender": self.gender,
             "birthday": self.birthday.isoformat() if self.birthday else None,
-            "account_id": self.account_id,
+            "account_id": self.account_id.to_dict(),
         }
 
     # @staticmethod

@@ -1,10 +1,16 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from app.services.contract_service import ContractService
 
 contract_bp = Blueprint("contract", __name__, url_prefix="/contracts")
 
 
 @contract_bp.route("/", methods=["GET"])
+def index():
+    print("hi")
+    return render_template("contracts/contracts.html")
+
+
+@contract_bp.route("/get-all", methods=["GET"])
 def get_all_contracts():
     contracts = ContractService.get_all_contracts()
     return jsonify(contracts), 200

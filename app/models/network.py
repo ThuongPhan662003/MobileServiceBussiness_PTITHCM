@@ -1,11 +1,12 @@
 from typing import Optional
 
+from . import *
 
 class Network:
     __id: Optional[int]
     __network_name: Optional[str]
     __display_name: Optional[str]
-    __country_id: Optional[int]
+    __country_id: Optional["Country"]
 
     def __init__(self, id=None, network_name=None, display_name=None, country_id=None):
         self.id = id
@@ -49,8 +50,8 @@ class Network:
 
     @country_id.setter
     def country_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("country_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("country_id must be an integer")
         self.__country_id = value
 
     def to_dict(self):
@@ -58,5 +59,5 @@ class Network:
             "id": self.id,
             "network_name": self.network_name,
             "display_name": self.display_name,
-            "country_id": self.country_id,
+            "country_id": self.country_id.to_dict(),
         }
