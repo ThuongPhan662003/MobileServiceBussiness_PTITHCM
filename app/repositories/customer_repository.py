@@ -9,13 +9,11 @@ class CustomerRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_customers", fetchall=True)
             customers = []
-
-            for row in result:
+            for row in result[0]:
                 customer = Customer()
-                customer.id = row.get("id")
+                customer.id = int(row.get("id")) if row.get("id") is not None else None
                 customer.full_name = row.get("full_name")
-                customer.is_active = True if row.get("is_active") else False
-                customer.account_id = row.get("account_id")
+                customer.is_active = bool(row.get("is_active"))
                 customer.card_id = row.get("card_id")
                 customers.append(customer.to_dict())
 
@@ -27,18 +25,21 @@ class CustomerRepository:
     @staticmethod
     def get_by_id(customer_id):
         try:
+            print(f"Executing query for customer_id: {customer_id}")
             result = db_instance.execute(
-                "CALL GetCustomerById(%s)", (customer_id,), fetchone=True
+                "SELECT * FROM customers WHERE id = %s", (customer_id,),
+                fetchone=True
             )
             if result:
                 customer = Customer()
                 customer.id = result.get("id")
                 customer.full_name = result.get("full_name")
-                customer.is_active = result.get("is_active")
-                customer.account_id = result.get("account_id")
+                customer.is_active = True if result.get("is_active") == 1 else False
                 customer.card_id = result.get("card_id")
                 return customer
-            return None
+            else:
+                print(f"Customer with ID {customer_id} not found.")
+                return None
         except Exception as e:
             print(f"Lỗi khi lấy khách hàng theo ID: {e}")
             return None

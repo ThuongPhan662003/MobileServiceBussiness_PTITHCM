@@ -14,28 +14,37 @@ class CustomerService:
     @staticmethod
     def create_customer(data: dict):
         try:
+            account_id = int(data.get("account_id")) if data.get("account_id") else None
+            card_id = data.get("card_id")
+            full_name = data.get("full_name")
+            is_active = str(data.get("is_active", "true")).lower() == "true"
             customer = Customer(
-                full_name=data.get("full_name"),
-                is_active=data.get("is_active", True),
-                account_id=data.get("account_id"),
-                card_id=data.get("card_id"),
+                full_name=full_name,
+                is_active=is_active,
+                account_id=account_id,
+                card_id=card_id,
             )
             result = CustomerRepository.insert(customer)
             if result is True:
                 return {"success": True}
             else:
+                print(" Lỗi khi insert:", result)
                 return {"error": result}
         except Exception as e:
-            return {"error": str(e)}
-
+            print(" Lỗi exception:", e)
+            return {"error": f"Lỗi tạo khách hàng: {str(e)}"}
     @staticmethod
     def update_customer(customer_id, data: dict):
         try:
+            account_id = int(data.get("account_id")) if data.get("account_id") else None
+            card_id = data.get("card_id")
+            full_name = data.get("full_name")
+            is_active = data.get("is_active", True)
             customer = Customer(
-                full_name=data.get("full_name"),
-                is_active=data.get("is_active", True),
-                account_id=data.get("account_id"),
-                card_id=data.get("card_id"),
+                full_name=full_name,
+                is_active=is_active,
+                account_id=account_id,
+                card_id=card_id,
             )
             result = CustomerRepository.update(customer_id, customer)
             if result is True:

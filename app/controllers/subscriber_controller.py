@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.services.subscriber_service import SubscriberService
 
 subscriber_bp = Blueprint("subscriber", __name__, url_prefix="/subscribers")
@@ -7,7 +7,7 @@ subscriber_bp = Blueprint("subscriber", __name__, url_prefix="/subscribers")
 @subscriber_bp.route("/", methods=["GET"])
 def get_all_subscribers():
     subscribers = SubscriberService.get_all_subscribers()
-    return jsonify(subscribers), 200
+    return render_template("admin_home/subscribers.html", subscribers=subscribers)
 
 
 @subscriber_bp.route("/<int:subscriber_id>", methods=["GET"])
@@ -42,3 +42,11 @@ def delete_subscriber(subscriber_id):
     if result.get("success"):
         return jsonify({"message": "Subscriber deleted successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
+
+@subscriber_bp.route("/detail/<int:subscriber_id>", methods=["GET"])
+def subscriber_detail(subscriber_id):
+    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
+    if not subscriber:
+        return "Thuê bao không tồn tại", 404
+
+    return render_template("admin_home/subscriber_detail.html", subscriber=subscriber)
