@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.services.customer_service import CustomerService
 
 customer_bp = Blueprint("customer", __name__, url_prefix="/customers")
@@ -7,15 +7,22 @@ customer_bp = Blueprint("customer", __name__, url_prefix="/customers")
 @customer_bp.route("/", methods=["GET"])
 def get_all_customers():
     customers = CustomerService.get_all_customers()
-    return jsonify(customers), 200
+    return render_template("admin_home/customer.html", customers=customers)
 
-
-@customer_bp.route("/<int:customer_id>", methods=["GET"])
-def get_customer_by_id(customer_id):
-    customer = CustomerService.get_customer_by_id(customer_id)
+@customer_bp.route("/<int:id>", methods=["GET"])
+def get_customer_by_id(id):
+    print("ID nhận được:", id)  # 👉 thêm dòng này để kiểm tra ID
+    customer = CustomerService.get_customer_by_id(id)
     if customer:
-        return jsonify(customer.to_dict()), 200
+        return jsonify({
+            "id": customer.id,
+            "full_name": customer.full_name,
+            "account_id": customer.account_id,
+            "card_id": customer.card_id,
+            "is_active": customer.is_active
+        })
     return jsonify({"error": "Customer not found"}), 404
+
 
 
 @customer_bp.route("/", methods=["POST"])

@@ -1,0 +1,233 @@
+{% extends 'admin_home/admin_base.html' %}
+
+{% block title %}Quản lý Khách Hàng{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        width: 85%;
+        margin: 40px auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 14px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .btn-edit {
+        background-color: #ffc107;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+    }
+
+    .btn-add {
+        background-color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 400px;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .close {
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    label {
+        display: block;
+        margin: 10px 0 5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+</style>
+
+<div class="container">
+    <h1 class="text-3xl font-bold mb-6 flex items-center">
+        <span class="mr-3"></span> Danh sách Khách Hàng
+    </h1>
+
+    <button class="btn btn-add" onclick="openAddCustomerModal()">Thêm Khách Hàng</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Trạng thái</th>
+                <th>Card ID</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.full_name }}</td>
+                <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
+             {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
+                </td>
+                <td>{{ customer.card_id }}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editCustomer({{ customer.id }})">Sửa</button>
+                    <button class="btn btn-delete" onclick="deleteCustomer({{ customer.id }})">Khóa</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-gray-500 italic">Không có khách hàng nào.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal thêm/sửa khách hàng -->
+<div id="customerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Thêm Khách Hàng</h3>
+            <button onclick="closeCustomerModal()" class="close">&times;</button>
+        </div>
+        <form id="customerForm">
+            <input type="hidden" id="customerId" name="id">
+            <label>Họ tên:</label>
+            <input type="text" id="customerName" name="full_name" required>
+            <label>Card ID:</label>
+            <input type="text" id="customerCardId" name="card_id" required>
+            <div id="statusField">
+                <label>Trạng thái:</label>
+                <select id="customerStatus" name="is_active">
+                    <option value="true">Kích hoạt</option>
+                    <option value="false">Không kích hoạt</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-add mt-4">Lưu</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddCustomerModal() {
+        document.getElementById('modalTitle').innerText = 'Thêm Khách Hàng';
+        document.getElementById('customerForm').reset();
+        document.getElementById('customerId').value = '';
+        document.getElementById('statusField').style.display = 'none'; // Ẩn trạng thái
+        document.getElementById('customerModal').style.display = 'flex';
+    }
+
+    function closeCustomerModal() {
+        document.getElementById('customerModal').style.display = 'none';
+    }
+
+    function editCustomer(id) {
+        fetch(`/customers/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('modalTitle').innerText = 'Chỉnh sửa Khách Hàng';
+                document.getElementById('customerId').value = data.id;
+                document.getElementById('customerName').value = data.full_name;
+                document.getElementById('customerAccountId').value = data.account_id;
+                document.getElementById('customerCardId').value = data.card_id;
+                document.getElementById('customerStatus').value = data.is_active ? 'true' : 'false';
+                document.getElementById('statusField').style.display = 'block'; // Hiện trạng thái
+                document.getElementById('customerModal').style.display = 'flex';
+            });
+    }
+
+    function deleteCustomer(id) {
+        if (confirm("Bạn có chắc muốn xóa khách hàng này không?")) {
+            fetch(`/customers/${id}`, { method: 'DELETE' })
+                .then(() => location.reload());
+        }
+    }
+
+    document.getElementById('customerForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const id = document.getElementById('customerId').value;
+        const isNew = !id;
+        const method = isNew ? 'POST' : 'PUT';
+        const url = isNew ? '/customers/' : `/customers/${id}`;
+
+        const formData = {
+            full_name: document.getElementById('customerName').value,
+            card_id: document.getElementById('customerCardId').value,
+            is_active: isNew ? true : document.getElementById('customerStatus').value === 'true'
+        };
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            closeCustomerModal();
+            location.reload();
+        })
+        .catch(error => console.error('Lỗi:', error));
+    });
+</script>
+{% endblock %}

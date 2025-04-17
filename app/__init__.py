@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 from app.controllers import *
+from app.controllers.subscriber_controller import subscriber_bp
 from app.exceptions import exceptions
 from app.auth import auth
 from app.models.account import Account
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(customer_bp)
     app.register_blueprint(plan_network_bp)
     app.register_blueprint(network_bp)
+    app.register_blueprint(subscriber_bp)
     app.register_blueprint(plan_detail_bp)
     app.register_blueprint(permission_bp)
     app.register_blueprint(main_bp)
