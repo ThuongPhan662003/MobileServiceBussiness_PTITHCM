@@ -30,11 +30,12 @@ class AccountRepository:
             print("password", password)
 
             # Gọi stored procedure với IN và OUT parameters
-            db_instance.execute(
+            acc = db_instance.execute(
                 "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
                 (username, password),
-                commit=True,
+                fetchone=True,
             )
+            print("acc", acc)
 
             # Truy vấn lấy kết quả OUT
             result = db_instance.execute(
@@ -49,8 +50,9 @@ class AccountRepository:
 
                 # Nếu status == 1 là thành công → lấy account
                 if status == 1:
-                    user = AccountRepository.get_by_id(username)
-                    print("AccountRepository.get_by_id(username)", user)
+                    user = AccountRepository.get_by_id(acc["account_id"])
+                    print("AccountRepository.get_by_id(username)", user.to_dict())
+
                     return {"success": True, "message": message, "data": user}
                 else:
                     # Trường hợp tài khoản sai hoặc bị vô hiệu hóa
@@ -68,7 +70,7 @@ class AccountRepository:
             result = db_instance.execute(
                 "CALL GetAccountById(%s)", (account_id,), fetchone=True
             )
-
+            print("resulr login", result)
             if result:
                 account = Account()
                 account.id = result.get("id")
@@ -85,18 +87,21 @@ class AccountRepository:
     @staticmethod
     def insert(data: Account):
         try:
+            print("khonae", data.username)
             result = db_instance.execute(
-                "CALL CreateAccount(%s, %s, %s)",
-                (data.username, data.password, data.is_active),
+                "CALL CreateAccount(%s, %s)",
+                (data.username, data.password),
                 fetchone=True,
+                commit=True,
             )
-            if result.get("error"):
-                print(f"Lỗi từ stored procedure (insert): {result['error']}")
-                return result["error"]
-            return True
+            print("insert", result)
+            if not result.get("success"):
+                print(f"Lỗi từ stored procedure (insert): {result['message']}")
+                return result
+            return result
         except Exception as e:
             print(f"Lỗi khi thêm account: {e}")
-            return False
+            return result
 
     @staticmethod
     def update(account_id, data: Account):

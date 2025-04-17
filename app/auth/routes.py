@@ -11,10 +11,9 @@ from . import auth
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    # logout_user()
-    print("cus", current_user)
-    # if current_user:
-    #     return redirect(url_for("main_bp.index"))
+    print("current_usre", current_user)
+    if current_user.get_id():
+        return redirect(url_for("main_bp.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -23,7 +22,6 @@ def login():
 
         if result.get("success"):
             user = result["data"]
-            print("use", user.to_dict(), current_user)
             login_user(user)
             flash(result.get("message"), "success")
             return redirect(url_for("main_bp.index"))
@@ -46,8 +44,14 @@ def register():
     # if current_user:
     #     return redirect(url_for("main_bp.index"))
     form = RegistrationForm()
+    data = {"username": form.username.data, "password": form.password.data}
     if form.validate_on_submit():
-        AccountService.create_account(form.username.data, form.password.data)
-        flash("Congratulations, you are now a registered user!")
-        return redirect(url_for("auth.login"))
+        result = AccountService.create_account(data)
+        flash(result["message"])
+        if result["success"]:
+
+            return redirect(url_for("auth.login"))
+        else:
+            # flash(result["message"])
+            return redirect(url_for("auth.register"))
     return render_template("auth/register.html", form=form)

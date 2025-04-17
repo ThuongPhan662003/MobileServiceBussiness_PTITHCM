@@ -9,12 +9,11 @@ main_bp = Blueprint("main_bp", __name__, url_prefix="/")
 
 
 @main_bp.route("/")
-@login_required
 def index():
-    user = None
 
-    print("current-use", current_user)
-    if current_user.is_authenticated:
-        print("có")
-        user = AccountService.get_account_by_id(current_user.id)
+    user = None
+    print("curgetddđ", current_user.get_id(), "2222")
+    if current_user.get_id():
+        print("cos")
+        user = AccountService.get_account_by_id(current_user.get_id())
     return render_template("home/index.html", current_user=user)

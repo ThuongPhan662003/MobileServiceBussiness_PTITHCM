@@ -26,16 +26,19 @@ class AccountService:
     @staticmethod
     def create_account(data: dict):
         try:
+            print("data", data)
             account = Account(
                 username=data.get("username"),
                 password=data.get("password"),
                 is_active=data.get("is_active", True),
             )
+            print("tài khoản", account.to_dict())
             result = AccountRepository.insert(account)
-            if result is True:
-                return {"success": True}
+            print("kết quả", result)
+            if result["success"] is True:
+                return result
             else:
-                return {"error": result}
+                return result
         except Exception as e:
             return {"error": str(e)}
 

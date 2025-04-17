@@ -3,8 +3,6 @@ from typing import Optional, List
 from flask_login import UserMixin
 
 
-
-
 class Account(UserMixin):
     __id: Optional[int]
     __username: Optional[str]
@@ -70,6 +68,7 @@ class Account(UserMixin):
         self.__is_active = value
 
     def to_dict(self):
+        print("self.username", self.username)
         return {
             "id": self.id,
             "username": self.username,
