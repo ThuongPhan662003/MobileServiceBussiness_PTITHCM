@@ -25,13 +25,44 @@ class AccountRepository:
 
     @staticmethod
     def check_login_by_username_and_password(username, password):
-        sql = "CALL sp_account_check_login(%s, %s)"
-        result = db_instance.execute(sql, (username, password), fetchone=True)
-        print("result", result)
-        if not result:
-            return None
-        user = AccountRepository.get_by_id(result.get("id"))
-        return user
+        try:
+            print("username", username)
+            print("password", password)
+
+            # Gọi stored procedure với IN và OUT parameters
+            acc = db_instance.execute(
+                "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
+                (username, password),
+                fetchone=True,
+            )
+            print("acc", acc)
+
+            # Truy vấn lấy kết quả OUT
+            result = db_instance.execute(
+                "SELECT @p_status AS status, @p_message AS message;", fetchone=True
+            )
+            print("Kết quả OUT:", result)
+
+            # Kiểm tra kết quả OUT
+            if result:
+                status = result.get("status")
+                message = result.get("message")
+
+                # Nếu status == 1 là thành công → lấy account
+                if status == 1:
+                    user = AccountRepository.get_by_id(acc["account_id"])
+                    print("AccountRepository.get_by_id(username)", user.to_dict())
+
+                    return {"success": True, "message": message, "data": user}
+                else:
+                    # Trường hợp tài khoản sai hoặc bị vô hiệu hóa
+                    return {"success": False, "message": message}
+
+            return {"success": False, "message": "Không thể xác thực tài khoản"}
+
+        except Exception as e:
+            print(f"Lỗi khi đăng nhập: {e}")
+            return {"success": False, "message": str(e)}
 
     @staticmethod
     def get_by_id(account_id):
@@ -39,13 +70,14 @@ class AccountRepository:
             result = db_instance.execute(
                 "CALL GetAccountById(%s)", (account_id,), fetchone=True
             )
-
+            print("resulr login", result)
             if result:
                 account = Account()
                 account.id = result.get("id")
                 account.username = result.get("username")
                 account.password = result.get("password")
                 account.is_active = True if result.get("is_active") else False
+                print("account", account.to_dict())
                 return account
             return None
         except Exception as e:
@@ -55,18 +87,21 @@ class AccountRepository:
     @staticmethod
     def insert(data: Account):
         try:
+            print("khonae", data.username)
             result = db_instance.execute(
-                "CALL CreateAccount(%s, %s, %s)",
-                (data.username, data.password, data.is_active),
+                "CALL CreateAccount(%s, %s)",
+                (data.username, data.password),
                 fetchone=True,
+                commit=True,
             )
-            if result.get("error"):
-                print(f"Lỗi từ stored procedure (insert): {result['error']}")
-                return result["error"]
-            return True
+            print("insert", result)
+            if not result.get("success"):
+                print(f"Lỗi từ stored procedure (insert): {result['message']}")
+                return result
+            return result
         except Exception as e:
             print(f"Lỗi khi thêm account: {e}")
-            return False
+            return result
 
     @staticmethod
     def update(account_id, data: Account):

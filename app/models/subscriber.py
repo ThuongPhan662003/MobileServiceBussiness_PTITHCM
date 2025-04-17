@@ -156,7 +156,9 @@ class Subscriber:
         return {
             "id": self.id,
             "phone_number": self.phone_number,
-            "main_balance": float(self.main_balance) if self.main_balance else 0.0,
+            "main_balance": (
+                float(self.main_balance) if self.main_balance is not None else 0.0
+            ),
             "activation_date": (
                 self.activation_date.isoformat() if self.activation_date else None
             ),
@@ -164,7 +166,7 @@ class Subscriber:
                 self.expiration_date.isoformat() if self.expiration_date else None
             ),
             "is_active": self.is_active,
-            "customer_id": self.customer_id.to_dict(),
+            "customer_id": self.customer_id.to_dict() if self.customer_id else None,
             "warning_date": (
                 self.warning_date.isoformat() if self.warning_date else None
             ),

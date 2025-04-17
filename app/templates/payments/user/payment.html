@@ -20,7 +20,7 @@
     {% endif %}
     {% endwith %}
 
-    <form method="post" action="{{ url_for('payment.vnpay_pay') }}" class="space-y-4">
+    <form method="post" action="{{ url_for('payment_api_bp.vnpay_pay') }}" class="space-y-4">
         {{ form.hidden_tag() }}
 
         <div>

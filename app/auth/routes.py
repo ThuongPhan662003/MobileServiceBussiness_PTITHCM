@@ -11,18 +11,23 @@ from . import auth
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-
-    if current_user.is_authenticated:
+    print("current_usre", current_user)
+    if current_user.get_id():
         return redirect(url_for("main_bp.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = AccountService.check_login(form.email.data, form.password.data)
-        print("login_success", user)
-        if user:
+        result = AccountService.check_login(form.email.data, form.password.data)
+        print("🧾 Kết quả đăng nhập:", result.get("data"))
+
+        if result.get("success"):
+            user = result["data"]
             login_user(user)
+            flash(result.get("message"), "success")
             return redirect(url_for("main_bp.index"))
-        flash("Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
+        else:
+            flash(result.get("message"), "danger")
+
     return render_template("auth/login.html", form=form)
 
 
@@ -39,8 +44,14 @@ def register():
     # if current_user:
     #     return redirect(url_for("main_bp.index"))
     form = RegistrationForm()
+    data = {"username": form.username.data, "password": form.password.data}
     if form.validate_on_submit():
-        AccountService.create_account(form.username.data, form.password.data)
-        flash("Congratulations, you are now a registered user!")
-        return redirect(url_for("auth.login"))
+        result = AccountService.create_account(data)
+        flash(result["message"])
+        if result["success"]:
+
+            return redirect(url_for("auth.login"))
+        else:
+            # flash(result["message"])
+            return redirect(url_for("auth.register"))
     return render_template("auth/register.html", form=form)

@@ -9,7 +9,7 @@ class ContractRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_contracts", fetchall=True)
             contracts = []
-
+            print("result", result)
             for row in result[0]:
                 contract = Contract()
                 contract.id = row["id"]
@@ -29,10 +29,11 @@ class ContractRepository:
                 subscriber_obj.phone_number = subcriber_data["phone_number"]
 
                 contract.subscriber_id = subscriber_obj
+                print("data", contract.subscriber_id)
                 contract.start_date = row["start_date"]
                 contract.end_date = row["end_date"]
                 contract.is_active = True if row["is_active"] else False
-
+                print("contract", contract)
                 contracts.append(contract.to_dict())
             print("len(contracts)", len(contracts))
             return contracts
