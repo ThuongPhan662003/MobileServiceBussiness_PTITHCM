@@ -9,20 +9,22 @@ def get_all_customers():
     customers = CustomerService.get_all_customers()
     return render_template("admin_home/customer.html", customers=customers)
 
+
 @customer_bp.route("/<int:id>", methods=["GET"])
 def get_customer_by_id(id):
-    print("ID nhận được:", id)  # 👉 thêm dòng này để kiểm tra ID
+    print("ID nhận được:", id)  
     customer = CustomerService.get_customer_by_id(id)
     if customer:
-        return jsonify({
-            "id": customer.id,
-            "full_name": customer.full_name,
-            "account_id": customer.account_id,
-            "card_id": customer.card_id,
-            "is_active": customer.is_active
-        })
+        return jsonify(
+            {
+                "id": customer.id,
+                "full_name": customer.full_name,
+                # "account_id": customer.account_id,
+                "card_id": customer.card_id,
+                "is_active": customer.is_active,
+            }
+        )
     return jsonify({"error": "Customer not found"}), 404
-
 
 
 @customer_bp.route("/", methods=["POST"])

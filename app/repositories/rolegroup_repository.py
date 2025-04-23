@@ -2,6 +2,7 @@ from flask import json
 from app.database import db_instance
 from app.models.rolegroup import RoleGroup
 from app.models.staff import Staff
+from app.services.account_service import AccountService
 
 
 class RoleGroupRepository:
@@ -23,12 +24,31 @@ class RoleGroupRepository:
             return []
 
     @staticmethod
+    def add_accounts_to_role_group(role_group_id, account_ids_csv):
+        try:
+            print("fffffffffffffff", role_group_id, account_ids_csv)
+            result = db_instance.execute(
+                "CALL sp_add_multiple_permissiondetails_from_csv(%s, %s)",
+                (role_group_id, account_ids_csv),
+                fetchone=True,
+                commit=True,
+            )
+            if result and result.get("success"):
+                return {"success": True}
+            else:
+                return result.get("error", "Có lỗi xảy ra")
+        except Exception as e:
+            print(f"Lỗi khi thêm accounts vào nhóm quyền: {e}")
+            return {"error": f"Đã xảy ra lỗi: {str(e)}"}
+
+    @staticmethod
     def get_staffs_by_role_group(role_group_id):
         try:
             # Gọi stored procedure 'GetStaffsByRoleGroupId' với tham số là role_group_id
+            print("role_group_id", type(role_group_id))
             query = "CALL GetStaffsByRoleGroupId(%s)"
             result = db_instance.execute(query, (role_group_id,), fetchall=True)
-            print(result)
+            print("result", result)
             staffs = []
             for row in result[0]:
                 staff = Staff()
@@ -39,9 +59,10 @@ class RoleGroupRepository:
                 staff.email = row.get("email")
                 staff.gender = row.get("gender")
                 staff.birthday = row.get("birthday")
-                staff.username = row.get("account_username")
+                acc = AccountService.get_account_by_id(row.get("account_id"))
+                staff.account_id = acc
                 staffs.append(staff.to_dict())
-
+                print(staff)
             return staffs
         except Exception as e:
             print(f"Lỗi khi lấy nhân viên theo role_group_id: {e}")
@@ -191,6 +212,19 @@ class RoleGroupRepository:
             return False
 
     @staticmethod
+    def remove_staff_from_group(role_group_id, account_id):
+        try:
+            result = db_instance.execute(
+                "CALL sp_remove_permission_detail(%s, %s)",
+                (role_group_id, account_id),
+                fetchone=True,
+            )
+            return result
+        except Exception as e:
+            print(f"[Repo] Lỗi khi xóa nhân viên khỏi nhóm quyền: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
     def delete(role_id):
         try:
             result = db_instance.execute(
@@ -203,3 +237,34 @@ class RoleGroupRepository:
         except Exception as e:
             print(f"Lỗi khi xóa role group: {e}")
             return False
+
+    @staticmethod
+    def get_staffs_not_in_role_group(role_group_id):
+        try:
+            # result = db_instance.execute("SELECT * FROM v_staffs", fetchall=True)
+            result = db_instance.execute(
+                "CALL sp_get_staffs_not_in_role_group(%s)",
+                (role_group_id,),
+                fetchall=True,
+            )
+            print("re", result)
+            staffs = []
+
+            for row in result[0]:
+                staff = Staff()
+                staff.id = row.get("id")
+                staff.full_name = row.get("full_name")
+                # staff.card_id = row.get("card_id")
+                staff.phone = row.get("phone")
+                staff.email = row.get("email")
+                # staff.is_active = True if row.get("is_active") else False
+                # staff.gender = row.get("gender")
+                # staff.birthday = row.get("birthday")
+                acc = AccountService.get_account_by_id(row.get("account_id"))
+                staff.account_id = acc
+                staffs.append(staff.to_dict())
+
+            return staffs
+        except Exception as e:
+            print(f"Lỗi khi lấy danh sách nhân viên: {e}")
+            return []

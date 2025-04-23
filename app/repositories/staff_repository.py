@@ -1,6 +1,8 @@
 from app.database import db_instance
 from app.models.staff import Staff
+from app.services.account_service import AccountService
 from app.viewmodels.staff_view_model import StaffViewModel
+
 
 
 class StaffRepository:
@@ -13,7 +15,7 @@ class StaffRepository:
     JOIN permissiondetail pd ON a.id = pd.account_id
     JOIN rolegroup rg ON pd.role_group_id = rg.id""", fetchall=True)
             staffs = []
-            
+
             for row in result[0]:
                 staff = Staff()
                 staff.id = row.get("id")
@@ -24,15 +26,24 @@ class StaffRepository:
                 staff.is_active = True if row.get("is_active") else False
                 staff.gender = row.get("gender")
                 staff.birthday = row.get("birthday")
+
+#                 acc = AccountService.get_account_by_id(row.get("account_id"))
+#                 staff.account_id = acc
+#                 staffs.append(staff.to_dict())
+
+
                 staff.account_id = row.get("account_id")
                 
                 # Tạo ViewModel với role_name
                 staff_vm = StaffViewModel(staff, row.get("role_name"))
                 staffs.append(staff_vm.to_dict())
+
             return staffs
         except Exception as e:
             print(f"Lỗi khi lấy danh sách nhân viên: {e}")
             return []
+
+    
 
     @staticmethod
     def get_by_id(staff_id):

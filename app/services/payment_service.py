@@ -16,7 +16,6 @@ class PaymentService:
         try:
             payment = Payment(
                 subscription_id=data.get("subscription_id"),
-                payment_date=data.get("payment_date"),
                 total_amount=data.get("total_amount"),
                 payment_method=data.get("payment_method"),
                 is_paid=data.get("is_paid", False),
@@ -24,7 +23,7 @@ class PaymentService:
             )
             result = PaymentRepository.insert(payment)
             if result is True:
-                return {"success": True}
+                return {"success": True, "payment_id": result["payment_id"]}
             else:
                 return {"error": result}
         except Exception as e:
@@ -59,3 +58,9 @@ class PaymentService:
                 return {"error": result}
         except Exception as e:
             return {"error": str(e)}
+
+    @staticmethod
+    def create_transaction(plan_code: str, subscriber_id: int):
+        return PaymentRepository.create_full_payment_transaction(
+            plan_code, subscriber_id
+        )

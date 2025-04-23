@@ -9,6 +9,8 @@ class StaffService:
     def get_all_staffs():
         return StaffRepository.get_all()
 
+    
+
     @staticmethod
     def get_staff_by_id(staff_id):
         return StaffRepository.get_by_id(staff_id)

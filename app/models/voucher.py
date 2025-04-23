@@ -163,6 +163,7 @@ class Voucher:
             "usage_limit": self.usage_limit,
             "remaining_count": self.remaining_count,
             "is_active": self.is_active,
-            "staff_id": self.staff_id.to_dict(),
+            "staff_id": self.staff_id.to_dict() if hasattr(self.staff_id, "to_dict") else self.staff_id,
             "packages": self.packages,
         }
+

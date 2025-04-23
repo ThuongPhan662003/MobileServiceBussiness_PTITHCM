@@ -17,15 +17,15 @@ class SubscriptionService:
             subscription = Subscription(
                 plan_id=data.get("plan_id"),
                 subscriber_id=data.get("subscriber_id"),
-                expiration_date=data.get("expiration_date"),
-                renewal_total=data.get("renewal_total", 0),
-                is_renewal=data.get("is_renewal", True),
-                cancel_at=data.get("cancel_at"),
-                activation_date=data.get("activation_date"),
+                # expiration_date=data.get("expiration_date"),
+                # renewal_total=data.get("renewal_total", 0),
+                # is_renewal=data.get("is_renewal", True),
+                # cancel_at=data.get("cancel_at"),
+                # activation_date=data.get("activation_date"),
             )
             result = SubscriptionRepository.insert(subscription)
-            if result is True:
-                return {"success": True}
+            if result["subscription_id"]:
+                return {"success": True, "subscription_id": result["subscription_id"]}
             else:
                 return {"error": result}
         except Exception as e:
