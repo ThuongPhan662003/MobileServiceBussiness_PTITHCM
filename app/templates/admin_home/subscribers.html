@@ -1,0 +1,302 @@
+{% extends 'admin_home/admin_base.html' %}
+
+{% block title %}Quản lý Thuê Bao{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        width: 85%;
+        margin: 40px auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 14px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .btn-edit {
+        background-color: #ffc107;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+    }
+
+    .btn-add {
+        background-color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 500px;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .close {
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    label {
+        display: block;
+        margin: 10px 0 5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .edit-only {
+        display: none;
+    }
+</style>
+
+<div class="container">
+    <h1 class="text-3xl font-bold mb-6 flex items-center">Quản lý Thuê Bao</h1>
+
+    <button class="btn btn-add" onclick="openAddSubscriberModal()">Thêm Thuê Bao</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Số điện thoại</th>
+                <th>Số dư</th>
+                <th>Ngày kích hoạt</th>
+                <th>Account ID</th>
+                <th>Ngày hết hạn</th>
+                <th>Trạng thái</th>
+                <th>Khách hàng</th>
+                <th>Ngày cảnh báo</th>
+                <th>Đã nhắn tin</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscriber in subscribers %}
+            <tr>
+                <td>{{ subscriber.id }}</td>
+                <td>{{ subscriber.phone_number }}</td>
+                <td>{{ subscriber.main_balance }}</td>
+                <td>{{ subscriber.activation_date }}</td>
+                <td>{{ subscriber.account_id }}</td>
+                <td>{{ subscriber.expiration_date }}</td>
+                <td style="color: {{ 'red' if not subscriber.is_active else 'inherit' }};">
+                    {{ 'Kích hoạt' if subscriber.is_active else 'Không kích hoạt' }}
+                </td>
+                <td>{{ subscriber.customer_id }}</td>
+                <td>{{ subscriber.warning_date or '—' }}</td>
+                <td>{{ 'Có' if subscriber.is_messaged else 'Không' }}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editSubscriber({{ subscriber.id }})">Sửa</button>
+                    <button class="btn btn-delete" onclick="deleteSubscriber({{ subscriber.id }})">Khóa</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="10" class="text-gray-500 italic">Không có thuê bao nào.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal thêm/sửa thuê bao -->
+<div id="subscriberModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Thêm Thuê Bao</h3>
+            <button onclick="closeSubscriberModal()" class="close">&times;</button>
+        </div>
+        <form id="subscriberForm">
+            <label>Số điện thoại:</label>
+            <input type="text" id="phoneNumber" name="phone_number" required>
+
+            <label>Số dư chính:</label>
+            <input type="number" id="mainBalance" name="main_balance" required>
+
+            <label>Ngày hết hạn:</label>
+            <input type="date" id="expirationDate" name="expiration_date" required>
+
+            <label>Account ID:</label>
+            <input type="number" id="customerAccountId" name="account_id" required>
+
+            <label>Customer ID:</label>
+            <input type="number" id="customerId" name="customer_id" required>
+
+            <!-- Các trường chỉ hiển thị khi sửa -->
+           <div class="edit-only">
+    <label>Ngày kích hoạt:</label>
+    <input type="date" id="activationDate" name="activation_date" disabled>
+</div>
+
+            <div class="edit-only">
+                <label>Trạng thái (is_active):</label>
+                <select id="isActive" name="is_active">
+                    <option value="true">Kích hoạt</option>
+                    <option value="false">Không kích hoạt</option>
+                </select>
+            </div>
+
+            <div class="edit-only">
+                <label>Ngày cảnh báo:</label>
+                <input type="date" id="warningDate" name="warning_date">
+            </div>
+
+            <div class="edit-only">
+                <label>Đã nhắn tin:</label>
+                <select id="isMessaged" name="is_messaged">
+                    <option value="true">Có</option>
+                    <option value="false">Không</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-add mt-4">Lưu</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleEditFields(show) {
+        const editFields = document.querySelectorAll('.edit-only');
+        editFields.forEach(field => {
+            field.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    function openAddSubscriberModal() {
+        document.getElementById('modalTitle').innerText = 'Thêm Thuê Bao';
+        document.getElementById('subscriberForm').reset();
+        document.getElementById('subscriberForm').removeAttribute('data-id');
+        document.getElementById('subscriberModal').style.display = 'flex';
+
+        toggleEditFields(false); // Ẩn các trường chỉ khi sửa
+
+        const now = new Date().toISOString().split('T')[0];
+        document.getElementById('activationDate').value = now;
+        document.getElementById('isActive').value = 'true';
+        document.getElementById('warningDate').value = '';
+        document.getElementById('isMessaged').value = 'false';
+    }
+
+    function closeSubscriberModal() {
+        document.getElementById('subscriberModal').style.display = 'none';
+    }
+
+    function editSubscriber(subscriberId) {
+        fetch(`/subscribers/${subscriberId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('modalTitle').innerText = 'Chỉnh sửa Thuê Bao';
+                document.getElementById('subscriberForm').setAttribute('data-id', subscriberId);
+                document.getElementById('subscriberModal').style.display = 'flex';
+
+                toggleEditFields(true); // Hiện các trường khi sửa
+
+                document.getElementById('phoneNumber').value = data.phone_number;
+                document.getElementById('mainBalance').value = data.main_balance;
+                document.getElementById('activationDate').value = data.activation_date;
+                document.getElementById('expirationDate').value = data.expiration_date;
+                document.getElementById('isActive').value = data.is_active ? 'true' : 'false';
+                document.getElementById('customerId').value = data.customer_id;
+                document.getElementById('warningDate').value = data.warning_date || '';
+                document.getElementById('isMessaged').value = data.is_messaged ? 'true' : 'false';
+            });
+    }
+
+    function deleteSubscriber(subscriberId) {
+        if (confirm("Bạn có chắc muốn xóa thuê bao này không?")) {
+            fetch(`/subscribers/${subscriberId}`, { method: 'DELETE' })
+                .then(() => location.reload());
+        }
+    }
+
+    document.getElementById('subscriberForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const subscriberId = this.getAttribute('data-id');
+        const isNew = !subscriberId;
+        const method = isNew ? 'POST' : 'PUT';
+        const url = isNew ? '/subscribers/' : `/subscribers/${subscriberId}`;
+
+        const formData = {
+            phone_number: document.getElementById('phoneNumber').value,
+            main_balance: document.getElementById('mainBalance').value,
+            activation_date: document.getElementById('activationDate').value,
+            expiration_date: document.getElementById('expirationDate').value,
+            account_id: document.getElementById('customerAccountId').value,
+            is_active: document.getElementById('isActive').value === 'true',
+            customer_id: parseInt(document.getElementById('customerId').value),
+            warning_date: document.getElementById('warningDate').value || null,
+            is_messaged: document.getElementById('isMessaged').value === 'true'
+        };
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            closeSubscriberModal();
+            location.reload();
+        })
+        .catch(error => console.error('Lỗi:', error));
+    });
+</script>
+{% endblock %}

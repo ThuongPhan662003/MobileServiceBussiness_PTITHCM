@@ -9,7 +9,7 @@ class ContractRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_contracts", fetchall=True)
             contracts = []
-
+            print("result", result)
             for row in result[0]:
                 contract = Contract()
                 contract.id = row["id"]
@@ -27,25 +27,13 @@ class ContractRepository:
                 subscriber_obj = Subscriber()
                 subscriber_obj.id = subcriber_data["id"]
                 subscriber_obj.phone_number = subcriber_data["phone_number"]
-                # subscriber_obj.main_balance = subcriber_data["main_balance"]
-                # subscriber_obj.activation_date = subcriber_data["activation_date"]
-                # subscriber_obj.expiration_date = subcriber_data["expiration_date"]
-                # subscriber_obj.is_active = (
-                #     True if subcriber_data["is_active"] else False
-                # )
-                # subscriber_obj.customer_id = subcriber_data["customer_id"]
-                # subscriber_obj.is_messaged = (
-                #     True if subcriber_data["is_messaged"] else False
-                # )
-                # subscriber_obj.contracts = subcriber_data["contracts"]
-                # subscriber_obj.subscriptions = subcriber_data["subscriptions"]
-                # subscriber_obj.usage_logs = subcriber_data["usage_logs"]
 
                 contract.subscriber_id = subscriber_obj
+                print("data", contract.subscriber_id)
                 contract.start_date = row["start_date"]
                 contract.end_date = row["end_date"]
                 contract.is_active = True if row["is_active"] else False
-
+                print("contract", contract)
                 contracts.append(contract.to_dict())
             print("len(contracts)", len(contracts))
             return contracts

@@ -26,7 +26,6 @@ class Subscriber:
         is_active=True,
         customer_id=None,
         warning_date=None,
-        is_messaged=False,
         contracts=None,
         subscriptions=None,
         usage_logs=None,
@@ -39,7 +38,6 @@ class Subscriber:
         self.is_active = is_active
         self.customer_id = customer_id
         self.warning_date = warning_date
-        self.is_messaged = is_messaged
         self.contracts = contracts or []
         self.subscriptions = subscriptions or []
         self.usage_logs = usage_logs or []
@@ -125,16 +123,6 @@ class Subscriber:
         self.__warning_date = value
 
     @property
-    def is_messaged(self):
-        return self.__is_messaged
-
-    @is_messaged.setter
-    def is_messaged(self, value):
-        if value is not None and not isinstance(value, bool):
-            raise ValueError("is_messaged must be a boolean")
-        self.__is_messaged = value
-
-    @property
     def contracts(self):
         return self.__contracts
 
@@ -168,7 +156,9 @@ class Subscriber:
         return {
             "id": self.id,
             "phone_number": self.phone_number,
-            "main_balance": float(self.main_balance) if self.main_balance else 0.0,
+            "main_balance": (
+                float(self.main_balance) if self.main_balance is not None else 0.0
+            ),
             "activation_date": (
                 self.activation_date.isoformat() if self.activation_date else None
             ),
@@ -176,11 +166,10 @@ class Subscriber:
                 self.expiration_date.isoformat() if self.expiration_date else None
             ),
             "is_active": self.is_active,
-            "customer_id": self.customer_id.to_dict(),
+            "customer_id": self.customer_id.to_dict() if self.customer_id else None,
             "warning_date": (
                 self.warning_date.isoformat() if self.warning_date else None
             ),
-            "is_messaged": self.is_messaged,
             "contracts": (
                 [c.to_dict() for c in self.contracts] if self.contracts else []
             ),

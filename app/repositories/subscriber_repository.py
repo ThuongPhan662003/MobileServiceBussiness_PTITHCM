@@ -4,23 +4,28 @@ from decimal import Decimal
 
 
 class SubscriberRepository:
+    from decimal import Decimal
+
     @staticmethod
     def get_all():
         try:
             result = db_instance.execute("SELECT * FROM v_subscribers", fetchall=True)
             subscribers = []
-
-            for row in result:
+            print(result)
+            for row in result[0]:
                 s = Subscriber()
                 s.id = row.get("id")
                 s.phone_number = row.get("phone_number")
                 s.main_balance = row.get("main_balance") or Decimal("0.00")
                 s.activation_date = row.get("activation_date")
                 s.expiration_date = row.get("expiration_date")
-                s.is_active = row.get("is_active")
+                # Ép kiểu bool đúng chuẩn
+                s.account_id = row.get("account_id")
+                s.is_active = bool(row.get("is_active"))
                 s.customer_id = row.get("customer_id")
                 s.warning_date = row.get("warning_date")
-                s.is_messaged = row.get("is_messaged")
+                s.is_messaged = bool(int.from_bytes(row.get("is_messaged"), "little")) \
+                    if isinstance(row.get("is_messaged"), bytes) else bool(row.get("is_messaged"))
                 subscribers.append(s.to_dict())
 
             return subscribers
@@ -32,14 +37,23 @@ class SubscriberRepository:
     def get_by_id(subscriber_id):
         try:
             result = db_instance.execute(
-                "CALL GetSubscriberById(%s)", (subscriber_id,), fetchone=True
+                "SELECT * FROM subscribers WHERE id =%s", (subscriber_id,), fetchone=True
             )
+            from decimal import Decimal
+
             if result:
                 s = Subscriber()
                 for key, val in result.items():
-                    setattr(s, key, val)
+                    # Xử lý kiểu dữ liệu đặc biệt
+                    if key == 'main_balance':
+                        setattr(s, key, Decimal(val) if val is not None else Decimal('0.00'))
+                    elif key in ['is_active', 'is_messaged']:
+                        setattr(s, key, bool(val))
+                    else:
+                        setattr(s, key, val)
                 return s
-            return None
+
+
         except Exception as e:
             print(f"Lỗi khi lấy subscriber theo ID: {e}")
             return None

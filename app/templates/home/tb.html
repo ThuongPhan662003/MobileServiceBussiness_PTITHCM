@@ -1,0 +1,154 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Viettel Form
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+            font-family: 'Roboto', sans-serif;
+        }
+  </style>
+ </head>
+ <body class="bg-white">
+  <header class="flex justify-between items-center p-4 border-b">
+   <img alt="Viettel Logo" class="h-10" height="40" src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-LmQ09WWGIGwOeeA4ArnRw0x5/user-uJPET5fjNenSso8wCETWVNOp/img-lWzVdkkw96PbAYZ6skpXVnDY.png?st=2025-04-16T13%3A23%3A21Z&amp;se=2025-04-16T15%3A23%3A21Z&amp;sp=r&amp;sv=2024-08-04&amp;sr=b&amp;rscd=inline&amp;rsct=image/png&amp;skoid=cc612491-d948-4d2e-9821-2683df3719f5&amp;sktid=a48cca56-e6da-484e-a814-9c849652bcb3&amp;skt=2025-04-16T05%3A07%3A43Z&amp;ske=2025-04-17T05%3A07%3A43Z&amp;sks=b&amp;skv=2024-08-04&amp;sig=2IsDSKd6TD2KRKDYwlntBog%2BtDl/JKHhSELFTlEwi0s%3D" width="100"/>
+   <nav class="flex space-x-4">
+    <div class="relative group">
+     <button class="text-gray-700">
+      Tin tức sự kiện
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+    <div class="relative group">
+     <button class="text-gray-700">
+      Sản phẩm dịch vụ
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+    <div class="relative group">
+     <button class="text-gray-700">
+      Viettel++
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+    <div class="relative group">
+     <button class="text-gray-700">
+      Viettel Shop
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+    <div class="relative group">
+     <button class="text-gray-700">
+      Hỗ trợ khách hàng
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+    <div class="relative group">
+     <button class="text-gray-700">
+      My Viettel
+      <i class="fas fa-chevron-down">
+      </i>
+     </button>
+     <div class="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+      <!-- Dropdown content -->
+     </div>
+    </div>
+   </nav>
+   <div class="relative group">
+    <button class="text-gray-700">
+     Xin chào, ĐÔNG
+     <i class="fas fa-chevron-down">
+     </i>
+    </button>
+    <div class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg hidden group-hover:block">
+     <div class="p-4">
+      <p class="font-bold">
+       Xin chào, TRÀ NHẬT ĐÔNG
+      </p>
+      <p class="text-red-600 font-bold">
+       84329419638
+      </p>
+     </div>
+     <ul>
+      <li class="px-4 py-2 hover:bg-gray-100">
+       <a href="#">
+        Đổi mật khẩu
+       </a>
+      </li>
+      <li class="px-4 py-2 hover:bg-gray-100">
+       <a href="#">
+        Lịch sử đăng nhập
+       </a>
+      </li>
+      <li class="px-4 py-2 hover:bg-gray-100">
+       <a href="#">
+        Quản lý tài khoản
+       </a>
+      </li>
+      <li class="px-4 py-2 hover:bg-gray-100">
+       <a href="#">
+        Liên kết Mạng xã hội
+       </a>
+      </li>
+      <li class="px-4 py-2 hover:bg-gray-100">
+       <a href="#">
+        Đăng xuất
+       </a>
+      </li>
+     </ul>
+    </div>
+   </div>
+  </header>
+<h2 class="text-xl font-bold mb-4 text-center">Thông tin chủ thuê bao</h2>
+ <h2 class="text-xl font-bold mb-4 text-center">{{ phone_number }}</h2>
+
+
+  <main class="flex justify-center mt-10">
+   <div class="w-full max-w-lg">
+    <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+ <div class="mb-4">
+  <label class="block text-gray-700 text-sm font-bold mb-2" for="owner">
+   Chủ thuê bao
+  </label>
+  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+         id="owner" readonly type="text" value="{{ owner }}">
+ </div>
+ <div class="mb-4">
+  <label class="block text-gray-700 text-sm font-bold mb-2" for="id-number">
+   CCCD
+  </label>
+  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+         id="id-number" readonly type="text" value="{{ id_number }}"/>
+ </div>
+</form>
+
+   </div>
+  </main>
+ </body>
+</html>
