@@ -9,22 +9,53 @@ from . import auth
 # auth = Blueprint("auth", __name__)
 
 
+# @auth.route("/login", methods=["GET", "POST"])
+# def login():
+#     print("current_usre", current_user)
+#     if current_user.get_id():
+#         return redirect(url_for("main_bp.index"))
+
+#     form = LoginForm()
+#     if form.validate_on_submit():
+#         result = AccountService.check_login(form.email.data, form.password.data)
+#         print("🧾 Kết quả đăng nhập:", result.get("data"))
+
+#         if result.get("success"):
+#             user = result["data"]
+#             print("user", user)
+#             login_user(user)
+#             flash(result.get("message"), "success")
+#             return redirect(url_for("main_bp.index"))
+#         else:
+#             flash(result.get("message"), "danger")
+
+
+#     return render_template("auth/login.html", form=form)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    print("current_usre", current_user)
+    print("current_user", current_user)
     if current_user.get_id():
         return redirect(url_for("main_bp.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
         result = AccountService.check_login(form.email.data, form.password.data)
-        print("🧾 Kết quả đăng nhập:", result.get("data"))
+        print("🧾 Kết quả đăng nhập:", result["data"])
 
         if result.get("success"):
-            user = result["data"]
-            login_user(user)
+            user = result["data"]["account_id"]
+            print("user", user)
+
+            login_user(user)  # cần đảm bảo `user` là instance của UserMixin
+
             flash(result.get("message"), "success")
-            return redirect(url_for("main_bp.index"))
+
+            # ➤ Điều hướng theo role
+            if result["data"]["role_type"] == "staff":
+                print("staff")
+                return redirect(url_for("admin_main_bp.index"))
+            else:
+                return redirect(url_for("main_bp.index"))
         else:
             flash(result.get("message"), "danger")
 

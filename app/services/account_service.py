@@ -13,12 +13,12 @@ class AccountService:
 
     @staticmethod
     def check_login(username, password):
-        print(
-            "service",
-            AccountRepository.check_login_by_username_and_password(username, password)[
-                "data"
-            ].to_dict(),
-        )
+        # print(
+        #     "service",
+        #     AccountRepository.check_login_by_username_and_password(username, password)[
+        #         "data"
+        #     ].to_dict(),
+        # )
         return AccountRepository.check_login_by_username_and_password(
             username, password
         )

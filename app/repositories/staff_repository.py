@@ -1,5 +1,6 @@
 from app.database import db_instance
 from app.models.staff import Staff
+from app.services.account_service import AccountService
 
 
 class StaffRepository:
@@ -9,7 +10,7 @@ class StaffRepository:
             result = db_instance.execute("SELECT * FROM v_staffs", fetchall=True)
             staffs = []
 
-            for row in result:
+            for row in result[0]:
                 staff = Staff()
                 staff.id = row.get("id")
                 staff.full_name = row.get("full_name")
@@ -19,13 +20,16 @@ class StaffRepository:
                 staff.is_active = True if row.get("is_active") else False
                 staff.gender = row.get("gender")
                 staff.birthday = row.get("birthday")
-                staff.account_id = row.get("account_id")
+                acc = AccountService.get_account_by_id(row.get("account_id"))
+                staff.account_id = acc
                 staffs.append(staff.to_dict())
 
             return staffs
         except Exception as e:
             print(f"Lỗi khi lấy danh sách nhân viên: {e}")
             return []
+
+    
 
     @staticmethod
     def get_by_id(staff_id):

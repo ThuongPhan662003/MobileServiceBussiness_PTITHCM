@@ -47,6 +47,7 @@ class PermissionDetailRepository:
                 "CALL AddPermissionDetail(%s, %s)",
                 (data.role_group_id, data.account_id),
                 fetchone=True,
+                commit=True,
             )
             if result.get("error"):
                 print(f"Lỗi khi thêm permission detail: {result['error']}")

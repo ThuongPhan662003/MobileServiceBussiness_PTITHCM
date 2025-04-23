@@ -47,23 +47,24 @@ class SubscriptionRepository:
     def insert(data: Subscription):
         try:
             result = db_instance.execute(
-                "CALL AddSubscription(%s, %s, %s, %s, %s, %s, %s)",
+                "CALL AddSubscription(%s, %s)",
                 (
                     data.plan_id,
                     data.subscriber_id,
-                    data.expiration_date,
-                    data.renewal_total,
-                    data.is_renewal,
-                    data.cancel_at,
-                    data.activation_date,
+                    # data.expiration_date,
+                    # data.renewal_total,
+                    # data.is_renewal,
+                    # data.cancel_at,
+                    # data.activation_date,
                 ),
                 fetchone=True,
+                commit=True,
             )
 
             if result.get("error"):
                 print(f"Lỗi khi thêm subscription: {result['error']}")
                 return result["error"]
-            return True
+            return result
         except Exception as e:
             print(f"Lỗi khi thêm subscription: {e}")
             return False

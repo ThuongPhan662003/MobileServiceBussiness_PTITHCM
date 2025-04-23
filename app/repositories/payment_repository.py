@@ -50,16 +50,16 @@ class PaymentRepository:
     def insert(data: Payment):
         try:
             result = db_instance.execute(
-                "CALL AddPayment(%s, %s, %s, %s, %s, %s)",
+                "CALL AddPayment(%s, %s, %s, %s, %s)",
                 (
                     data.subscription_id,
-                    data.payment_date,
                     data.total_amount,
                     data.payment_method,
                     data.is_paid,
                     data.due_date,
                 ),
                 fetchone=True,
+                commit=True,
             )
             if result.get("error"):
                 print(f"Lỗi khi thêm payment: {result['error']}")
@@ -106,3 +106,25 @@ class PaymentRepository:
         except Exception as e:
             print(f"Lỗi khi xóa payment: {e}")
             return False
+
+    @staticmethod
+    def create_full_payment_transaction(plan_code: str, subscriber_id: int):
+        try:
+            result = db_instance.execute(
+                "CALL CreateFullPaymentTransaction(%s, %s)",
+                (plan_code, subscriber_id),
+                fetchone=True,
+                commit=True,
+            )
+            if result.get("success"):
+                return {
+                    "success": True,
+                    "message": result.get("message"),
+                    "subscription_id": result.get("subscription_id"),
+                    "payment_id": result.get("payment_id"),
+                }
+            else:
+                return {"success": False, "message": result.get("message")}
+        except Exception as e:
+            print(f"[Repository] Lỗi khi tạo giao dịch thanh toán đầy đủ: {e}")
+            return {"success": False, "message": str(e)}

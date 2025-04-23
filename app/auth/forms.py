@@ -20,19 +20,22 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, EqualTo, Regexp
+
+
 class RegistrationForm(FlaskForm):
     username = StringField(
-        "Username",
+        "Số điện thoại",
         validators=[
-            DataRequired(message="Email không được để trống"),
-            Length(min=2, max=20),
+            DataRequired(message="Số điện thoại không được để trống"),
+            Regexp(r"^\d{10}$", message="Số điện thoại phải gồm đúng 10 chữ số"),
         ],
     )
-    email = StringField(
-        "Email", validators=[DataRequired(), Length(min=6, max=120), Email()]
-    )
-    password = PasswordField("Password", validators=[DataRequired()])
+    password = PasswordField("Mật khẩu", validators=[DataRequired()])
     confirm_password = PasswordField(
-        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
+        "Xác nhận mật khẩu",
+        validators=[DataRequired(), EqualTo("password", message="Mật khẩu không khớp")],
     )
-    submit = SubmitField("Register")
+    submit = SubmitField("Đăng ký")
