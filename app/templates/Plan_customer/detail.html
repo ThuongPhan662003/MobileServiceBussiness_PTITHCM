@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết gói cước{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="padding-top: 120px;">
+    {% if plan %}
+        <h2 class="mb-4 page-title">{{ plan.code }}</h2>
+
+        <div class="plan-details-card">
+            <div class="row">
+                <!-- Cột bên trái: Thông tin cơ bản -->
+                <div class="col-md-6">
+                    <h4 class="section-title">Thông tin cơ bản</h4>
+                    <p><strong>Dung lượng Data:</strong> {{ plan.free_data }}GB</p>
+                    <p><strong>Giá:</strong> {{ plan.price }}đ</p>
+                    <p><strong>Thông tin mô tả:</strong> {{ plan.description or 'Không có' }}</p>
+                    <p><strong>Tự động gia hạn:</strong> {{ 'Có' if plan.auto_renew else 'Không' }}</p>
+                </div>
+
+                <!-- Cột bên phải: Ưu đãi và chi phí -->
+                <div class="col-md-6">
+                    <h4 class="section-title">Ưu đãi gọi và SMS</h4>
+                    <p><strong>Phút gọi nội mạng miễn phí (mỗi cuộc):</strong> {{ plan.free_on_network_a_call or '0' }} giây</p>
+                    <p><strong>Thời lượng gọi nội mạng miễn phí:</strong> {{ plan.free_on_network_call or '0' }} giây</p>
+                    <p><strong>Thời lượng tối đa cuộc gọi nội mạng:</strong> {{ plan.maximum_on_network_call or '0' }} giây</p>
+                    <p><strong>SMS nội mạng miễn phí:</strong> {{ plan.free_on_network_SMS or '0' }} tin</p>
+                    <p><strong>Phút gọi ngoại mạng miễn phí (mỗi cuộc):</strong> {{ plan.free_off_network_a_call or '0' }} giây</p>
+                    <p><strong>Thời lượng gọi ngoại mạng miễn phí:</strong> {{ plan.free_off_network_call or '0' }} giây</p>
+                    <p><strong>SMS ngoại mạng miễn phí:</strong> {{ plan.free_off_network_SMS or '0' }} tin</p>
+
+                    <h4 class="section-title mt-4">Chi phí</h4>
+                    <p><strong>Phí cho mỗi cuộc gọi nội mạng:</strong> {{ plan.ON_a_call_cost or '0' }}đ/phút</p>
+                    <p><strong>Phí SMS nội mạng:</strong> {{ plan.ON_SMS_cost or '0' }}đ/tin</p>
+                </div>
+            </div>
+
+            <!-- Cú pháp -->
+            <h4 class="section-title mt-4">Cú pháp sử dụng</h4>
+            <p><strong>Cú pháp đăng ký:</strong> {{ plan.registration_syntax or 'Không có' }}</p>
+            <p><strong>Cú pháp gia hạn:</strong> {{ plan.renewal_syntax or 'Không có' }}</p>
+            <p><strong>Cú pháp hủy:</strong> {{ plan.cancel_syntax or 'Không có' }}</p>
+
+            <!-- Nút hành động -->
+            <div class="button-group mt-4">
+                <button class="btn btn-primary" onclick="alert('Chức năng đăng ký đang phát triển!')">Đăng ký</button>
+                <a href="{{ url_for('customer_plan.mobile_plans') if plan.service_id in [3,4,5,6] else url_for('customer_plan.main_plans') }}" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            {{ error if error else "Không tìm thấy gói cước." }}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Style cho tiêu đề chính */
+    .page-title {
+        font-size: 2.5rem; /* Kích thước chữ to (40px) */
+        color: #000; /* Màu đen */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Bóng chữ */
+    }
+
+    /* Style cho thẻ chi tiết gói cước */
+    .plan-details-card {
+        border: none;
+        border-radius: 15px;
+        padding: 30px;
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .plan-details-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 8px 8px 20px rgba(0,0,0,0.15), -8px -8px 20px rgba(255,255,255,0.9);
+    }
+
+    /* Style cho tiêu đề phụ */
+    .section-title {
+        font-size: 1.25rem;
+        color: #d32f2f;
+        margin-bottom: 15px;
+        position: relative;
+        padding-bottom: 5px;
+    }
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background: #d32f2f;
+        border-radius: 2px;
+    }
+
+    /* Style cho thông tin */
+    .plan-details-card p {
+        margin: 8px 0;
+        font-size: 1rem;
+        color: #333;
+    }
+    .plan-details-card p strong {
+        color: #555;
+    }
+
+    /* Style cho các nút */
+    .button-group {
+        display: flex;
+        gap: 15px;
+    }
+    .btn-primary {
+        background-color: #28a745; /* Màu xanh lá */
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #218838; /* Xanh lá đậm hơn khi hover */
+        box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+    }
+    .btn-secondary {
+        background-color: #007bff; /* Màu xanh dương */
+        color: #fff; /* Màu chữ trắng */
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        text-decoration: none; /* Xóa gạch chân */
+    }
+    .btn-secondary:hover {
+        background-color: #0056b3; /* Xanh dương đậm hơn khi hover */
+        color: #fff; /* Màu chữ vẫn trắng khi hover */
+        box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        text-decoration: none; /* Xóa gạch chân khi hover */
+    }
+</style>
+{% endblock %}

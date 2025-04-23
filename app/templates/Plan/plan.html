@@ -1,0 +1,280 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Quản lý Gói Cước{% endblock %}
+
+{% block content %}
+<style>
+    .container { width: 80%; margin: 40px auto; }
+    .search-filter { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .search-filter input, .search-filter select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; margin-right: 10px; }
+    .search-filter button { padding: 10px; border-radius: 5px; border: none; background-color: #3498db; color: white; cursor: pointer; }
+    .search-filter button:hover { opacity: 0.9; }
+    .search-filter .btn-reset { background-color: #e74c3c; }
+    table { width: 100%; border-collapse: collapse; background-color: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+    th, td { padding: 14px; text-align: center; border: 1px solid #ddd; }
+    th { background-color: #007bff; color: white; }
+    tr:nth-child(even) { background-color: #f8f9fa; }
+    tr:hover { background-color: #f1f1f1; }
+    .status-active { color: green; font-weight: bold; }
+    .status-locked { color: red; font-weight: bold; }
+    .btn { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+    .btn-lock { background-color: #e74c3c; }
+    .btn-update { background-color: #3498db; margin-right: 5px; }
+    .btn-add { background-color: #2ecc71; margin-bottom: 20px; padding: 10px 20px; font-size: 1rem; }
+    .btn:hover:not(:disabled) { opacity: 0.9; }
+    .btn:disabled { background-color: #a0a0a0; cursor: not-allowed; opacity: 0.6; }
+    .flashes { list-style: none; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+    .flashes li.success { background-color: #d4edda; color: #155724; }
+    .flashes li.error { background-color: #f8d7da; color: #721c24; }
+    .pagination { display: flex; justify-content: center; align-items: center; margin-top: 20px; }
+    .pagination button { padding: 8px 12px; margin: 0 5px; border: none; border-radius: 5px; background-color: #3498db; color: white; cursor: pointer; }
+    .pagination button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+    .pagination span { font-size: 1rem; margin: 0 10px; }
+</style>
+
+<div class="container">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">📋</span> Danh sách Gói Cước
+    </h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <button class="btn btn-add" onclick="window.location.href='/plans/create'">➕ Thêm gói cước</button>
+
+    <div class="search-filter">
+        <input type="text" id="codeInput" placeholder="Mã Code">
+        <input type="number" id="priceInput" placeholder="Giá (VND)" step="0.01" min="0">
+        <select id="statusInput">
+            <option value="">Tất cả trạng thái</option>
+            <option value="1">Đang hoạt động</option>
+            <option value="0">Đã khóa</option>
+        </select>
+        <button onclick="searchPlans()">🔍 Tìm kiếm</button>
+        <button class="btn-reset" onclick="resetSearch()">🔄 Đặt lại</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Thứ tự</th>
+                <th>Mã Code</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Cú pháp đăng ký</th>
+                <th>Cú pháp gia hạn</th>
+                <th>Cú pháp hủy</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody id="planTableBody">
+            {% for plan in plans %}
+            <tr class="plan-row" style="display: none;">
+                <td>{{ loop.index }}</td>
+                <td>{{ plan.code }}</td>
+                <td>{{ plan.description or '' }}</td>
+                <td class="text-end">{{ "{:,.0f}".format(plan.price) }} đ</td>
+                <td>{{ plan.registration_syntax or '' }}</td>
+                <td>{{ plan.renewal_syntax or '' }}</td>
+                <td>{{ plan.cancel_syntax or '' }}</td>
+                <td class="{{ 'status-active' if plan.is_active else 'status-locked' }}">
+                    {{ 'Đang hoạt động' if plan.is_active else 'Đã khóa' }}
+                </td>
+                <td>
+                    <button class="btn btn-update" onclick="location.href='/plans/update/{{ plan.id }}'" {% if not plan.is_active %}disabled{% endif %}>🛠 Cập nhật</button>
+                    {% if plan.is_active %}
+                    <button class="btn btn-lock" data-plan-id="{{ plan.id }}" onclick="lockPlan(this)">🔒 Khóa</button>
+                    {% else %}
+                    <button class="btn btn-lock" disabled>🔒 Đã khóa</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button onclick="prevPage()" id="prevPage">←</button>
+        <span id="pageInfo">Trang 1</span>
+        <button onclick="nextPage()" id="nextPage">→</button>
+    </div>
+</div>
+
+<script>
+    const rowsPerPage = 8;
+    let currentPage = 1;
+    let allRows = document.querySelectorAll(".plan-row");
+
+    function updatePagination() {
+        allRows = document.querySelectorAll(".plan-row");
+        const totalRows = allRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        allRows.forEach((row, index) => {
+            row.style.display = (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) ? "" : "none";
+        });
+
+        document.getElementById("pageInfo").textContent = `Trang ${currentPage}`;
+        document.getElementById("prevPage").disabled = currentPage === 1;
+        document.getElementById("nextPage").disabled = currentPage === totalPages || totalRows === 0;
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePagination();
+        }
+    }
+
+    function nextPage() {
+        const totalRows = allRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePagination();
+        }
+    }
+
+    function searchPlans() {
+        const code = document.getElementById("codeInput").value;
+        const price = document.getElementById("priceInput").value;
+        const status = document.getElementById("statusInput").value;
+
+        fetch('/plans/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ code, price, is_active: status })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById("planTableBody");
+            tbody.innerHTML = '';
+            data.forEach((plan, index) => {
+                const row = `
+                    <tr class="plan-row">
+                        <td>${index + 1}</td>
+                        <td>${plan.code}</td>
+                        <td>${plan.description || ''}</td>
+                        <td class="text-end">${new Intl.NumberFormat('vi-VN').format(plan.price)} đ</td>
+                        <td>${plan.registration_syntax || ''}</td>
+                        <td>${plan.renewal_syntax || ''}</td>
+                        <td>${plan.cancel_syntax || ''}</td>
+                        <td class="${plan.is_active ? 'status-active' : 'status-locked'}">
+                            ${plan.is_active ? 'Đang hoạt động' : 'Đã khóa'}
+                        </td>
+                        <td>
+                            <button class="btn btn-update" onclick="location.href='/plans/update/${plan.id}'" ${plan.is_active ? '' : 'disabled'}>🛠 Cập nhật</button>
+                            ${plan.is_active ? 
+                                `<button class="btn btn-lock" data-plan-id="${plan.id}" onclick="lockPlan(this)">🔒 Khóa</button>` :
+                                `<button class="btn btn-lock" disabled>🔒 Đã khóa</button>`}
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            currentPage = 1;
+            updatePagination();
+        })
+        .catch(error => {
+            console.error("Lỗi khi tìm kiếm:", error);
+            alert("Lỗi khi tìm kiếm: " + error.message);
+        });
+    }
+
+    function resetSearch() {
+        // Xóa giá trị các trường tìm kiếm
+        document.getElementById("codeInput").value = '';
+        document.getElementById("priceInput").value = '';
+        document.getElementById("statusInput").value = '';
+
+        // Gọi API để lấy danh sách gói cước ban đầu
+        fetch('/plans/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById("planTableBody");
+            tbody.innerHTML = '';
+            data.forEach((plan, index) => {
+                const row = `
+                    <tr class="plan-row">
+                        <td>${index + 1}</td>
+                        <td>${plan.code}</td>
+                        <td>${plan.description || ''}</td>
+                        <td class="text-end">${new Intl.NumberFormat('vi-VN').format(plan.price)} đ</td>
+                        <td>${plan.registration_syntax || ''}</td>
+                        <td>${plan.renewal_syntax || ''}</td>
+                        <td>${plan.cancel_syntax || ''}</td>
+                        <td class="${plan.is_active ? 'status-active' : 'status-locked'}">
+                            ${plan.is_active ? 'Đang hoạt động' : 'Đã khóa'}
+                        </td>
+                        <td>
+                            <button class="btn btn-update" onclick="location.href='/plans/update/${plan.id}'" ${plan.is_active ? '' : 'disabled'}>🛠 Cập nhật</button>
+                            ${plan.is_active ? 
+                                `<button class="btn btn-lock" data-plan-id="${plan.id}" onclick="lockPlan(this)">🔒 Khóa</button>` :
+                                `<button class="btn btn-lock" disabled>🔒 Đã khóa</button>`}
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            currentPage = 1;
+            updatePagination();
+        })
+        .catch(error => {
+            console.error("Lỗi khi đặt lại:", error);
+            alert("Lỗi khi đặt lại danh sách: " + error.message);
+        });
+    }
+
+    function lockPlan(button) {
+        const planId = button.getAttribute("data-plan-id");
+        if (confirm("Bạn có chắc chắn muốn khóa gói cước này không?")) {
+            fetch(`/plans/lock/${planId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Có lỗi xảy ra khi khóa gói cước.");
+                }
+            })
+            .catch(error => {
+                alert("Lỗi khi khóa gói cước: " + error);
+            });
+        }
+    }
+
+    // Khởi tạo phân trang khi tải trang
+    updatePagination();
+</script>
+{% endblock %}
