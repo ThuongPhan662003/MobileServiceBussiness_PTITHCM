@@ -136,7 +136,7 @@ class Staff:
             "is_active": self.is_active,
             "gender": self.gender,
             "birthday": self.birthday.isoformat() if self.birthday else None,
-            "account_id": self.account_id.to_dict(),
+            "account_id": self.account_id.to_dict() if hasattr(self.account_id, 'to_dict') else self.account_id,
         }
 
     # @staticmethod
