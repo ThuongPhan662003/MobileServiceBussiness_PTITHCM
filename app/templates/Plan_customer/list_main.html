@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Gói dịch vụ cước chính{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="padding-top: 120px;">
+    <h2 class="mb-3 page-title">Gói dịch vụ cước chính</h2>
+
+    <!-- Hiển thị lỗi nếu có -->
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <!-- Danh sách gói cước -->
+    <div class="plans-grid">
+        {% if plans %}
+            {% for plan in plans %}
+                <div class="plan-card">
+                    <h5>{{ plan.code }}</h5>
+                    <p><strong>Data:</strong> {{ plan.free_data }}GB</p>
+                    <p><strong>Giá:</strong> {{ plan.price }}đ</p>
+                    <div class="button-group">
+                        <a href="{{ url_for('customer_plan.plan_details', plan_id=plan.id) }}" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                        <button class="btn btn-primary btn-sm" onclick="alert('Chức năng đăng ký đang phát triển!')">Đăng ký</button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Không có gói cước nào để hiển thị.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Style cho tiêu đề chính */
+    .page-title {
+        font-size: 2.5rem; /* Kích thước chữ to (40px) */
+        color: #000; /* Màu đen */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Bóng chữ */
+    }
+
+    /* Style cho lưới gói cước */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 cột đều nhau */
+        gap: 20px; /* Khoảng cách giữa các thẻ */
+        padding: 10px;
+    }
+
+    /* Style cho thẻ gói cước (plan cards) */
+    .plan-card { 
+        border: none;
+        border-radius: 15px;
+        padding: 20px;
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 8px 8px 20px rgba(0,0,0,0.15), -8px -8px 20px rgba(255,255,255,0.9);
+    }
+    .plan-card h5 { 
+        color: #d32f2f;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .plan-card p {
+        margin: 5px 0;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    /* Style cho các nút trong thẻ gói cước */
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+        border-radius: 25px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+    }
+    .btn-primary {
+        background-color: #28a745; /* Màu xanh lá */
+        border: none;
+        border-radius: 25px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #218838; /* Xanh lá đậm hơn khi hover */
+        box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+    }
+
+    /* Responsive design */
+    @media (max-width: 992px) {
+        .plans-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2 cột trên tablet */
+        }
+    }
+    @media (max-width: 576px) {
+        .plans-grid {
+            grid-template-columns: 1fr; /* 1 cột trên mobile */
+        }
+    }
+</style>
+{% endblock %}

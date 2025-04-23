@@ -1,3 +1,185 @@
+
+
+
+# from app.database import db_instance
+# from app.models.plan import Plan
+
+
+# class PlanRepository:
+#     @staticmethod
+#     def get_all():
+#         try:
+#             result = db_instance.execute("SELECT * FROM v_plans", fetchall=True)
+#             plans = []
+#             for row in result[0]:
+#                 plan = Plan()
+#                 plan.id = row.get("id")
+#                 plan.code = row.get("code")
+#                 plan.price = row.get("price")
+#                 plan.description = row.get("description")
+#                 plan.service_id = row.get("service_id")
+#                 plan.is_active = True if row.get("is_active") else False
+#                 plan.renewal_syntax = row.get("renewal_syntax")
+#                 plan.registration_syntax = row.get("registration_syntax")
+#                 plan.cancel_syntax = row.get("cancel_syntax")
+#                 plan.free_data = row.get("free_data")
+#                 plan.free_on_network_a_call = row.get("free_on_network_a_call")
+#                 plan.free_on_network_call = row.get("free_on_network_call")
+#                 plan.free_on_network_SMS = row.get("free_on_network_SMS")
+#                 plan.free_off_network_a_call = row.get("free_off_network_a_call")
+#                 plan.free_off_network_call = row.get("free_off_network_call")
+#                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
+#                 plan.auto_renew = True if row.get("auto_renew") else False
+#                 plan.staff_id = row.get("staff_id")
+#                 plan.created_at = row.get("created_at")
+#                 plan.updated_at = row.get("updated_at")
+#                 plan.maximum_on_network_call = row.get("maximum_on_network_call")
+#                 plan.ON_SMS_cost = row.get("ON_SMS_cost")
+#                 plan.ON_a_call_cost = row.get("ON_a_call_cost")
+#                 plans.append(plan.to_dict())
+#             return plans
+#         except Exception as e:
+#             print(f"Lỗi khi lấy danh sách plan: {e}")
+#             return []
+
+#     @staticmethod
+#     def get_by_id(plan_id):
+#         try:
+#             result = db_instance.execute(
+#                 "CALL GetPlanById(%s)", (plan_id,), fetchone=True
+#             )
+#             if result:
+#                 plan = Plan()
+#                 for key in result:
+#                     if key in ("is_active", "auto_renew"):
+#                         # Chuyển đổi is_active và auto_renew thành boolean
+#                         value = result[key]
+#                         setattr(plan, key, bool(int(value)) if value is not None else False)
+#                     else:
+#                         setattr(plan, key, result[key])
+#                 return plan
+#             return None
+#         except Exception as e:
+#             print(f"Lỗi khi lấy plan theo ID: {e}")
+#             return None
+#     @staticmethod
+#     def insert(data: Plan):
+#         try:
+#             result = db_instance.execute(
+#                 "CALL AddPlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+#                 (
+#                     data.code,
+#                     data.price,
+#                     data.description,
+#                     data.service_id,
+#                     data.is_active,
+#                     data.renewal_syntax,
+#                     data.registration_syntax,
+#                     data.cancel_syntax,
+#                     data.free_data,
+#                     data.free_on_network_a_call,
+#                     data.free_on_network_call,
+#                     data.free_on_network_SMS,
+#                     data.free_off_network_a_call,
+#                     data.free_off_network_call,
+#                     data.free_off_network_SMS,
+#                     data.auto_renew,
+#                     data.staff_id,
+#                     data.maximum_on_network_call,
+#                     data.ON_SMS_cost,
+#                     data.ON_a_call_cost,
+#                 ),
+#                 fetchone=True, commit=True,
+#             )
+#             if result and result.get("error"):
+#                 print(f"Lỗi khi thêm plan: {result['error']}")
+#                 return result["error"]
+#             return True
+#         except Exception as e:
+#             print(f"Lỗi khi thêm plan: {e}")
+#             return str(e)
+
+#     @staticmethod
+#     def update(plan_id, data: Plan):
+#         try:
+#             result = db_instance.execute(
+#                 "CALL UpdatePlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+#                 (
+#                     plan_id,
+#                     data.code,
+#                     data.price,
+#                     data.description,
+#                     data.service_id,
+#                     data.is_active,
+#                     data.renewal_syntax,
+#                     data.registration_syntax,
+#                     data.cancel_syntax,
+#                     data.free_data,
+#                     data.free_on_network_a_call,
+#                     data.free_on_network_call,
+#                     data.free_on_network_SMS,
+#                     data.free_off_network_a_call,
+#                     data.free_off_network_call,
+#                     data.free_off_network_SMS,
+#                     data.auto_renew,
+#                     data.staff_id,
+#                     data.maximum_on_network_call,
+#                     data.ON_SMS_cost,
+#                     data.ON_a_call_cost,
+#                 ),
+#                 fetchone=True, commit=True,
+#             )
+#             if result and result.get("error"):
+#                 print(f"Lỗi khi cập nhật plan: {result['error']}")
+#                 return result["error"]
+#             return True
+#         except Exception as e:
+#             print(f"Lỗi khi cập nhật plan: {e}")
+#             return str(e)
+
+#     @staticmethod
+#     def lock(plan_id):
+#         try:
+#             result = db_instance.execute("CALL LockPlan(%s)", (plan_id,), fetchone=True, commit=True)
+#             if result and result.get("error"):
+#                 print(f"Lỗi khi khóa plan: {result['error']}")
+#                 return result["error"]
+#             return True
+#         except Exception as e:
+#             print(f"Lỗi khi khóa plan: {e}")
+#             return str(e)
+
+#     @staticmethod
+#     def search(code, price, is_active):
+#         try:
+#             params = (
+#                 code if code else None,
+#                 float(price) if price else None,
+#                 int(is_active) if is_active is not None else None
+#             )
+#             result = db_instance.execute(
+#                 "CALL SearchPlans(%s, %s, %s)", params, fetchall=True
+#             )
+#             plans = []
+#             for row in result[0]:  # fetchall=True trả về tuple (rows, ...)
+#                 plan = Plan()
+#                 for key in row:
+#                     if key in ("is_active", "auto_renew"):
+#                         value = row[key]
+#                         setattr(plan, key, bool(int(value)) if value is not None else False)
+#                     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+#                         value = row[key]
+#                         setattr(plan, key, float(value) if value is not None else None)
+#                     else:
+#                         setattr(plan, key, row[key])
+#                 plans.append(plan.to_dict())
+#             return plans
+#         except Exception as e:
+#             print(f"Lỗi khi tìm kiếm plans: {e}")
+#             return []
+
+
+
 from app.database import db_instance
 from app.models.plan import Plan
 
@@ -8,15 +190,14 @@ class PlanRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_plans", fetchall=True)
             plans = []
-
-            for row in result:
+            for row in result[0]:
                 plan = Plan()
                 plan.id = row.get("id")
                 plan.code = row.get("code")
                 plan.price = row.get("price")
                 plan.description = row.get("description")
                 plan.service_id = row.get("service_id")
-                plan.is_active = row.get("is_active")
+                plan.is_active = True if row.get("is_active") else False
                 plan.renewal_syntax = row.get("renewal_syntax")
                 plan.registration_syntax = row.get("registration_syntax")
                 plan.cancel_syntax = row.get("cancel_syntax")
@@ -27,13 +208,14 @@ class PlanRepository:
                 plan.free_off_network_a_call = row.get("free_off_network_a_call")
                 plan.free_off_network_call = row.get("free_off_network_call")
                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
-                plan.auto_renew = row.get("auto_renew")
+                plan.auto_renew = True if row.get("auto_renew") else False
                 plan.staff_id = row.get("staff_id")
                 plan.created_at = row.get("created_at")
                 plan.updated_at = row.get("updated_at")
                 plan.maximum_on_network_call = row.get("maximum_on_network_call")
+                plan.ON_SMS_cost = row.get("ON_SMS_cost")
+                plan.ON_a_call_cost = row.get("ON_a_call_cost")
                 plans.append(plan.to_dict())
-
             return plans
         except Exception as e:
             print(f"Lỗi khi lấy danh sách plan: {e}")
@@ -48,7 +230,11 @@ class PlanRepository:
             if result:
                 plan = Plan()
                 for key in result:
-                    setattr(plan, key, result[key])
+                    if key in ("is_active", "auto_renew"):
+                        value = result[key]
+                        setattr(plan, key, bool(int(value)) if value is not None else False)
+                    else:
+                        setattr(plan, key, result[key])
                 return plan
             return None
         except Exception as e:
@@ -59,7 +245,7 @@ class PlanRepository:
     def insert(data: Plan):
         try:
             result = db_instance.execute(
-                "CALL AddPlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL AddPlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     data.code,
                     data.price,
@@ -79,22 +265,24 @@ class PlanRepository:
                     data.auto_renew,
                     data.staff_id,
                     data.maximum_on_network_call,
+                    data.ON_SMS_cost,
+                    data.ON_a_call_cost,
                 ),
-                fetchone=True,
+                fetchone=True, commit=True,
             )
-            if result.get("error"):
+            if result and result.get("error"):
                 print(f"Lỗi khi thêm plan: {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
             print(f"Lỗi khi thêm plan: {e}")
-            return False
+            return str(e)
 
     @staticmethod
     def update(plan_id, data: Plan):
         try:
             result = db_instance.execute(
-                "CALL UpdatePlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL UpdatePlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     plan_id,
                     data.code,
@@ -115,25 +303,107 @@ class PlanRepository:
                     data.auto_renew,
                     data.staff_id,
                     data.maximum_on_network_call,
+                    data.ON_SMS_cost,
+                    data.ON_a_call_cost,
                 ),
-                fetchone=True,
+                fetchone=True, commit=True,
             )
-            if result.get("error"):
+            if result and result.get("error"):
                 print(f"Lỗi khi cập nhật plan: {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
             print(f"Lỗi khi cập nhật plan: {e}")
-            return False
+            return str(e)
 
     @staticmethod
-    def delete(plan_id):
+    def lock(plan_id):
         try:
-            result = db_instance.execute("CALL DeletePlan(%s)", (plan_id,), fetchone=True)
-            if result.get("error"):
-                print(f"Lỗi khi xóa plan: {result['error']}")
+            result = db_instance.execute("CALL LockPlan(%s)", (plan_id,), fetchone=True, commit=True)
+            if result and result.get("error"):
+                print(f"Lỗi khi khóa plan: {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
-            print(f"Lỗi khi xóa plan: {e}")
-            return False
+            print(f"Lỗi khi khóa plan: {e}")
+            return str(e)
+
+    @staticmethod
+    def search(code, price, is_active):
+        try:
+            params = (
+                code if code else None,
+                float(price) if price else None,
+                int(is_active) if is_active is not None else None
+            )
+            result = db_instance.execute(
+                "CALL SearchPlans(%s, %s, %s)", params, fetchall=True
+            )
+            plans = []
+            for row in result[0]:
+                plan = Plan()
+                for key in row:
+                    if key in ("is_active", "auto_renew"):
+                        value = row[key]
+                        setattr(plan, key, bool(int(value)) if value is not None else False)
+                    elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+                        value = row[key]
+                        setattr(plan, key, float(value) if value is not None else None)
+                    else:
+                        setattr(plan, key, row[key])
+                plans.append(plan.to_dict())
+            return plans
+        except Exception as e:
+            print(f"Lỗi khi tìm kiếm plans: {e}")
+            return []
+
+    @staticmethod
+    def get_sub_services(parent_service_id):
+        try:
+            result = db_instance.execute(
+                "SELECT id, service_name FROM services WHERE parent_id = %s",
+                (parent_service_id,), fetchall=True
+            )
+            return [{"id": row["id"], "service_name": row["service_name"]} for row in result[0]]
+        except Exception as e:
+            print(f"Lỗi khi lấy danh sách sub-services: {e}")
+            return []
+
+    @staticmethod
+    def get_plans_by_service_id(service_id):
+        try:
+            result = db_instance.execute(
+                "SELECT * FROM v_plans WHERE service_id = %s AND is_active = TRUE",
+                (service_id,), fetchall=True
+            )
+            plans = []
+            for row in result[0]:
+                plan = Plan()
+                plan.id = row.get("id")
+                plan.code = row.get("code")
+                plan.price = row.get("price")
+                plan.description = row.get("description")
+                plan.service_id = row.get("service_id")
+                plan.is_active = True if row.get("is_active") else False
+                plan.renewal_syntax = row.get("renewal_syntax")
+                plan.registration_syntax = row.get("registration_syntax")
+                plan.cancel_syntax = row.get("cancel_syntax")
+                plan.free_data = row.get("free_data")
+                plan.free_on_network_a_call = row.get("free_on_network_a_call")
+                plan.free_on_network_call = row.get("free_on_network_call")
+                plan.free_on_network_SMS = row.get("free_on_network_SMS")
+                plan.free_off_network_a_call = row.get("free_off_network_a_call")
+                plan.free_off_network_call = row.get("free_off_network_call")
+                plan.free_off_network_SMS = row.get("free_off_network_SMS")
+                plan.auto_renew = True if row.get("auto_renew") else False
+                plan.staff_id = row.get("staff_id")
+                plan.created_at = row.get("created_at")
+                plan.updated_at = row.get("updated_at")
+                plan.maximum_on_network_call = row.get("maximum_on_network_call")
+                plan.ON_SMS_cost = row.get("ON_SMS_cost")
+                plan.ON_a_call_cost = row.get("ON_a_call_cost")
+                plans.append(plan.to_dict())
+            return plans
+        except Exception as e:
+            print(f"Lỗi khi lấy danh sách gói cước theo service_id: {e}")
+            return []

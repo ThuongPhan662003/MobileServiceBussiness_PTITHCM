@@ -1,0 +1,121 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Cập nhật Gói Cước{% endblock %}
+
+{% block content %}
+<style>
+    .container { width: 60%; margin: 40px auto; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    .form-group input[type="checkbox"] { width: auto; }
+    .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+    .btn-submit { background-color: #3498db; }
+    .btn-cancel { background-color: #e74c3c; margin-left: 10px; }
+    .btn:hover { opacity: 0.9; }
+    .flashes { list-style: none; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+    .flashes li.error { background-color: #f8d7da; color: #721c24; }
+    .required::after { content: " *"; color: red; }
+</style>
+
+<div class="container">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">🛠</span> Cập nhật Gói Cước
+    </h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('plan.update_plan', plan_id=plan_id) }}">
+        <div class="form-group">
+            <label for="code" class="required">Mã Code</label>
+            <input type="text" id="code" name="code" value="{{ plan['code'] }}" maxlength="50" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Mô tả</label>
+            <textarea id="description" name="description" rows="4">{{ plan['description'] or '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="price" class="required">Giá (VND)</label>
+            <input type="number" id="price" name="price" step="0.01" value="{{ plan['price'] }}" min="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="registration_syntax">Cú pháp đăng ký</label>
+            <input type="text" id="registration_syntax" name="registration_syntax" value="{{ plan['registration_syntax'] or '' }}" maxlength="255">
+        </div>
+        <div class="form-group">
+            <label for="renewal_syntax">Cú pháp gia hạn</label>
+            <input type="text" id="renewal_syntax" name="renewal_syntax" value="{{ plan['renewal_syntax'] or '' }}" maxlength="255">
+        </div>
+        <div class="form-group">
+            <label for="cancel_syntax">Cú pháp hủy</label>
+            <input type="text" id="cancel_syntax" name="cancel_syntax" value="{{ plan['cancel_syntax'] or '' }}" maxlength="255">
+        </div>
+        <div class="form-group">
+            <label for="free_data">Dữ liệu miễn phí (MB)</label>
+            <input type="number" id="free_data" name="free_data" value="{{ plan['free_data'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_on_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi nội mạng</label>
+            <input type="number" id="free_on_network_a_call" name="free_on_network_a_call" value="{{ plan['free_on_network_a_call'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_on_network_call">Thời lượng gọi nội mạng miễn phí (Phút)</label>
+            <input type="number" id="free_on_network_call" name="free_on_network_call" value="{{ plan['free_on_network_call'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_on_network_SMS">Số tin nhắn SMS nội mạng miễn phí</label>
+            <input type="number" id="free_on_network_SMS" name="free_on_network_SMS" value="{{ plan['free_on_network_SMS'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_off_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi ngoại mạng</label>
+            <input type="number" id="free_off_network_a_call" name="free_off_network_a_call" value="{{ plan['free_off_network_a_call'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_off_network_call">Thời lượng gọi ngoại mạng miễn phí (Phút)</label>
+            <input type="number" id="free_off_network_call" name="free_off_network_call" value="{{ plan['free_on_network_call'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="free_off_network_SMS">Số tin nhắn SMS ngoại mạng miễn phí</label>
+            <input type="number" id="free_off_network_SMS" name="free_off_network_SMS" value="{{ plan['free_off_network_SMS'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="maximum_on_network_call">Thời lượng tối đa cuộc gọi nội mạng (Phút)</label>
+            <input type="number" id="maximum_on_network_call" name="maximum_on_network_call" value="{{ plan['maximum_on_network_call'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="ON_SMS_cost">Chi phí SMS nội mạng (VND)</label>
+            <input type="number" id="ON_SMS_cost" name="ON_SMS_cost" step="0.01" value="{{ plan['ON_SMS_cost'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="ON_a_call_cost">Chi phí gọi nội mạng (VND/phút)</label>
+            <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ plan['ON_a_call_cost'] or '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="is_active">Kích hoạt</label>
+            <input type="checkbox" id="is_active" name="is_active" {% if plan['is_active'] %}checked{% endif %}>
+        </div>
+        <div class="form-group">
+            <label for="auto_renew">Tự động gia hạn</label>
+            <input type="checkbox" id="auto_renew" name="auto_renew" {% if plan['auto_renew'] %}checked{% endif %}>
+        </div>
+        <div class="form-group">
+            <label for="service_id">ID Dịch vụ</label>
+            <input type="number" id="service_id" name="service_id" value="{{ plan['service_id'] or '' }}" min="1">
+        </div>
+        <div class="form-group">
+            <label for="staff_id">ID Nhân viên</label>
+            <input type="number" id="staff_id" name="staff_id" value="{{ plan['staff_id'] or '' }}" min="1">
+        </div>
+        <button type="submit" class="btn btn-submit">Cập nhật</button>
+        <a href="{{ url_for('plan.get_all_plans') }}" class="btn btn-cancel">Hủy</a>
+    </form>
+</div>
+{% endblock %}
