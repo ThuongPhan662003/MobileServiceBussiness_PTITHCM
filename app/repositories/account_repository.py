@@ -97,3 +97,28 @@ class AccountRepository:
         except Exception as e:
             print(f"Lỗi khi xóa account: {e}")
             return False
+
+    @staticmethod
+    def create_account_from_phone(phone_number: str):
+        try:
+            # Gọi stored procedure
+            result = db_instance.execute(
+                "CALL create_account_from_phone(%s)",  # Gọi stored procedure
+                (phone_number,),  # Tham số truyền vào là số điện thoại
+                fetchone=True,  # Lấy một dòng duy nhất
+                commit=True  # Commit sau khi thực thi
+            )
+
+            # In ra kết quả trả về để kiểm tra
+            print("Kết quả trả về từ stored procedure:", result)
+
+            # Kiểm tra kết quả trả về và lấy account_id
+            if result and "id" in result:
+                return result["id"]  # Trả về account_id
+            else:
+                return {"error": "Không thể lấy account_id từ stored procedure"}
+
+        except Exception as e:
+            print(f"Lỗi khi tạo account từ số điện thoại: {e}")
+            return {"error": str(e)}
+

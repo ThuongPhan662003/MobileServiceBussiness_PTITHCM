@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác nhận đăng ký</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+    p {
+      margin: 10px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .input-box {
+      border: 2px solid red;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 14px;
+      color: #888;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .close {
+      border: 1px solid #ccc;
+      background-color: white;
+      color: #333;
+    }
+    .agree {
+      background-color: #ff3333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <span class="close-btn">×</span>
+    <h2>XÁC NHẬN ĐĂNG KÝ</h2>
+    <p>Quý khách xác nhận đăng ký gói cước<br><span id="packageName">S7TK</span> với giá <span id="packagePrice">7.000</span> đồng.</p>
+    <div class="input-box">
+      Đăng ký qua tài khoản gốc điện thoại
+    </div>
+    <p>Đăng ký qua QR code</p>
+    <div class="buttons">
+      <button class="close">ĐÓNG</button>
+      <button class="agree">ĐỒNG Ý</button>
+    </div>
+  </div>
+
+  <script>
+    // Giả lập dữ liệu từ backend
+    const backendData = {
+      packageName: "S7TK",
+      packagePrice: "7.000"
+    };
+
+    // Chèn dữ liệu từ backend vào giao diện
+    document.getElementById("packageName").textContent = backendData.packageName;
+    document.getElementById("packagePrice").textContent = backendData.packagePrice;
+  </script>
+</body>
+</html>

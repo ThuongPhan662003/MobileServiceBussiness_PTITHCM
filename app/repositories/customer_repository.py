@@ -1,4 +1,3 @@
-# customer repositorie
 from app.database import db_instance
 from app.models.customer import Customer
 
@@ -13,10 +12,9 @@ class CustomerRepository:
                 customer = Customer()
                 customer.id = int(row.get("id")) if row.get("id") is not None else None
                 customer.full_name = row.get("full_name")
-                customer.is_active = bool(row.get("is_active"))
                 customer.card_id = row.get("card_id")
+                customer.is_active = bool(row.get("is_active"))
                 customers.append(customer.to_dict())
-
             return customers
         except Exception as e:
             print(f"Lỗi khi lấy danh sách khách hàng: {e}")
@@ -25,10 +23,9 @@ class CustomerRepository:
     @staticmethod
     def get_by_id(customer_id):
         try:
-            print(f"Executing query for customer_id: {customer_id}")
             result = db_instance.execute(
-                "SELECT * FROM customers WHERE id = %s", (customer_id,),
-                fetchone=True
+                "CALL GetCustomerById(%s)", (customer_id,),
+                fetchone=True, commit=True
             )
             if result:
                 customer = Customer()
@@ -38,7 +35,6 @@ class CustomerRepository:
                 customer.card_id = result.get("card_id")
                 return customer
             else:
-                print(f"Customer with ID {customer_id} not found.")
                 return None
         except Exception as e:
             print(f"Lỗi khi lấy khách hàng theo ID: {e}")
@@ -48,12 +44,11 @@ class CustomerRepository:
     def insert(data: Customer):
         try:
             result = db_instance.execute(
-                "CALL AddCustomer(%s, %s, %s, %s)",
-                (data.full_name, data.is_active, data.account_id, data.card_id),
-                fetchone=True,
+                "CALL AddCustomer(%s, %s)",
+                (data.full_name,  data.card_id),
+                fetchone=True, commit=True
             )
             if result.get("error"):
-                print(f"Lỗi từ stored procedure (insert): {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
@@ -64,18 +59,11 @@ class CustomerRepository:
     def update(customer_id, data: Customer):
         try:
             result = db_instance.execute(
-                "CALL UpdateCustomer(%s, %s, %s, %s, %s)",
-                (
-                    customer_id,
-                    data.full_name,
-                    data.is_active,
-                    data.account_id,
-                    data.card_id,
-                ),
-                fetchone=True,
+                "CALL UpdateCustomer(%s, %s, %s, %s)",
+                (customer_id, data.full_name, data.is_active, data.card_id),
+                fetchone=True
             )
             if result.get("error"):
-                print(f"Lỗi từ stored procedure (update): {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
@@ -89,9 +77,24 @@ class CustomerRepository:
                 "CALL DeleteCustomer(%s)", (customer_id,), fetchone=True
             )
             if result.get("error"):
-                print(f"Lỗi từ stored procedure (delete): {result['error']}")
                 return result["error"]
             return True
         except Exception as e:
             print(f"Lỗi khi xóa khách hàng: {e}")
+            return False
+
+    @staticmethod
+    def exists_by_card_id(card_id: str, exclude_customer_id=None):
+        try:
+            query = "SELECT COUNT(*) AS count FROM customers WHERE card_id = %s"
+            params = [card_id]
+
+            if exclude_customer_id is not None:
+                query += " AND id != %s"
+                params.append(exclude_customer_id)
+
+            result = db_instance.execute(query, tuple(params), fetchone=True)
+            return result.get("count", 0) > 0
+        except Exception as e:
+            print(f"Lỗi khi kiểm tra card_id tồn tại: {e}")
             return False

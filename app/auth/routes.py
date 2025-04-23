@@ -5,6 +5,9 @@ from app.services.account_service import AccountService
 from .forms import LoginForm, RegistrationForm
 from ..models import Account
 from . import auth
+from ..services.customer_service import CustomerService
+from ..services.subscriber_service import SubscriberService
+
 
 # auth = Blueprint("auth", __name__)
 
@@ -44,3 +47,10 @@ def register():
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
     return render_template("auth/register.html", form=form)
+@auth.route("/subscribers/<int:subscriber_id>", methods=["GET"])
+def view_subscriber(subscriber_id):
+    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
+    if subscriber:
+        customer = CustomerService.get_customer_by_id(subscriber.customer_id)
+        return render_template("home/tb.html", subscriber=subscriber, customer=customer)
+    return "Thuê bao không tồn tại", 404
