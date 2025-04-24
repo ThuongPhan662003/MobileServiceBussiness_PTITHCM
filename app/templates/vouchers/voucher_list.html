@@ -1,0 +1,643 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Quản Lý Mã Khuyến Mãi{% endblock %}
+
+{% block content %}
+<style>
+    .voucher-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .voucher-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .voucher-header h2 {
+        font-size: 2rem;
+        color: #222;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .voucher-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .search-box {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        font-size: 1rem;
+        width: 250px;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #ee2b47;
+        box-shadow: 0 0 5px rgba(238, 43, 71, 0.3);
+    }
+
+    .btn-add {
+        padding: 10px 20px;
+        border-radius: 25px;
+        background: linear-gradient(90deg, #ee2b47, #ff6b6b);
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(90deg, #d81f3a, #e65f5f);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(238, 43, 71, 0.4);
+    }
+
+    .voucher-table {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .voucher-table th {
+        background: #ee2b47;
+        color: white;
+        font-weight: 600;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .voucher-table td {
+        padding: 15px;
+        vertical-align: middle;
+        color: #555;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .voucher-table tr:hover {
+        background: #fafafa;
+    }
+
+    .badge {
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+
+    .badge-success {
+        background: #00b14f;
+        color: white;
+    }
+
+    .badge-danger {
+        background: #ee2b47;
+        color: white;
+    }
+
+    .btn-action {
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit {
+        border: 1px solid #007bff;
+        color: #007bff;
+    }
+
+    .btn-edit:hover {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-delete {
+        border: 1px solid #ee2b47;
+        color: #ee2b47;
+    }
+
+    .btn-delete:hover {
+        background: #ee2b47;
+        color: white;
+    }
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        /* Ensure modals are hidden by default */
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal.active {
+        display: flex;
+        /* Show modal when active class is added */
+    }
+
+    .modal-dialog {
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-header {
+        padding: 20px;
+        background: #fafafa;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        color: #222;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #666;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-body input,
+    .modal-body label {
+        display: block;
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+
+    .modal-body input[type="text"],
+    .modal-body input[type="date"],
+    .modal-body input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .modal-body input:focus {
+        outline: none;
+        border-color: #ee2b47;
+        box-shadow: 0 0 5px rgba(238, 43, 71, 0.3);
+    }
+
+    .modal-body label {
+        margin-top: 10px;
+        color: #555;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #f0f0f0;
+        text-align: right;
+    }
+
+    .btn-save,
+    .btn-update {
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save {
+        background: linear-gradient(90deg, #00b14f, #00d15e);
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(90deg, #009b43, #00b952);
+        transform: translateY(-2px);
+    }
+
+    .btn-update {
+        background: linear-gradient(90deg, #007bff, #00a1ff);
+        color: white;
+    }
+
+    .btn-update:hover {
+        background: linear-gradient(90deg, #0056b3, #0087d1);
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .voucher-container {
+            margin: 20px 15px;
+        }
+
+        .voucher-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .voucher-controls {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .voucher-table th,
+        .v: .voucher-table td {
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        .modal-dialog {
+            width: 95%;
+            max-height: 90vh;
+        }
+
+        .modal-body {
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="voucher-container">
+    <div class="voucher-header">
+        <h2><i class="fas fa-ticket-alt"></i> Danh Sách Mã Khuyến Mãi</h2>
+        <div class="voucher-controls">
+            <input type="text" id="searchBox" class="search-box" placeholder="Tìm mã khuyến mãi..." />
+            <button class="btn-add" onclick="openModal('addVoucherModal')"><i class="fas fa-plus"></i> Thêm Mã</button>
+        </div>
+    </div>
+
+    <table class="voucher-table table table-bordered table-hover" id="voucherTable">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Mô Tả</th>
+                <th>Gói Áp Dụng</th>
+                <th>Ngày Bắt Đầu</th>
+                <th>Ngày Kết Thúc</th>
+                <th>Còn Lại</th>
+                <th>Hoạt Động</th>
+                <th>Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody id="voucherListBody">
+            {% for voucher in vouchers %}
+            <tr>
+                <td>{{ voucher.code }}</td>
+                <td>{{ voucher.description }}</td>
+                <td>{{ voucher.packages or "Tất cả" }}</td>
+                <td>{{ voucher.start_date }}</td>
+                <td>{{ voucher.end_date }}</td>
+                <td>{{ voucher.remaining_count }}/{{ voucher.usage_limit }}</td>
+                <td class="text-center">
+                    {% if voucher.is_active %}
+                    <span class="badge badge-success">✔️</span>
+                    {% else %}
+                    <span class="badge badge-danger">❌</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <button class="btn-action btn-edit" onclick="openEditModal({{ voucher.id }})"><i
+                            class="fas fa-edit"></i></button>
+                    <button class="btn-action btn-delete" onclick="deleteVoucher({{ voucher.id }})"><i
+                            class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Sửa -->
+<div id="editVoucherModal" class="modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa Mã Khuyến Mãi</h5>
+                <button type="button" class="btn-close" onclick="closeModal('editVoucherModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editVoucherId">
+                <input type="text" id="editCode" class="form-control" required>
+                <textarea id="editDescription" class="form-control" rows="8" cols="60" placeholder="Mô tả"></textarea>
+                <input type="text" id="editPackages" class="form-control" placeholder="Gói áp dụng">
+                <input type="date" id="editStartDate" class="form-control" required>
+                <input type="date" id="editEndDate" class="form-control" required>
+                <input type="number" id="editUsageLimit" class="form-control" placeholder="Số lượt sử dụng" required>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="editIsActive">
+                    <label class="form-check-label" for="editIsActive">Kích hoạt</label>
+                </div>
+                <label>Điều kiện và Ưu đãi (conandpro)</label>
+                <textarea id="editConAndPro" class="form-control" rows="6" cols="60" placeholder='JSON'></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-update" onclick="updateVoucher()">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Thêm -->
+<div id="addVoucherModal" class="modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Thêm Mã Khuyến Mãi</h5>
+                <button type="button" class="btn-close" onclick="closeModal('addVoucherModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="addCode" class="form-control" placeholder="Mã khuyến mãi" required>
+                <input type="text" id="addDescription" class="form-control" placeholder="Mô tả">
+                <input type="text" id="addPackages" class="form-control"
+                    placeholder="Gói áp dụng (cách nhau bởi dấu ,)">
+                <input type="date" id="addStartDate" class="form-control" required>
+                <input type="date" id="addEndDate" class="form-control" required>
+                <input type="number" id="addUsageLimit" class="form-control" placeholder="Số lượt sử dụng" required>
+                <label><input type="checkbox" id="addIsActive" checked> Kích hoạt</label>
+                <label>Điều kiện và Ưu đãi (JSON)</label>
+                <textarea id="addConAndPro" class="form-control" rows="6" cols="60"
+                    placeholder='Dán JSON hoặc để trống để tự động sinh'></textarea>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn-save" onclick="saveVoucher()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa
+<div id="editVoucherModal" class="modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa Mã Khuyến Mãi</h5>
+                <button type="button" class="btn-close" onclick="closeModal('editVoucherModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editVoucherId">
+                <input type="text" id="editCode" class="form-control" required>
+
+                <textarea id="editDescription" class="form-control" rows="10">
+
+                </textarea>
+                <input type="text" id="editPackages" class="form-control">
+                <input type="date" id="editStartDate" class="form-control" required>
+                <input type="date" id="editEndDate" class="form-control" required>
+                <input type="number" id="editUsageLimit" class="form-control" required>
+                <label><input type="checkbox" id="editIsActive"> Kích hoạt</label>
+                <label>Điều kiện và Ưu đãi (conandpro)</label>
+                <textarea id="addConAndPro" class="form-control" rows="10">
+                {
+                  "condition": {
+                    "plan_id": [13],
+                    "subscriber": ["TRASAU"],
+                    "created_at": "DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))",
+                    "renewal_total": 2
+                  },
+                  "promotion": {
+                    "payments": {
+                      "total_amount": {
+                        "operator": "*",
+                        "value": 0.5
+                      }
+                    },
+                    "payment_detail": {
+                      "free_data": {
+                        "operator": "+",
+                        "value": 5
+                      }
+                    }
+                  }
+                }
+                </textarea>
+
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn-update" onclick="updateVoucher()">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<script>
+    // Ensure modals are hidden on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('addVoucherModal').style.display = 'none';
+        document.getElementById('editVoucherModal').style.display = 'none';
+    });
+
+    function openModal(id) {
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('active');
+            modal.style.display = 'flex';  // 👈 Bắt buộc
+        }
+
+        document.getElementById(id).classList.add('active');
+        document.getElementById(id).style.display = 'flex';
+        if (id === 'addVoucherModal') {
+            document.getElementById('addConAndPro').value = JSON.stringify({
+                condition: {
+                    plan_id: [13],
+                    subscriber: ["TRASAU"],
+                    created_at: "DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))",
+                    renewal_total: 2
+                },
+                promotion: {
+                    payments: {
+                        total_amount: {
+                            operator: "*",
+                            value: 0.5
+                        }
+                    },
+                    payment_detail: {
+                        free_data: {
+                            operator: "+",
+                            value: 5
+                        }
+                    }
+                }
+            }, null, 2);
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function saveVoucher() {
+        const data = {
+            code: document.getElementById('addCode').value,
+            description: document.getElementById('addDescription').value,
+            packages: document.getElementById('addPackages').value,
+            start_date: document.getElementById('addStartDate').value,
+            end_date: document.getElementById('addEndDate').value,
+            usage_limit: parseInt(document.getElementById('addUsageLimit').value),
+            remaining_count: parseInt(document.getElementById('addUsageLimit').value),
+            is_active: document.getElementById('addIsActive').checked,
+            conandpro: document.getElementById('addConAndPro').value
+        };
+        console.log(data)
+        fetch("/vouchers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(res => res.ok ? location.reload() : res.json().then(j => alert(j.error)));
+    }
+
+
+    function openEditModal(id) {
+        fetch(`/vouchers/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                // ⚠️ Chờ DOM đã hiển thị trước khi gán
+                document.getElementById('editVoucherId').value = id;
+                document.getElementById('editCode').value = data.code;
+                document.getElementById('editDescription').value = data.description;
+                document.getElementById('editPackages').value = data.packages;
+                document.getElementById('editStartDate').value = data.start_date;
+                document.getElementById('editEndDate').value = data.end_date;
+                document.getElementById('editUsageLimit').value = data.usage_limit;
+                document.getElementById('editIsActive').checked = data.is_active;
+                document.getElementById('editConAndPro').value = JSON.stringify(data.conandpro || {}, null, 2);
+
+                // ✅ Hiển thị modal SAU khi set dữ liệu
+                setTimeout(() => openModal('editVoucherModal'), 50); // hoặc không cần timeout
+            });
+    }
+
+    function updateVoucher() {
+        const id = document.getElementById('editVoucherId').value;
+        const data = {
+            code: document.getElementById('editCode').value,
+            description: document.getElementById('editDescription').value,
+            packages: document.getElementById('editPackages').value,
+            start_date: document.getElementById('editStartDate').value,
+            end_date: document.getElementById('editEndDate').value,
+            usage_limit: parseInt(document.getElementById('editUsageLimit').value),
+            is_active: document.getElementById('editIsActive').checked
+        };
+        fetch(`/vouchers/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(res => res.ok ? location.reload() : res.json().then(j => alert(j.error)));
+    }
+
+    function deleteVoucher(id) {
+        if (!confirm("Bạn có chắc muốn xóa mã này không?")) return;
+        fetch(`/vouchers/${id}`, {
+            method: "DELETE",
+        }).then(res => res.ok ? location.reload() : res.json().then(j => alert(j.error)));
+    }
+    function buildConAndProJsonFromForm() {
+        const subscriber = document.getElementById("promo_subscriber_type").value;
+        const renewal = parseInt(document.getElementById("promo_renewal_times").value) || 0;
+        const created_at = document.getElementById("promo_created_expr").value || "DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))";
+
+        const discountOp = document.getElementById("promo_discount_operator").value;
+        const discountVal = parseFloat(document.getElementById("promo_discount_value").value);
+
+        const dataOp = document.getElementById("promo_data_operator").value;
+        const dataVal = parseFloat(document.getElementById("promo_free_data").value);
+
+        return {
+            condition: {
+                plan_id: [13],  // Giả định gói này cố định
+                subscriber: [subscriber],
+                created_at: created_at,
+                renewal_total: renewal
+            },
+            promotion: {
+                payments: {
+                    total_amount: (discountOp && !isNaN(discountVal)) ? {
+                        operator: discountOp,
+                        value: discountVal
+                    } : null
+                },
+                payment_detail: {
+                    free_data: (dataOp && !isNaN(dataVal)) ? {
+                        operator: dataOp,
+                        value: dataVal
+                    } : null
+                }
+            }
+        };
+    }
+
+    document.getElementById('searchBox').addEventListener('input', function () {
+        const keyword = this.value.toLowerCase();
+        document.querySelectorAll('#voucherListBody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(keyword) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

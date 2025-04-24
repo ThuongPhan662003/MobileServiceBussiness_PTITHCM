@@ -1,4 +1,6 @@
-{% extends './admin_base.html' %}
+
+{% extends 'admin_base.html' %}
+
 
 {% block title %}Quản lý Khách Hàng{% endblock %}
 
@@ -120,8 +122,8 @@
             <tr>
                 <th>ID</th>
                 <th>Họ tên</th>
-                <th>Trạng thái</th>
                 <th>Card ID</th>
+                <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -130,10 +132,15 @@
             <tr>
                 <td>{{ customer.id }}</td>
                 <td>{{ customer.full_name }}</td>
+
                 <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
                     {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
                 </td>
+
                 <td>{{ customer.card_id }}</td>
+                <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
+                    {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
+                </td>
                 <td>
                     <button class="btn btn-edit" onclick="editCustomer({{ customer.id }})">Sửa</button>
                     <button class="btn btn-delete" onclick="deleteCustomer({{ customer.id }})">Khóa</button>
@@ -157,6 +164,7 @@
         </div>
         <form id="customerForm">
             <input type="hidden" id="customerId" name="id">
+            <div id="formError" style="color: red; margin-bottom: 10px;"></div>
             <label>Họ tên:</label>
             <input type="text" id="customerName" name="full_name" required>
             <label>Card ID:</label>
@@ -168,7 +176,6 @@
                     <option value="false">Không kích hoạt</option>
                 </select>
             </div>
-
             <button type="submit" class="btn btn-add mt-4">Lưu</button>
         </form>
     </div>
@@ -179,7 +186,8 @@
         document.getElementById('modalTitle').innerText = 'Thêm Khách Hàng';
         document.getElementById('customerForm').reset();
         document.getElementById('customerId').value = '';
-        document.getElementById('statusField').style.display = 'none'; // Ẩn trạng thái
+        document.getElementById('statusField').style.display = 'none';
+        document.getElementById('formError').innerText = '';
         document.getElementById('customerModal').style.display = 'flex';
     }
 
@@ -194,16 +202,16 @@
                 document.getElementById('modalTitle').innerText = 'Chỉnh sửa Khách Hàng';
                 document.getElementById('customerId').value = data.id;
                 document.getElementById('customerName').value = data.full_name;
-                document.getElementById('customerAccountId').value = data.account_id;
                 document.getElementById('customerCardId').value = data.card_id;
                 document.getElementById('customerStatus').value = data.is_active ? 'true' : 'false';
-                document.getElementById('statusField').style.display = 'block'; // Hiện trạng thái
+                document.getElementById('statusField').style.display = 'block';
+                document.getElementById('formError').innerText = '';
                 document.getElementById('customerModal').style.display = 'flex';
             });
     }
 
     function deleteCustomer(id) {
-        if (confirm("Bạn có chắc muốn xóa khách hàng này không?")) {
+        if (confirm("Bạn có chắc muốn khóa khách hàng này không?")) {
             fetch(`/customers/${id}`, { method: 'DELETE' })
                 .then(() => location.reload());
         }
@@ -227,11 +235,21 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         })
-            .then(() => {
+
+        .then(async (response) => {
+            if (!response.ok) {
+                const result = await response.json();
+                document.getElementById('formError').innerText = result.error || 'Đã có lỗi xảy ra.';
+            } else {
                 closeCustomerModal();
                 location.reload();
-            })
-            .catch(error => console.error('Lỗi:', error));
+            }
+        })
+        .catch(error => {
+            document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
+            console.error('Lỗi:', error);
+        });
+
     });
 </script>
 {% endblock %}

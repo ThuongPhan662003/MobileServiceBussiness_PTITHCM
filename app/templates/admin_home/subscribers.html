@@ -1,4 +1,4 @@
-{% extends 'admin_home/admin_base.html' %}
+{% extends 'admin_base.html' %}
 
 {% block title %}Quản lý Thuê Bao{% endblock %}
 
@@ -72,7 +72,7 @@
         background: white;
         padding: 30px;
         border-radius: 10px;
-        width: 500px;
+        width: 400px;
         position: relative;
     }
 
@@ -102,10 +102,6 @@
         border-radius: 5px;
         border: 1px solid #ccc;
     }
-
-    .edit-only {
-        display: none;
-    }
 </style>
 
 <div class="container">
@@ -120,12 +116,13 @@
                 <th>Số điện thoại</th>
                 <th>Số dư</th>
                 <th>Ngày kích hoạt</th>
-                <th>Account ID</th>
                 <th>Ngày hết hạn</th>
-                <th>Trạng thái</th>
+                <th>Account ID</th>
                 <th>Khách hàng</th>
+                <th>Loại Thuê Bao</th>
                 <th>Ngày cảnh báo</th>
                 <th>Đã nhắn tin</th>
+                <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -136,14 +133,15 @@
                 <td>{{ subscriber.phone_number }}</td>
                 <td>{{ subscriber.main_balance }}</td>
                 <td>{{ subscriber.activation_date }}</td>
-                <td>{{ subscriber.account_id }}</td>
                 <td>{{ subscriber.expiration_date }}</td>
+                <td>{{ subscriber.account_id }}</td>
+                <td>{{ subscriber.customer_id }}</td>
+                <td>{{ subscriber.subscriber_type }}</td>
+                <td>{{ subscriber.warning_date or '—' }}</td>
+                <td>{{ 'Có' if subscriber.is_messaged else 'Không' }}</td>
                 <td style="color: {{ 'red' if not subscriber.is_active else 'inherit' }};">
                     {{ 'Kích hoạt' if subscriber.is_active else 'Không kích hoạt' }}
                 </td>
-                <td>{{ subscriber.customer_id }}</td>
-                <td>{{ subscriber.warning_date or '—' }}</td>
-                <td>{{ 'Có' if subscriber.is_messaged else 'Không' }}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editSubscriber({{ subscriber.id }})">Sửa</button>
                     <button class="btn btn-delete" onclick="deleteSubscriber({{ subscriber.id }})">Khóa</button>
@@ -151,7 +149,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="10" class="text-gray-500 italic">Không có thuê bao nào.</td>
+                <td colspan="12" class="text-gray-500 italic">Không có thuê bao nào.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -166,6 +164,8 @@
             <button onclick="closeSubscriberModal()" class="close">&times;</button>
         </div>
         <form id="subscriberForm">
+            <div id="formAlert" style="color:red; font-size: 14px; margin-bottom:10px;"></div>
+
             <label>Số điện thoại:</label>
             <input type="text" id="phoneNumber" name="phone_number" required>
 
@@ -175,20 +175,23 @@
             <label>Ngày hết hạn:</label>
             <input type="date" id="expirationDate" name="expiration_date" required>
 
-            <label>Account ID:</label>
-            <input type="number" id="customerAccountId" name="account_id" required>
-
             <label>Customer ID:</label>
             <input type="number" id="customerId" name="customer_id" required>
 
+            <label>Loại Thuê Bao:</label>
+            <select id="subscriberType" name="subscriber_type" required>
+                <option value="Trả trước">Trả trước</option>
+                <option value="Trả sau">Trả sau</option>
+            </select>
+
             <!-- Các trường chỉ hiển thị khi sửa -->
-           <div class="edit-only">
-    <label>Ngày kích hoạt:</label>
-    <input type="date" id="activationDate" name="activation_date" disabled>
-</div>
+            <div class="edit-only">
+                <label>Ngày kích hoạt:</label>
+                <input type="date" id="activationDate" name="activation_date" disabled>
+            </div>
 
             <div class="edit-only">
-                <label>Trạng thái (is_active):</label>
+                <label>Trạng thái:</label>
                 <select id="isActive" name="is_active">
                     <option value="true">Kích hoạt</option>
                     <option value="false">Không kích hoạt</option>
@@ -208,6 +211,8 @@
                 </select>
             </div>
 
+            <input type="hidden" id="accountId" name="account_id">
+
             <button type="submit" class="btn btn-add mt-4">Lưu</button>
         </form>
     </div>
@@ -215,88 +220,92 @@
 
 <script>
     function toggleEditFields(show) {
-        const editFields = document.querySelectorAll('.edit-only');
-        editFields.forEach(field => {
-            field.style.display = show ? 'block' : 'none';
-        });
+        document.querySelectorAll('.edit-only').forEach(el => el.style.display = show ? 'block' : 'none');
     }
 
     function openAddSubscriberModal() {
         document.getElementById('modalTitle').innerText = 'Thêm Thuê Bao';
         document.getElementById('subscriberForm').reset();
+        document.getElementById('formAlert').innerText = '';
         document.getElementById('subscriberForm').removeAttribute('data-id');
+        toggleEditFields(false);
         document.getElementById('subscriberModal').style.display = 'flex';
 
-        toggleEditFields(false); // Ẩn các trường chỉ khi sửa
-
-        const now = new Date().toISOString().split('T')[0];
-        document.getElementById('activationDate').value = now;
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('activationDate').value = today;
         document.getElementById('isActive').value = 'true';
         document.getElementById('warningDate').value = '';
         document.getElementById('isMessaged').value = 'false';
+        document.getElementById('accountId').value = '';
+        document.getElementById('subscriberType').value = 'Trả trước';
     }
 
     function closeSubscriberModal() {
         document.getElementById('subscriberModal').style.display = 'none';
     }
 
-    function editSubscriber(subscriberId) {
-        fetch(`/subscribers/${subscriberId}`)
+    function editSubscriber(id) {
+        fetch(`/subscribers/${id}`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('modalTitle').innerText = 'Chỉnh sửa Thuê Bao';
-                document.getElementById('subscriberForm').setAttribute('data-id', subscriberId);
+                document.getElementById('subscriberForm').setAttribute('data-id', id);
+                document.getElementById('formAlert').innerText = '';
+                toggleEditFields(true);
                 document.getElementById('subscriberModal').style.display = 'flex';
-
-                toggleEditFields(true); // Hiện các trường khi sửa
 
                 document.getElementById('phoneNumber').value = data.phone_number;
                 document.getElementById('mainBalance').value = data.main_balance;
                 document.getElementById('activationDate').value = data.activation_date;
                 document.getElementById('expirationDate').value = data.expiration_date;
-                document.getElementById('isActive').value = data.is_active ? 'true' : 'false';
                 document.getElementById('customerId').value = data.customer_id;
+                document.getElementById('subscriberType').value = data.subscriber_type;
                 document.getElementById('warningDate').value = data.warning_date || '';
                 document.getElementById('isMessaged').value = data.is_messaged ? 'true' : 'false';
+                document.getElementById('isActive').value = data.is_active ? 'true' : 'false';
+                document.getElementById('accountId').value = data.account_id;
             });
     }
 
-    function deleteSubscriber(subscriberId) {
-        if (confirm("Bạn có chắc muốn xóa thuê bao này không?")) {
-            fetch(`/subscribers/${subscriberId}`, { method: 'DELETE' })
-                .then(() => location.reload());
+    function deleteSubscriber(id) {
+        if (confirm("Bạn có chắc muốn khóa thuê bao này không?")) {
+            fetch(`/subscribers/${id}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.error) {
+                        alert(result.error);
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Lỗi khi xóa:', error));
         }
     }
 
-    document.getElementById('subscriberForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const subscriberId = this.getAttribute('data-id');
-        const isNew = !subscriberId;
-        const method = isNew ? 'POST' : 'PUT';
-        const url = isNew ? '/subscribers/' : `/subscribers/${subscriberId}`;
+    document.getElementById('subscriberForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        const id = this.getAttribute('data-id');
 
-        const formData = {
-            phone_number: document.getElementById('phoneNumber').value,
-            main_balance: document.getElementById('mainBalance').value,
-            activation_date: document.getElementById('activationDate').value,
-            expiration_date: document.getElementById('expirationDate').value,
-            account_id: document.getElementById('customerAccountId').value,
-            is_active: document.getElementById('isActive').value === 'true',
-            customer_id: parseInt(document.getElementById('customerId').value),
-            warning_date: document.getElementById('warningDate').value || null,
-            is_messaged: document.getElementById('isMessaged').value === 'true'
-        };
-
-        fetch(url, {
-            method: method,
+        fetch(id ? `/subscribers/${id}` : '/subscribers', {
+            method: id ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(data)
         })
-        .then(() => {
-            closeSubscriberModal();
-            location.reload();
+        .then(res => res.json())
+        .then(result => {
+            if (result.error) {
+                document.getElementById('formAlert').innerText = result.error;
+            } else {
+                closeSubscriberModal();
+                location.reload();
+            }
         })
-        .catch(error => console.error('Lỗi:', error));
+        .catch(error => {
+            document.getElementById('formAlert').innerText = "Đã xảy ra lỗi khi gửi dữ liệu.";
+            console.error(error);
+        });
     });
 </script>
 {% endblock %}

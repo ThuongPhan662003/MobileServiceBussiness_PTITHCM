@@ -53,17 +53,7 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="mb-3">
-                {{ form.email.label(class="form-label") }}
-                {{ form.email(class="form-control", placeholder="Enter your email") }}
-                {% if form.email.errors %}
-                <div class="text-danger small">
-                    {% for error in form.email.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
+
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
                 {{ form.password(class="form-control", placeholder="Enter your password") }}

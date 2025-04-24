@@ -24,6 +24,17 @@ class ServiceRepository:
             return []
 
     @staticmethod
+    def get_all_services():
+        try:
+            result = db_instance.execute(
+                "SELECT id, service_name FROM services", fetchall=True
+            )
+            return result[0] if result else []
+        except Exception as e:
+            print("Lỗi khi lấy danh sách dịch vụ:", e)
+            return []
+
+    @staticmethod
     def get_by_id(service_id):
         try:
             result = db_instance.execute(
@@ -42,42 +53,73 @@ class ServiceRepository:
             return None
 
     @staticmethod
-    def insert(data: Service):
-        results = None
-        print("start")
+    def insert(data: dict):
         try:
+            print("Start insert service...")
+            print("coverage_area type:", type(data["coverage_area"]))
 
             result = db_instance.execute(
                 "CALL AddService(%s, %s, %s)",
-                (data.service_name, data.parent_id, data.coverage_area),
+                (data["service_name"], data["parent_id"], data["coverage_area"]),
+                fetchone=True,
+                commit=True,
+            )
+            print("Kết quả từ stored procedure:", result)
+
+            # Nếu stored procedure trả về lỗi logic (ví dụ trùng tên)
+            if result.get("error") or result.get("success") is False:
+                return {
+                    "success": False,
+                    "error": result.get("error"),
+                    "message": result.get("message", "Thêm dịch vụ thất bại."),
+                }
+
+            # Thành công
+            return {
+                "success": True,
+                "message": result.get("message", "Thêm dịch vụ thành công."),
+            }
+
+        except Exception as e:
+            print("Lỗi exception khi insert service:", e)
+            return {
+                "success": False,
+                "error": str(e),
+                "message": "Lỗi hệ thống khi tạo dịch vụ.",
+            }
+
+    @staticmethod
+    def update(service_id: int, data: Service):
+        try:
+            result = db_instance.execute(
+                "CALL UpdateService(%s, %s, %s)",
+                (service_id, data.parent_id, data.coverage_area),
                 fetchone=True,
                 commit=True,
             )
 
-            if result.get("error"):
-                print(f"Lỗi khi thêm dịch vụ: {result['error']}")
-                return result["error"]
-            print("oke")
-            return True
-        except Exception as e:
-            print(f"Lỗi khi thêm dịch vụ: {e}")
-            return False
+            print("[Update Result]", result)
 
-    @staticmethod
-    def update(service_id, data: Service):
-        try:
-            result = db_instance.execute(
-                "CALL UpdateService(%s, %s, %s, %s)",
-                (service_id, data.service_name, data.parent_id, data.coverage_area),
-                fetchone=True,
-            )
+            # ✅ Trường hợp có lỗi (result là dict chứa "error")
             if result.get("error"):
-                print(f"Lỗi khi cập nhật dịch vụ: {result['error']}")
-                return result["error"]
-            return True
+                return {
+                    "success": False,
+                    "error": True,
+                    "message": result.get("message", "Lỗi khi cập nhật dịch vụ."),
+                }
+
+            return {
+                "success": True,
+                "message": result.get("message", "Cập nhật dịch vụ thành công."),
+            }
+
         except Exception as e:
-            print(f"Lỗi khi cập nhật dịch vụ: {e}")
-            return False
+            print(f"[Exception] Lỗi khi cập nhật dịch vụ:", str(e))
+            return {
+                "success": False,
+                "error": True,
+                "message": f"Lỗi hệ thống: {str(e)}",
+            }
 
     @staticmethod
     def delete(service_id):

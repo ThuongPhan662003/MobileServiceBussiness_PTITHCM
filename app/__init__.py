@@ -1,4 +1,5 @@
-from flask import Flask
+from datetime import timedelta
+from flask import Flask, json, session
 from flask_login import LoginManager
 from app.controllers import *
 from app.controllers.subscriber_controller import subscriber_bp
@@ -10,6 +11,10 @@ from config import Config
 from app.database import db_instance
 import paypalrestsdk
 from app.utils import vnpay, ip
+
+from app.controllers.customer_plan_controller import customer_plan_bp  # Import Blueprint
+
+
 
 from app.controllers.customer_plan_controller import customer_plan_bp  # Import Blueprint
 
@@ -43,9 +48,12 @@ def create_app():
     app.register_blueprint(admin_main_bp)
     app.register_blueprint(payment_api_bp)
     app.register_blueprint(customer_plan_bp)
+    app.register_blueprint(report_bp)
     # Register error handlers
     app.register_blueprint(exceptions)
     app.register_blueprint(auth)
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
+
     # Cấu hình Login Manager
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"

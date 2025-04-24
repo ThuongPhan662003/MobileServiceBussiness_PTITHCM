@@ -1,17 +1,191 @@
-<!-- templates/index.html -->
 {% extends "base.html" %}
 
-{% block title %}Trang thanh toán{% endblock %}
+{% block title %}Trang Thanh Toán{% endblock %}
 
 {% block content %}
-<h1 class="mb-4" style="margin-top: 300px;">Chọn phương thức thanh toán</h1>
+<style>
+    .payment-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        animation: fadeIn 0.5s ease-in-out;
+    }
 
-<div class="d-flex justify-content-center gap-3">
-    <a href="{{ url_for('payment_api_bp.pay_paypal') }}" class="btn btn-primary btn-lg">
-        Thanh toán với PayPal ($10)
-    </a>
-    <a href="{{ url_for('payment_api_bp.vnpay_pay') }}" class="btn btn-success btn-lg">
-        Thanh toán với VNPAY (100.000₫)
-    </a>
-</div>
-{% endblock %}
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .payment-header h1 {
+        font-size: 2rem;
+        color: #2d3436;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .payment-header p {
+        color: #636e72;
+        font-size: 1rem;
+    }
+
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .order-summary h3 {
+        font-size: 1.3rem;
+        color: #2d3436;
+        margin-bottom: 15px;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: #636e72;
+        font-size: 0.95rem;
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #2d3436;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+    }
+
+    .payment-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-payment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-paypal {
+        background: #0070ba;
+        color: white;
+    }
+
+    .btn-paypal:hover {
+        background: #005ea6;
+        transform: translateY(-1px);
+    }
+
+    .btn-vnpay {
+        background: #00a65a;
+        color: white;
+    }
+
+    .btn-vnpay:hover {
+        background: #00924c;
+        transform: translateY(-1px);
+    }
+
+    .btn-payment img {
+        height: 20px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .payment-container {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .payment-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .btn-payment {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+
+        .order-summary h3 {
+            font-size: 1.1rem;
+        }
+
+        .order-total {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<!-- <div class="container"> -->
+<div class="payment-container">
+    <div class="payment-header">
+        <h1>Thanh Toán Đơn Hàng</h1>
+        <p>Vui lòng kiểm tra thông tin đơn hàng và chọn phương thức thanh toán</p>
+    </div>
+
+    <div class="order-summary">
+        <h3>Thông Tin Đơn Hàng</h3>
+        <div class="order-item">
+            <span>Sản phẩm</span>
+            <span>{{ item_name }}</span>
+        </div>
+        <div class="order-item">
+            <span>Số lượng</span>
+            <span>1</span>
+        </div>
+        <div class="order-item">
+            <span>Giá</span>
+            <span>${{ usd_price }} / {{ "{:,.0f}".format(vnd_price) }}₫</span>
+        </div>
+        <div class="order-total">
+            <span>Tổng cộng</span>
+            <span>${{ usd_price }} / {{ "{:,.0f}".format(vnd_price) }}₫</span>
+        </div>
+
+        <div class="payment-buttons">
+            <a href="{{ url_for('payment_api_bp.pay_paypal', item_name=item_name, item_price_vnd=vnd_price, package_id=plan_id) }}"
+                class="btn-payment btn-paypal">
+                <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal">
+                Thanh Toán Với PayPal ({{ "{:,.0f}".format(vnd_price) }}₫)
+            </a>
+
+            <a href="{{ url_for('payment_api_bp.vnpay_pay', item_name=item_name, item_price_vnd=vnd_price, package_id=plan_id) }}"
+                class="btn-payment btn-vnpay">
+                <img src="https://vnpay.vn/assets/images/logo-icon.svg" alt="VNPAY">
+                Thanh Toán Với VNPAY ({{ "{:,.0f}".format(vnd_price) }}₫)
+            </a>
+
+        </div>
+    </div>
+    <!-- </div> -->
+    {% endblock %}
+

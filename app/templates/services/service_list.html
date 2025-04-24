@@ -1,467 +1,565 @@
 {% extends "admin_base.html" %}
-{% block title %}Quản lý dịch vụ{% endblock %}
+
+{% block title %}Quản Lý Dịch Vụ{% endblock %}
 
 {% block content %}
 <style>
-    .toggle-btn {
-        border: none !important;
-        background: none !important;
+    .service-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Roboto', sans-serif;
     }
 
-    .toggle-btn i {
-        color: #0d6efd;
-        /* màu primary khi mở */
-        transition: color .2s;
-
+    .service-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
     }
 
-    .toggle-btn.closed i {
-        color: #6c757d;
-        /* màu xám khi đóng */
+    .service-header h1 {
+        font-size: 2rem;
+        color: #222;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
+    .service-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .search-box {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        font-size: 1rem;
+        width: 250px;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #ee2b47;
+        box-shadow: 0 0 5px rgba(238, 43, 71, 0.3);
+    }
+
+    .btn-add {
+        padding: 10px 20px;
+        border-radius: 25px;
+        background: linear-gradient(90deg, #ee2b47, #ff6b6b);
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(90deg, #d81f3a, #e65f5f);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(238, 43, 71, 0.4);
+    }
 
     #service-tree-container {
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
-        padding: .5rem;
         background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 15px;
+        border: 1px solid #f0f0f0;
     }
 
-    /* Mỗi node trong cây */
+    .service-tree {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
     .tree-node {
         display: flex;
         align-items: center;
-        padding: .25rem .5rem;
-        border-bottom: 1px solid #eee;
+        padding: 12px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s ease;
     }
 
-    /* Xoá border-bottom cho node cuối cùng */
+    .tree-node:hover {
+        background: #fafafa;
+    }
+
     .tree-node:last-child {
         border-bottom: none;
     }
 
-    /* Toggle button nhỏ gọn */
-    .tree-node .toggle-btn {
-        margin-right: .5rem;
+    .toggle-btn {
+        background: none;
+        border: none;
         padding: 0;
-        width: 1.25rem;
-        height: 1.25rem;
-    }
-
-    /* Tên dịch vụ */
-    .tree-node .service-name {
-        flex-grow: 1;
-        margin-right: .25rem;
-        /* giảm margin */
-    }
-
-    /* Hành động: sát tên hơn */
-    .tree-node .actions {
+        width: 24px;
+        height: 24px;
         display: flex;
-        gap: .25rem;
-        /* khoảng cách rất nhỏ */
-        margin-left: 0;
-        /* bỏ margin trái */
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
-    /* Nút Sửa/Xóa gọn hơn */
-    .tree-node .actions .btn {
-        padding: .2rem .3rem;
-        /* nhỏ hơn */
-        font-size: .85rem;
-        /* nhỏ hơn */
+    .toggle-btn i {
+        color: #007bff;
+        font-size: 1.2rem;
+        transition: color 0.2s ease;
+    }
+
+    .toggle-btn.closed i {
+        color: #6c757d;
+    }
+
+    .toggle-placeholder {
+        width: 24px;
+        display: inline-block;
+    }
+
+    .service-name {
+        flex-grow: 1;
+        font-size: 1rem;
+        color: #222;
+        margin-right: 15px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit {
+        border: 1px solid #007bff;
+        color: #007bff;
+    }
+
+    .btn-edit:hover {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-delete {
+        border: 1px solid #ee2b47;
+        color: #ee2b47;
+    }
+
+    .btn-delete:hover {
+        background: #ee2b47;
+        color: white;
+    }
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #fff;
+        max-width: 500px;
+        width: 90%;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-header {
+        padding: 20px;
+        background: #fafafa;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        color: #222;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #666;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-body label {
+        display: block;
+        font-size: 1rem;
+        color: #222;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .modal-body input,
+    .modal-body select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .modal-body input:focus,
+    .modal-body select:focus {
+        outline: none;
+        border-color: #ee2b47;
+        box-shadow: 0 0 5px rgba(238, 43, 71, 0.3);
+    }
+
+    .modal-body .form-check {
+        margin-top: 15px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #f0f0f0;
+        text-align: right;
+    }
+
+    .btn-save {
+        padding: 10px 20px;
+        border-radius: 25px;
+        background: linear-gradient(90deg, #007bff, #00a1ff);
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(90deg, #0056b3, #0087d1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .service-container {
+            margin: 20px 15px;
+        }
+
+        .service-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .service-controls {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .tree-node {
+            padding: 10px;
+        }
+
+        .service-name {
+            font-size: 0.9rem;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
     }
 </style>
 
-<!-- <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-sitemap"></i> Quản lý dịch vụ</h1>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-
-
-
-</div> -->
-
-<div class="mb-3">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-sitemap"></i> Quản lý dịch vụ
-
-        </h1>
-        <div>
-            <input type="text" id="search-box" class="form-control" placeholder="Tìm dịch vụ...">
-
-            <button onclick="openModal('serviceModal')"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                ➕ Thêm dịch vụ mới
-            </button>
-
+<div class="service-container">
+    <div class="service-header">
+        <h1><i class="fas fa-sitemap"></i> Quản Lý Dịch Vụ</h1>
+        <div class="service-controls">
+            <input type="text" id="search-box" class="search-box" placeholder="Tìm dịch vụ..." />
+            <button class="btn-add" onclick="openModal('serviceModal')"><i class="fas fa-plus"></i> Thêm Dịch
+                Vụ</button>
         </div>
-
     </div>
 
-</div>
-
-{% macro render_tree(nodes) %}
-<ul class="service-tree list-unstyled">
-    {% for node in nodes %}
-    <li>
-        <div class="tree-node">
-            {% if node.children %}
-            <button class="toggle-btn" aria-expanded="true">
-                <span class="">
-                    <i class="fas fa-minus-square"></i>
-                </span>
-            </button>
-            {% else %}
-            <span class="toggle-placeholder me-2" style="width:1.25rem;display:inline-block;"></span>
-            {% endif %}
-
-            <span class="service-name">{{ node.name }}</span>
-
-            <div class="actions">
-                <button class="btn btn-sm btn-outline-primary btn-edit" title="Sửa"
-                    onclick="openEditModal({{ node.id }})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" title="Xóa" onclick="removeService({{ node.id }})">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
-        </div>
-        {% if node.children %}
-        {{ render_tree(node.children) }}
+    <div id="service-tree-container">
+        {% if service_tree %}
+        {% macro render_tree(nodes) %}
+        <ul class="service-tree list-unstyled">
+            {% for node in nodes %}
+            <li>
+                <div class="tree-node">
+                    {% if node.children %}
+                    <button class="toggle-btn" aria-expanded="true">
+                        <i class="fas fa-minus-square"></i>
+                    </button>
+                    {% else %}
+                    <span class="toggle-placeholder"></span>
+                    {% endif %}
+                    <span class="service-name">{{ node.name }}</span>
+                    <div class="actions">
+                        <button class="btn-action btn-edit" onclick="openEditModal({{ node.id }})"><i
+                                class="fas fa-edit"></i></button>
+                        <button class="btn-action btn-delete" onclick="removeService({{ node.id }})"><i
+                                class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                {% if node.children %}
+                {{ render_tree(node.children) }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endmacro %}
+        {{ render_tree(service_tree) }}
+        {% else %}
+        <p class="text-muted">Chưa có dịch vụ nào.</p>
         {% endif %}
-    </li>
-    {% endfor %}
-</ul>
-{% endmacro %}
-
-<div id="service-tree-container">
-    {% if service_tree %}
-    {{ render_tree(service_tree) }}
-    {% else %}
-    <p class="text-muted">Chưa có dịch vụ nào.</p>
-    {% endif %}
-</div>
-<!-- Modal Thêm dịch vụ -->
-<div id="serviceModal" class="modal"
-    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000;">
-    <div class="modal-content"
-        style="background:#fff; max-width:500px; margin:5% auto; border-radius:8px; overflow:hidden;">
-
-        <!-- Header -->
-        <div class="modal-header" style="padding:1rem; border-bottom:1px solid #eee; position:relative;">
-            <h3 class="text-lg font-semibold text-center">➕ Thêm dịch vụ mới</h3>
-            <button onclick="closeModal('serviceModal')" class="close"
-                style="position:absolute; top:0.75rem; right:1rem; font-size:1.5rem; background:none; border:none; cursor:pointer;">
-                &times;
-            </button>
-        </div>
-
-        <!-- Body -->
-        <div class="modal-body" style="padding:1rem;">
-            <div class="mb-4">
-                <label class="block font-medium mb-1">Tên dịch vụ:</label>
-                <input type="text" id="addServiceName" class="w-full border rounded px-3 py-2"
-                    placeholder="Nhập tên dịch vụ">
-            </div>
-            <div class="mb-4">
-                <label class="block font-medium mb-1">Dịch vụ cha:</label>
-                <select id="addServiceParent" class="w-full border rounded px-3 py-2">
-                    <option value="">— Không có —</option>
-                    {% for s in flat_services %}
-                    <option value="{{ s.id }}">{{ s.service_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <!-- Coverage checkbox -->
-            <div class="mb-4 form-check">
-                <input type="checkbox" class="form-check-input" id="addCoverageCheck">
-                <label class="form-check-label" for="coverageCheck">Coverage</label>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="modal-footer" style="padding:1rem; border-top:1px solid #eee;">
-            <button onclick="saveAddService()"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full">
-                💾 Lưu dịch vụ
-            </button>
-        </div>
     </div>
-</div>
-<!-- Modal Sửa dịch vụ -->
-<div id="editServiceModal" class="modal"
-    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000;">
-    <div class="modal-content" style="background:#fff; max-width:500px; margin:5% auto; border-radius:8px;">
-        <div class="modal-header" style="padding:1rem; border-bottom:1px solid #eee; position:relative;">
-            <h3 class="text-lg font-semibold">✏️ Sửa dịch vụ</h3>
-            <button onclick="closeModal('editServiceModal')" class="close"
-                style="position:absolute; top:0.75rem; right:1rem; font-size:1.5rem; background:none; border:none;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding:1rem;">
-            <input type="hidden" id="editServiceId">
-            <div class="mb-4">
-                <label class="block mb-1">Tên dịch vụ:</label>
-                <input type="text" id="editServiceName" class="w-full border rounded px-3 py-2">
-            </div>
-            <div class="mb-4">
-                <label class="block mb-1">Chọn dịch vụ cha:</label>
-                <div id="editServiceParents" class="max-h-40 overflow-y-auto border rounded p-2">
 
-                    <select id="editServiceParent" class="w-full border rounded px-3 py-2">
+    <!-- Modal Thêm Dịch Vụ -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-plus"></i> Thêm Dịch Vụ Mới</h3>
+                <button class="btn-close" onclick="closeModal('serviceModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label>Tên Dịch Vụ:</label>
+                    <input type="text" id="addServiceName" class="form-control" placeholder="Nhập tên dịch vụ" required>
+
+                </div>
+                <div class="mb-4">
+                    <label>Dịch Vụ Cha:</label>
+                    <select id="addServiceParent" class="form-control">
                         <option value="">— Không có —</option>
                         {% for s in flat_services %}
                         <option value="{{ s.id }}">{{ s.service_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="addCoverageCheck">
+                    <label class="form-check-label" for="addCoverageCheck">Coverage</label>
+                </div>
             </div>
-            <div class="mb-4 form-check">
-                <input type="checkbox" class="form-check-input" id="editCoverageCheck">
-                <label class="form-check-label" for="editCoverageCheck">Coverage</label>
+            <div class="modal-footer">
+                <button class="btn-save" onclick="saveAddService()">Lưu Dịch Vụ</button>
             </div>
         </div>
-        <div class="modal-footer" style="padding:1rem; border-top:1px solid #eee;">
-            <button onclick="saveEditService()" class="btn btn-primary w-full">💾 Lưu thay đổi</button>
+    </div>
+
+    <!-- Modal Sửa Dịch Vụ -->
+    <div id="editServiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-edit"></i> Sửa Dịch Vụ</h3>
+                <button class="btn-close" onclick="closeModal('editServiceModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editServiceId">
+                <div class="mb-4">
+                    <label>Tên Dịch Vụ:</label>
+                    <input type="text" id="editServiceName" class="form-control" readonly>
+                </div>
+                <div class="mb-4">
+                    <label>Dịch Vụ Cha:</label>
+                    <select id="editServiceParent" class="form-control">
+                        <option value="">— Không có —</option>
+                        {% for s in flat_services %}
+                        <option value="{{ s.id }}">{{ s.service_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="editCoverageCheck">
+                    <label class="form-check-label" for="editCoverageCheck">Coverage</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-save" onclick="saveEditService()">Lưu Thay Đổi</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Mở modal
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('serviceModal').style.display = 'none';
+        document.getElementById('editServiceModal').style.display = 'none';
+        initToggleButtons();
+    });
+
     function openModal(id) {
-        document.getElementById(id).style.display = 'block';
+        const modal = document.getElementById(id);
+        modal.style.display = 'flex';
+
+        if (id === 'serviceModal') {
+            setTimeout(() => {
+                const input = document.getElementById('addServiceName');
+                if (input) input.focus();
+            }, 100); // đợi DOM render modal xong mới focus
+        }
     }
-    // Đóng modal
+
+
     function closeModal(id) {
         document.getElementById(id).style.display = 'none';
     }
-    // Mở Add Modal
-    function openAddModal() {
-        document.getElementById('addServiceName').value = '';
-        document.getElementById('addCoverageCheck').checked = false;
-        const parentSelect = document.getElementById('newServiceParent');
-        if (parentSelect) {
-            parentSelect.value = '';
-        }
-        openModal('addServiceModal');
-    }
-    // Lưu Add
+
     function saveAddService() {
         const name = document.getElementById('addServiceName').value.trim();
-        if (!name) { alert('Nhập tên dịch vụ'); return; }
-        // Read parent_id from the <select>
-        const parentSelect = document.getElementById('addServiceParent');
-        const rawParent = parentSelect.value || null;
-        // Convert to integer, or keep null if empty
-        const parent_id = rawParent ? parseInt(rawParent, 10) : null;
+        if (!name) {
+            alert('Vui lòng nhập tên dịch vụ');
+            return;
+        }
+
+        const parent_id = document.getElementById('addServiceParent').value || null;
         const coverage = document.getElementById('addCoverageCheck').checked;
-        console.log("sđsdf", coverage, name, typeof (parent_id))
+        console.log({
+            service_name: name,
+            parent_id: parent_id ? parseInt(parent_id) : null,
+            coverage: coverage ? 1 : 0
+        })
         fetch('/services/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service_name: name, parent_id, coverage })
-        }).then(r => r.ok ? location.reload() : r.json().then(j => alert(j.error)));
+            body: JSON.stringify({
+                service_name: name,
+                parent_id: parent_id ? parseInt(parent_id) : null,
+                coverage_area: coverage ? 1 : 0
+            })
+        })
+            .then(async (response) => {
+                const data = await response.json(); // 👉 luôn xử lý JSON 1 lần duy nhất
+                console.log("data", data, response.ok)
+                if (response.ok && data.success) {
+                    alert(data.message || 'Thêm dịch vụ thành công!');
+                    location.reload();
+                } else {
+                    alert(data.message || data.error || 'Đã xảy ra lỗi khi thêm dịch vụ.');
+                }
+            })
+            .catch(error => {
+                // console.error('Lỗi kết nối:', error);
+                alert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+            });
     }
-    // Edit
+
+
     function openEditModal(id) {
         fetch(`/services/${id}`).then(r => r.json()).then(data => {
             document.getElementById('editServiceId').value = id;
             document.getElementById('editServiceName').value = data.service_name;
             document.getElementById('editCoverageCheck').checked = !!data.coverage;
-            document.getElementById('editServiceParent').value = !!data.parent_id;
-            const parentSelect = document.getElementById('editServiceParent');
-
-            // 2) Gán giá trị:
-            //    - Nếu data.parent_id khác null/undefined, chuyển thành string và gán
-            //    - Ngược lại gán '' để chọn option “— Không có —”
-            parentSelect.value = data.parent_id != null
-                ? String(data.parent_id)
-                : '';
+            document.getElementById('editServiceParent').value = data.parent_id ? String(data.parent_id) : '';
             openModal('editServiceModal');
-            console.log(data.service_name)
         });
     }
+
     function saveEditService() {
         const id = document.getElementById('editServiceId').value;
         const name = document.getElementById('editServiceName').value.trim();
-        if (!name) { alert('Nhập tên dịch vụ'); return; }
-        // Read parent_id from the <select>
-        const parentSelect = document.getElementById('editServiceParent');
-        const rawParent = parentSelect.value || null;
-        // Convert to integer, or keep null if empty
-        const parent_id = rawParent ? parseInt(rawParent, 10) : null;
+        if (!name) { alert('Vui lòng nhập tên dịch vụ'); return; }
+        const parent_id = document.getElementById('editServiceParent').value || null;
         const coverage = document.getElementById('editCoverageCheck').checked;
         fetch(`/services/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service_name: name, parent_id, coverage })
+            body: JSON.stringify({ service_name: name, parent_id: parent_id ? parseInt(parent_id) : null, coverage })
         }).then(r => r.ok ? location.reload() : r.json().then(j => alert(j.error)));
     }
-    // Mở rộng/thu gọn toàn bộ
-    function toggleAll(expand) {
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            const ul = btn.closest('li').querySelector('ul');
-            if (!ul) return;
-            ul.style.display = expand ? '' : 'none';
-            btn.innerHTML = expand
-                ? '<i class="fas fa-minus-square"></i>'
-                : '<i class="fas fa-plus-square"></i>';
-        });
-    }
-    function removeService(serviceId) {
-        if (!confirm('Xóa dịch vụ này?')) return;
 
+    function removeService(serviceId) {
+        if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
         fetch(`/services/${serviceId}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                // nếu có CSRF, thêm vào đây
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                return response.json().then(data => {
+                    alert(data.message || 'Xóa thành công');
+                    location.reload();
+                });
+            } else {
+                return response.json().then(err => alert(err.error || 'Xóa không thành công'));
             }
-        })
-            .then(response => {
-                console.log('Delete response:', response);
-                if (response.ok) {
-                    // Thành công, server trả 200 + JSON
-                    return response.json().then(data => {
-                        alert(data.message || 'Xóa thành công');
-                        location.reload();
-                    });
-                } else {
-                    // Lỗi (4xx hoặc 5xx)
-                    const contentType = response.headers.get('Content-Type') || '';
-                    if (contentType.includes('application/json')) {
-                        // Server trả JSON lỗi
-                        return response.json().then(err => {
-                            alert(err.error || 'Xóa không thành công');
-                        });
-                    } else {
-                        // Server trả HTML (trang lỗi), đọc text để debug
-                        return response.text().then(html => {
-                            console.error('Server error HTML:', html);
-                            alert('Có lỗi từ server. Vui lòng thử lại hoặc kiểm tra console.');
-                        });
-                    }
-                }
-            })
-            .catch(err => {
-                console.error('Fetch failed:', err);
-                alert('Lỗi kết nối. Vui lòng kiểm tra mạng.');
-            });
+        }).catch(err => {
+            console.error('Fetch failed:', err);
+            alert('Lỗi kết nối. Vui lòng kiểm tra mạng.');
+        });
     }
-    // Hàm toggle cho từng node
+
     function initToggleButtons() {
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                // tìm <ul> ngay sau <div class="tree-node">
                 const li = btn.closest('li');
-                const childUl = li.querySelector('ul');
+                const childUl = li.querySelector(':scope > ul');
                 if (!childUl) return;
-
-                const isOpen = btn.getAttribute('aria-expanded') === 'true';
-                // toggle hiển thị
-                childUl.style.display = isOpen ? 'none' : '';
-                // cập nhật aria-expanded
-                btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-                // đổi icon
-                btn.innerHTML = isOpen
-                    ? '<i class="fas fa-plus-square"></i>'
-                    : '<i class="fas fa-minus-square"></i>';
-                // toggle class để style màu
-                btn.classList.toggle('closed', isOpen);
+                const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+                childUl.style.display = isExpanded ? 'none' : '';
+                btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+                const icon = btn.querySelector('i.fas');
+                if (icon) {
+                    icon.classList.toggle('fa-minus-square', !isExpanded);
+                    icon.classList.toggle('fa-plus-square', isExpanded);
+                }
+                btn.classList.toggle('closed', isExpanded);
             });
         });
     }
-    // Tìm kiếm nhanh
+
     document.getElementById('search-box').addEventListener('input', function () {
         const term = this.value.trim().toLowerCase();
         document.querySelectorAll('.service-tree li').forEach(li => {
-            const text = li.querySelector('.tree-node span').textContent.toLowerCase();
-            li.style.display = text.includes(term) ? '' : 'none';
-        });
-    });
-    function initToggleButtons() {
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Lấy <li> cha và <ul> con ngay bên dưới
-                const li = btn.closest('li');
-                const childUl = li.querySelector('ul');
-                if (!childUl) return;  // không có cây con thì thôi
-
-                const expanded = btn.getAttribute('aria-expanded') === 'true';
-                console.log("helllo");
-                // Toggle hiển thị cây con
-                childUl.style.display = expanded ? 'none' : '';
-                // Cập nhật aria-expanded
-                btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-
-                // Đổi icon bên trong <i>
-                const icon = btn.querySelector('i.fas');
-                if (icon) {
-                    icon.classList.toggle('fa-minus-square', expanded === false);
-                    icon.classList.toggle('fa-plus-square', expanded === true);
-                }
-
-                // Thêm/bỏ class .closed để CSS đổi màu
-                btn.classList.toggle('closed', expanded);
-            });
-        });
-    }
-
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     // 1) Gắn toggle cho từng nút
-    //     initToggleButtons();
-
-    //     // 2) Gắn tìm kiếm nhanh
-    //     const searchBox = document.getElementById('search-box');
-    //     if (searchBox) {
-    //         searchBox.addEventListener('input', function () {
-    //             const term = this.value.trim().toLowerCase();
-    //             document.querySelectorAll('.service-tree li').forEach(li => {
-    //                 const name = li.querySelector('.service-name').textContent.toLowerCase();
-    //                 li.style.display = name.includes(term) ? '' : 'none';
-    //             });
-    //         });
-    //     }
-    // });
-    document.addEventListener('DOMContentLoaded', () => {
-        // Lấy tất cả các nút toggle
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Tìm thẻ <li> cha
-                const li = btn.closest('li');
-                if (!li) return;
-
-                // Tìm <ul> con đầu tiên bên dưới li
-                const childUl = li.querySelector(':scope > ul');
-                if (!childUl) return;
-
-                // Xem hiện đang mở hay đóng
-                const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-                console.log("helllo");
-                // Đổi trạng thái hiển thị
-                childUl.style.display = isExpanded ? 'none' : '';
-
-                // Cập nhật aria-expanded
-                btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
-
-                // Đổi icon
-                const icon = btn.querySelector('i.fas');
-                if (icon) {
-                    if (isExpanded) {
-                        icon.classList.remove('fa-minus-square');
-                        icon.classList.add('fa-plus-square');
-                    } else {
-                        icon.classList.remove('fa-plus-square');
-                        icon.classList.add('fa-minus-square');
-                    }
-                }
-
-                // Thêm/bỏ class closed để style (màu xám)
-                btn.classList.toggle('closed', isExpanded);
-            });
+            const name = li.querySelector('.service-name').textContent.toLowerCase();
+            li.style.display = name.includes(term) ? '' : 'none';
         });
     });
 </script>
