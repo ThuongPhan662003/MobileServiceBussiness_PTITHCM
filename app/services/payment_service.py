@@ -21,15 +21,11 @@ class PaymentService:
                 is_paid=data.get("is_paid", False),
                 due_date=data.get("due_date"),
             )
-
             result = PaymentRepository.insert(payment)
-
-            if result.get("success"):
-                return {"success": True}
-
+            if result is True:
+                return {"success": True, "payment_id": result["payment_id"]}
             else:
-                return {"error": result.get("error", "Không thể thêm payment")}
-
+                return {"error": result}
         except Exception as e:
             return {"error": str(e)}
 
@@ -67,4 +63,12 @@ class PaymentService:
     def create_transaction(plan_code: str, subscriber_id: int):
         return PaymentRepository.create_full_payment_transaction(
             plan_code, subscriber_id
+        )
+
+    @staticmethod
+    def search_payments(
+        subscription_id=None, payment_date=None, payment_method=None, is_paid=None
+    ):
+        return PaymentRepository.search_payments(
+            subscription_id, payment_date, payment_method, is_paid
         )

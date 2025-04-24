@@ -6,7 +6,6 @@ from app.models.voucher import Voucher
 from app.repositories.staff_repository import StaffRepository
 
 
-
 class VoucherRepository:
 
     @staticmethod

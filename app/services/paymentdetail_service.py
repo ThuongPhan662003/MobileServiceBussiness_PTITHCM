@@ -67,3 +67,8 @@ class PaymentDetailService:
                 return {"error": result}
         except Exception as e:
             return {"error": str(e)}
+
+
+    @staticmethod
+    def get_by_payment_id(payment_id):
+        return PaymentDetailRepository.get_by_payment_id(payment_id)

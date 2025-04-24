@@ -13,7 +13,7 @@ class Plan:
     __registration_syntax: Optional[str]
     __cancel_syntax: Optional[str]
     __free_data: Optional[int]
-    __free_on_network_a_call: Optional[int]
+    __free_on_network_a_call: Optional [int]
     __free_on_network_call: Optional[int]
     __free_on_network_SMS: Optional[int]
     __free_off_network_a_call: Optional[int]

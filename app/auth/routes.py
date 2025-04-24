@@ -38,7 +38,7 @@ from ..services.subscription_service import SubscriptionService
 #     return render_template("auth/login.html", form=form)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    print("current_usre", current_user)
+    print("current_user", current_user)
     if current_user.get_id():
         return redirect(url_for("main_bp.index"))
 
@@ -68,7 +68,7 @@ def login():
 
             elif role == "subscriber":
                 session["subscriber_id"] = user_data.get("subscriber_id")
-                
+
                 session["full_name"] = user_data.get(
                     "customer_name"
                 )  # lấy tên từ customer

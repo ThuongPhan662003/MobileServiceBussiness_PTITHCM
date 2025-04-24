@@ -179,6 +179,26 @@ class Subscriber:
         self.__account_id = value
 
     @property
+    def subscriber(self):
+        return self.__subscriber
+
+    @subscriber.setter
+    def subscriber(self, value):
+        # if value is not None and not isinstance(value, list):
+        #     raise ValueError("contracts must be a list")
+        self.__subscriber = value
+
+    @property
+    def account_id(self):
+        return self.__account_id
+
+    @account_id.setter
+    def account_id(self, value):
+        # if value is not None and not isinstance(value, list):
+        #     raise ValueError("contracts must be a list")
+        self.__account_id = value
+
+    @property
     def subscriptions(self):
         return self.__subscriptions
 

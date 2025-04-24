@@ -29,13 +29,17 @@ class SubscriptionService:
             expiration_date = created_at + timedelta(days=plan.duration)
 
             # Kiểm tra subscription đã tồn tại chưa
-            existing = SubscriptionRepository.get_by_subscriber_and_plan(subscriber_id, plan_id)
+            existing = SubscriptionRepository.get_by_subscriber_and_plan(
+                subscriber_id, plan_id
+            )
 
             if existing:
                 # Cập nhật subscription đã có
                 existing.created_at = created_at
                 existing.expiration_date = expiration_date
-                existing.activation_date = existing.activation_date  # Không thay đổi activation_date
+                existing.activation_date = (
+                    existing.activation_date
+                )  # Không thay đổi activation_date
                 existing.is_renewal = True
                 existing.cancel_at = None
                 existing.renewal_total = existing.renewal_total + 1
@@ -43,7 +47,11 @@ class SubscriptionService:
                 result = SubscriptionRepository.update(existing.id, existing)
 
                 if isinstance(result, dict) and result.get("success"):
-                    return {"success": True, "updated": True, "subscription_id": existing.id}
+                    return {
+                        "success": True,
+                        "updated": True,
+                        "subscription_id": existing.id,
+                    }
                 else:
                     return {"error": "Lỗi khi cập nhật subscription."}
 
@@ -63,11 +71,16 @@ class SubscriptionService:
                 result = SubscriptionRepository.insert(subscription)
 
                 if isinstance(result, dict) and result.get("subscription_id"):
-                    return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
+                    return {
+                        "success": True,
+                        "created": True,
+                        "subscription_id": result["subscription_id"],
+                    }
                 else:
                     return {"error": "Lỗi khi tạo subscription."}
         except Exception as e:
             return {"error": str(e)}
+
     @staticmethod
     def update_subscription(subscription_id, data: dict):
         try:

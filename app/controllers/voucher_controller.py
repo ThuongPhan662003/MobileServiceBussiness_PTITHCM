@@ -15,7 +15,6 @@ def voucher_list():
     return render_template("vouchers/voucher_list.html", vouchers=all_vouchers)
 
 
-
 @voucher_bp.route("/", methods=["POST"])
 def voucher_create():
     data = request.get_json()
@@ -47,7 +46,6 @@ def voucher_create():
         ),
         400,
     )
-
 
 
 @voucher_bp.route("/<int:voucher_id>", methods=["PUT"])

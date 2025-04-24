@@ -25,6 +25,7 @@ class SubscriptionRepository:
         except Exception as e:
             print(f"Lỗi khi lấy danh sách subscription: {e}")
             return []
+
     @staticmethod
     def get_by_id(subscription_id):
         try:
@@ -56,7 +57,6 @@ class SubscriptionRepository:
                     data.is_renewal,
                     data.cancel_at,
                     data.activation_date,
-
                 ),
                 fetchone=True,
                 commit=True,
@@ -89,7 +89,8 @@ class SubscriptionRepository:
                     data.cancel_at,
                     data.activation_date,
                 ),
-                fetchone=True, commit=True,
+                fetchone=True,
+                commit=True,
             )
 
             # Nếu DB trả về kết quả hợp lệ, kiểm tra và trả kết quả thành công
@@ -125,13 +126,13 @@ class SubscriptionRepository:
                 ORDER BY created_at DESC LIMIT 1
                 """,
                 (subscriber_id, plan_id),
-                fetchone=True
+                fetchone=True,
             )
 
             if result:
                 s = Subscription()
                 for key, value in result.items():
-                    if key == 'is_renewal':
+                    if key == "is_renewal":
                         setattr(s, key, bool(value))
                     else:
                         setattr(s, key, value)
@@ -143,8 +144,8 @@ class SubscriptionRepository:
 
     @staticmethod
     def get_subscription_by_subscriber_and_plan(subscriber_id, plan_id):
-            try:
-                query = """
+        try:
+            query = """
                    SELECT id AS subscription_id
 FROM subscriptions
 WHERE subscriber_id = %s AND plan_id = %s 
@@ -152,12 +153,12 @@ ORDER BY created_at DESC
 LIMIT 1;
 
                 """
-                result = db_instance.execute(query, (subscriber_id, plan_id), fetchone=True)
+            result = db_instance.execute(query, (subscriber_id, plan_id), fetchone=True)
 
-                if result:
-                    return result.get("subscription_id")
-                else:
-                    return None  # Không tìm thấy subscription phù hợp
-            except Exception as e:
-                print(f"Lỗi khi truy vấn subscription: {e}")
-                return None
+            if result:
+                return result.get("subscription_id")
+            else:
+                return None  # Không tìm thấy subscription phù hợp
+        except Exception as e:
+            print(f"Lỗi khi truy vấn subscription: {e}")
+            return None

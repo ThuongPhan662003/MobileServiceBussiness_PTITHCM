@@ -4,53 +4,47 @@ from app.models.staff import Staff
 from datetime import datetime
 from app.viewmodels.staff_view_model import StaffViewModel
 
+
 class StaffService:
     @staticmethod
     def get_all_staffs():
         return StaffRepository.get_all()
 
-    
-
     @staticmethod
     def get_staff_by_id(staff_id):
         return StaffRepository.get_by_id(staff_id)
 
-
-
-
     # @staticmethod
     # def create_staff(data: dict):
-        # try:
-            # birthday_str = data.get("birthday")
-            # birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
+    # try:
+    # birthday_str = data.get("birthday")
+    # birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
 
-            # staff_model = Staff(
-                # full_name=data.get("full_name"),
-                # card_id=data.get("card_number"),
-                # phone=data.get("phone"),
-                # email=data.get("email"),
-                # gender=data.get("gender"),
-                # birthday=birthday,
+    # staff_model = Staff(
+    # full_name=data.get("full_name"),
+    # card_id=data.get("card_number"),
+    # phone=data.get("phone"),
+    # email=data.get("email"),
+    # gender=data.get("gender"),
+    # birthday=birthday,
 
     # )
 
+    # staff = StaffViewModel(
+    # staff_model,
+    # role_name=data.get("role_name"),
+    # username=data.get("username"),
+    # password=data.get("password")
+    # )
+    # print(staff)
+    # result = StaffRepository.insert(staff)
+    # if result is True:
+    # return {"success": True}
+    # else:
+    # return {"error": result}
 
-            # staff = StaffViewModel(
-                # staff_model,
-                # role_name=data.get("role_name"),
-                # username=data.get("username"),
-                # password=data.get("password")
-            # )
-            # print(staff)
-            # result = StaffRepository.insert(staff)
-            # if result is True:
-                # return {"success": True}
-            # else:
-                # return {"error": result}
-
-        # except Exception as e:
-            # return {"error": str(e)}
-
+    # except Exception as e:
+    # return {"error": str(e)}
 
     @staticmethod
     def get_staff_by_account_id(account_id):
@@ -88,12 +82,10 @@ class StaffService:
     # except Exception as e:
     # return {"error": str(e)}
 
-
     @staticmethod
     def create_staff(data: dict):
         try:
             # Check required fields
-
 
             required_fields = [
                 "full_name",
@@ -107,7 +99,6 @@ class StaffService:
                 "password",
             ]
 
-
             for field in required_fields:
                 if not data.get(field):
                     return {"error": f"Trường '{field}' là bắt buộc."}
@@ -118,10 +109,9 @@ class StaffService:
             username = data.get("username")
             birthday_str = data.get("birthday")
 
-
-            birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
-
-
+            birthday = (
+                datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
+            )
 
             # Kiểm tra Mã số thẻ
             if not re.fullmatch(r"\d{12}", card_id):
@@ -147,18 +137,13 @@ class StaffService:
             if StaffRepository.check_card_id_exists(card_id):
                 return {"error": "Mã số thẻ đã tồn tại. Vui lòng nhập mã khác."}
 
-
-
             # Kiểm tra trùng SĐT
             if StaffRepository.check_phone_exists(phone):
                 return {"error": "Số điện thoại đã tồn tại. Vui lòng nhập số khác."}
 
-
-
             # Kiểm tra trùng Email
             if StaffRepository.check_email_exists(email):
                 return {"error": "Email đã tồn tại. Vui lòng nhập email khác."}
-
 
             # Nếu qua hết các kiểm tra
             staff_model = Staff(
@@ -173,11 +158,7 @@ class StaffService:
                 staff_model,
                 role_name=data.get("role_name"),
                 username=data.get("username"),
-
-
-                password=data.get("password")
-
-
+                password=data.get("password"),
             )
             result = StaffRepository.insert(staff)
             if result is True:
@@ -187,11 +168,9 @@ class StaffService:
         except Exception as e:
             return {"error": str(e)}
 
-
     @staticmethod
     def update_staff(staff_id, data: dict):
         try:
-
 
             # Check required fields
             required_fields = [
@@ -203,7 +182,6 @@ class StaffService:
                 "role_name",
             ]
 
-
             for field in required_fields:
                 if not data.get(field):
                     return {"error": f"Trường '{field}' là bắt buộc."}
@@ -212,11 +190,9 @@ class StaffService:
             email = data.get("email")
             birthday_str = data.get("birthday")
 
-
             birthday = (
                 datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
             )
-
 
             # Kiểm tra SĐT
             if not re.fullmatch(r"\d{10}", phone):
@@ -258,7 +234,6 @@ class StaffService:
             print(e)
             return {"error": str(e)}
 
-
     @staticmethod
     def delete_staff(staff_id):
         try:
@@ -270,7 +245,6 @@ class StaffService:
         except Exception as e:
             return {"error": str(e)}
 
-
     @staticmethod
     def search_staffs(filters: dict):
         return StaffRepository.search_staffs(
@@ -278,9 +252,5 @@ class StaffService:
             account_id=filters.get("account_id"),
             gender=filters.get("gender"),
             is_active=filters.get("is_active"),
-
-
             role_name=filters.get("role"),
-
-
         )
