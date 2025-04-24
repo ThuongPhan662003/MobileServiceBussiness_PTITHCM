@@ -68,6 +68,7 @@ def login():
 
             elif role == "subscriber":
                 session["subscriber_id"] = user_data.get("subscriber_id")
+                
                 session["full_name"] = user_data.get(
                     "customer_name"
                 )  # lấy tên từ customer
