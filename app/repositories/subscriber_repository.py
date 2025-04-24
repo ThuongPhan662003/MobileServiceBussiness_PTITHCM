@@ -18,12 +18,24 @@ class SubscriberRepository:
                 s = Subscriber()
                 s.id = int(row.get("id")) if row.get("id") is not None else None
                 s.phone_number = row.get("phone_number")
-                s.main_balance = Decimal(row.get("main_balance")) if row.get("main_balance") is not None else Decimal("0.00")
+                s.main_balance = (
+                    Decimal(row.get("main_balance"))
+                    if row.get("main_balance") is not None
+                    else Decimal("0.00")
+                )
                 s.activation_date = row.get("activation_date")
                 s.expiration_date = row.get("expiration_date")
-                s.account_id = int(row.get("account_id")) if row.get("account_id") is not None else None
+                s.account_id = (
+                    int(row.get("account_id"))
+                    if row.get("account_id") is not None
+                    else None
+                )
                 s.is_active = bool(row.get("is_active"))
-                s.customer_id = int(row.get("customer_id")) if row.get("customer_id") is not None else None
+                s.customer_id = (
+                    int(row.get("customer_id"))
+                    if row.get("customer_id") is not None
+                    else None
+                )
                 s.warning_date = row.get("warning_date")
                 s.subscriber_type = row.get("subscriber_type")
 
@@ -46,13 +58,17 @@ class SubscriberRepository:
     def get_by_id(subscriber_id):
         try:
             result = db_instance.execute(
-                "SELECT * FROM subscribers WHERE id = %s", (subscriber_id,), fetchone=True
+                "SELECT * FROM subscribers WHERE id = %s",
+                (subscriber_id,),
+                fetchone=True,
             )
             if result:
                 s = Subscriber()
                 for key, val in result.items():
                     if key == "main_balance":
-                        setattr(s, key, Decimal(val) if val is not None else Decimal("0.00"))
+                        setattr(
+                            s, key, Decimal(val) if val is not None else Decimal("0.00")
+                        )
                     elif key in ["is_active", "is_messaged"]:
                         setattr(s, key, bool(val))
                     else:
@@ -61,6 +77,18 @@ class SubscriberRepository:
             return None
         except Exception as e:
             print(f"Lỗi khi lấy subscriber theo ID: {e}")
+            return None
+
+    @staticmethod
+    def get_by_account_id(account_id: int):
+        try:
+            result = db_instance.execute(
+                "CALL sp_subscriber_get_by_account_id(%s)", (account_id,), fetchone=True
+            )
+            print("result", result)
+            return result
+        except Exception as e:
+            print(f"Lỗi khi lấy subscriber theo account_id: {e}")
             return None
 
     @staticmethod
@@ -75,10 +103,10 @@ class SubscriberRepository:
                     data.expiration_date,
                     data.subscriber_type,  # Kiểu BOOLEAN: Trả sau = True, Trả trước = False
                     data.customer_id,
-                    data.account_id
+                    data.account_id,
                 ),
                 fetchone=True,
-                commit=True
+                commit=True,
             )
 
             if result.get("error"):
@@ -102,10 +130,10 @@ class SubscriberRepository:
                     data.customer_id,
                     data.warning_date,
                     data.subscriber_type,  # Thêm subscriber_type
-                    data.account_id
+                    data.account_id,
                 ),
                 fetchone=True,
-                commit=True
+                commit=True,
             )
             if result.get("error"):
                 return result["error"]
@@ -118,7 +146,10 @@ class SubscriberRepository:
     def delete(subscriber_id):
         try:
             result = db_instance.execute(
-                "CALL DeleteSubscriber(%s)", (subscriber_id,), fetchone=True, commit=True
+                "CALL DeleteSubscriber(%s)",
+                (subscriber_id,),
+                fetchone=True,
+                commit=True,
             )
             if result.get("error"):
                 return result["error"]

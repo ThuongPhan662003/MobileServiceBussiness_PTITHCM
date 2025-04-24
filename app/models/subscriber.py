@@ -12,11 +12,13 @@ class Subscriber:
     __is_active: Optional[bool]
     __customer_id: Optional[int]
     __warning_date: Optional[datetime]
-    __subscriber_type: Optional[str]
-    __account_id: Optional[int]
-    __contracts: Optional[List]
-    __subscriptions: Optional[List]
-    __usage_logs: Optional[List]
+
+    __contracts: Optional[List["Contract"]]
+    __subscriptions: Optional[List["Subscription"]]
+    __usage_logs: Optional[List["UsageLog"]]
+    __subscriber: Optional[str]
+    __account_id: Optional["Account"]
+
 
     def __init__(
         self,
@@ -28,11 +30,11 @@ class Subscriber:
         is_active=True,
         customer_id=None,
         warning_date=None,
-        subscriber_type=None,
-        account_id=None,
         contracts=None,
         subscriptions=None,
         usage_logs=None,
+        subscriber=None,
+        account_id=None,
     ):
         self.id = id
         self.phone_number = phone_number
@@ -42,11 +44,12 @@ class Subscriber:
         self.is_active = is_active
         self.customer_id = customer_id
         self.warning_date = warning_date
-        self.subscriber_type = subscriber_type
         self.account_id = account_id
         self.contracts = contracts or []
         self.subscriptions = subscriptions or []
         self.usage_logs = usage_logs or []
+        self.account_id = account_id
+        self.subscriber = subscriber
 
     @property
     def id(self):
@@ -157,6 +160,26 @@ class Subscriber:
         self.__contracts = value
 
     @property
+    def subscriber(self):
+        return self.__subscriber
+
+    @subscriber.setter
+    def subscriber(self, value):
+        # if value is not None and not isinstance(value, list):
+        #     raise ValueError("contracts must be a list")
+        self.__subscriber = value
+
+    @property
+    def account_id(self):
+        return self.__account_id
+
+    @account_id.setter
+    def account_id(self, value):
+        # if value is not None and not isinstance(value, list):
+        #     raise ValueError("contracts must be a list")
+        self.__account_id = value
+
+    @property
     def subscriptions(self):
         return self.__subscriptions
 
@@ -176,15 +199,43 @@ class Subscriber:
         return {
             "id": self.id,
             "phone_number": self.phone_number,
-            "main_balance": float(self.main_balance) if self.main_balance else 0.0,
-            "activation_date": self.activation_date.isoformat() if self.activation_date else None,
-            "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
+# <<<<<<< HEAD
+#             "main_balance": float(self.main_balance) if self.main_balance else 0.0,
+#             "activation_date": self.activation_date.isoformat() if self.activation_date else None,
+#             "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
+#             "is_active": self.is_active,
+#             "customer_id": self.customer_id,
+#             "warning_date": self.warning_date.isoformat() if self.warning_date else None,
+#             "contracts": [c.to_dict() for c in self.contracts] if self.contracts else [],
+#             "subscriptions": [s.to_dict() for s in self.subscriptions] if self.subscriptions else [],
+#             "usage_logs": [u.to_dict() for u in self.usage_logs] if self.usage_logs else [],
+#             "subscriber_type": self.subscriber_type,
+#             "account_id": self.account_id,
+# =======
+            "main_balance": (
+                float(self.main_balance) if self.main_balance is not None else 0.0
+            ),
+            "activation_date": (
+                self.activation_date.isoformat() if self.activation_date else None
+            ),
+            "expiration_date": (
+                self.expiration_date.isoformat() if self.expiration_date else None
+            ),
             "is_active": self.is_active,
-            "customer_id": self.customer_id,
-            "warning_date": self.warning_date.isoformat() if self.warning_date else None,
-            "contracts": [c.to_dict() for c in self.contracts] if self.contracts else [],
-            "subscriptions": [s.to_dict() for s in self.subscriptions] if self.subscriptions else [],
-            "usage_logs": [u.to_dict() for u in self.usage_logs] if self.usage_logs else [],
-            "subscriber_type": self.subscriber_type,
-            "account_id": self.account_id,
+            "customer_id": self.customer_id.to_dict() if self.customer_id else None,
+            "account_id": self.account_id.to_dict() if self.account_id else None,
+            "subscriber": self.subscriber.to_dict() if self.subscriber else None,
+            "warning_date": (
+                self.warning_date.isoformat() if self.warning_date else None
+            ),
+            "contracts": (
+                [c.to_dict() for c in self.contracts] if self.contracts else []
+            ),
+            "subscriptions": (
+                [s.to_dict() for s in self.subscriptions] if self.subscriptions else []
+            ),
+            "usage_logs": (
+                [u.to_dict() for u in self.usage_logs] if self.usage_logs else []
+            ),
+
         }

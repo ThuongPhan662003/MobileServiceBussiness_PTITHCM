@@ -9,12 +9,15 @@ def get_all_customers():
     customers = CustomerService.get_all_customers()
     return render_template("customers/customer.html", customers=customers)
 
+
 @customer_bp.route("/<int:id>", methods=["GET"])
 def get_customer_by_id(id):
+
     customer = CustomerService.get_customer_by_id(id)
     if customer:
         return jsonify(customer.to_dict()), 200
     return jsonify({"error": "Customer not found"}), 404
+
 
 @customer_bp.route("/", methods=["POST"])
 def create_customer():

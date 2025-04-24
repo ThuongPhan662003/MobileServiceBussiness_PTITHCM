@@ -57,6 +57,11 @@
             <option value="1">Đang hoạt động</option>
             <option value="0">Đã khóa</option>
         </select>
+        <select id="objectTypeInput">
+            <option value="">Tất cả hình thức</option>
+            <option value="TRATRUOC">Trả trước</option>
+            <option value="TRASAU">Trả sau</option>
+        </select>
         <button onclick="searchPlans()">🔍 Tìm kiếm</button>
         <button class="btn-reset" onclick="resetSearch()">🔄 Đặt lại</button>
     </div>
@@ -71,6 +76,8 @@
                 <th>Cú pháp đăng ký</th>
                 <th>Cú pháp gia hạn</th>
                 <th>Cú pháp hủy</th>
+                <th>Hình thức</th>
+                <th>Thời hạn (ngày)</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
@@ -85,6 +92,8 @@
                 <td>{{ plan.registration_syntax or '' }}</td>
                 <td>{{ plan.renewal_syntax or '' }}</td>
                 <td>{{ plan.cancel_syntax or '' }}</td>
+                <td>{{ 'Trả trước' if plan.object_type == 'TRATRUOC' else 'Trả sau' if plan.object_type else '' }}</td>
+                <td>{{ plan.duration or '' }}</td>
                 <td class="{{ 'status-active' if plan.is_active else 'status-locked' }}">
                     {{ 'Đang hoạt động' if plan.is_active else 'Đã khóa' }}
                 </td>
@@ -147,6 +156,10 @@
         const code = document.getElementById("codeInput").value;
         const price = document.getElementById("priceInput").value;
         const status = document.getElementById("statusInput").value;
+        const objectType = document.getElementById("objectTypeInput").value;
+
+        const searchData = { code, price, is_active: status, object_type: objectType };
+        console.log("Search data:", searchData);
 
         fetch('/plans/search', {
             method: 'POST',
@@ -154,7 +167,7 @@
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ code, price, is_active: status })
+            body: JSON.stringify(searchData)
         })
         .then(response => {
             if (!response.ok) {
@@ -163,6 +176,7 @@
             return response.json();
         })
         .then(data => {
+            console.log("Search results:", data);
             const tbody = document.getElementById("planTableBody");
             tbody.innerHTML = '';
             data.forEach((plan, index) => {
@@ -175,6 +189,8 @@
                         <td>${plan.registration_syntax || ''}</td>
                         <td>${plan.renewal_syntax || ''}</td>
                         <td>${plan.cancel_syntax || ''}</td>
+                        <td>${plan.object_type === 'TRATRUOC' ? 'Trả trước' : plan.object_type === 'TRASAU' ? 'Trả sau' : 'Không xác định'}</td>
+                        <td>${plan.duration !== null && plan.duration !== undefined ? plan.duration : 'Không xác định'}</td>
                         <td class="${plan.is_active ? 'status-active' : 'status-locked'}">
                             ${plan.is_active ? 'Đang hoạt động' : 'Đã khóa'}
                         </td>
@@ -198,18 +214,21 @@
     }
 
     function resetSearch() {
-        // Xóa giá trị các trường tìm kiếm
-        document.getElementById("codeInput").value = '';
-        document.getElementById("priceInput").value = '';
-        document.getElementById("statusInput").value = '';
+        const code = null;
+        const price = null;
+        const status = null;
+        const objectType = null;
 
-        // Gọi API để lấy danh sách gói cước ban đầu
-        fetch('/plans/', {
-            method: 'GET',
+        const searchData = { code, price, is_active: status, object_type: objectType };
+        console.log("Search data:", searchData);
+
+        fetch('/plans/search', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
-            }
+            },
+            body: JSON.stringify(searchData)
         })
         .then(response => {
             if (!response.ok) {
@@ -218,6 +237,7 @@
             return response.json();
         })
         .then(data => {
+            console.log("Search results:", data);
             const tbody = document.getElementById("planTableBody");
             tbody.innerHTML = '';
             data.forEach((plan, index) => {
@@ -230,6 +250,8 @@
                         <td>${plan.registration_syntax || ''}</td>
                         <td>${plan.renewal_syntax || ''}</td>
                         <td>${plan.cancel_syntax || ''}</td>
+                        <td>${plan.object_type === 'TRATRUOC' ? 'Trả trước' : plan.object_type === 'TRASAU' ? 'Trả sau' : 'Không xác định'}</td>
+                        <td>${plan.duration !== null && plan.duration !== undefined ? plan.duration : 'Không xác định'}</td>
                         <td class="${plan.is_active ? 'status-active' : 'status-locked'}">
                             ${plan.is_active ? 'Đang hoạt động' : 'Đã khóa'}
                         </td>
@@ -247,8 +269,8 @@
             updatePagination();
         })
         .catch(error => {
-            console.error("Lỗi khi đặt lại:", error);
-            alert("Lỗi khi đặt lại danh sách: " + error.message);
+            console.error("Lỗi khi tìm kiếm:", error);
+            alert("Lỗi khi tìm kiếm: " + error.message);
         });
     }
 
@@ -274,7 +296,6 @@
         }
     }
 
-    // Khởi tạo phân trang khi tải trang
     updatePagination();
 </script>
 {% endblock %}

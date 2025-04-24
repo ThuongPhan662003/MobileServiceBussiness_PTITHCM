@@ -18,6 +18,7 @@ class SubscriptionService:
     @staticmethod
     def create_subscription(subscriber_id: int, plan_id: int):
         try:
+
             created_at = datetime.now()
 
             # Lấy thông tin gói cước từ repository
@@ -45,6 +46,7 @@ class SubscriptionService:
                     return {"success": True, "updated": True, "subscription_id": existing.id}
                 else:
                     return {"error": "Lỗi khi cập nhật subscription."}
+
             else:
                 # Tạo mới subscription
                 subscription = Subscription(

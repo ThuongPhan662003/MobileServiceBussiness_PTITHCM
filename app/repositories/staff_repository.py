@@ -4,16 +4,18 @@ from app.services.account_service import AccountService
 from app.viewmodels.staff_view_model import StaffViewModel
 
 
-
 class StaffRepository:
     @staticmethod
     def get_all():
         try:
-            result = db_instance.execute("""SELECT s.*, rg.role_name
+            result = db_instance.execute(
+                """SELECT s.*, rg.role_name
     FROM staffs s
     JOIN accounts a ON s.account_id = a.id
     JOIN permissiondetail pd ON a.id = pd.account_id
-    JOIN rolegroup rg ON pd.role_group_id = rg.id""", fetchall=True)
+    JOIN rolegroup rg ON pd.role_group_id = rg.id""",
+                fetchall=True,
+            )
             staffs = []
 
             for row in result[0]:
@@ -27,13 +29,12 @@ class StaffRepository:
                 staff.gender = row.get("gender")
                 staff.birthday = row.get("birthday")
 
-#                 acc = AccountService.get_account_by_id(row.get("account_id"))
-#                 staff.account_id = acc
-#                 staffs.append(staff.to_dict())
-
+                #                 acc = AccountService.get_account_by_id(row.get("account_id"))
+                #                 staff.account_id = acc
+                #                 staffs.append(staff.to_dict())
 
                 staff.account_id = row.get("account_id")
-                
+
                 # Tạo ViewModel với role_name
                 staff_vm = StaffViewModel(staff, row.get("role_name"))
                 staffs.append(staff_vm.to_dict())
@@ -42,8 +43,6 @@ class StaffRepository:
         except Exception as e:
             print(f"Lỗi khi lấy danh sách nhân viên: {e}")
             return []
-
-    
 
     @staticmethod
     def get_by_id(staff_id):
@@ -56,6 +55,21 @@ class StaffRepository:
                 for key in result:
                     setattr(staff, key, result[key])
                 return staff
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy nhân viên theo ID: {e}")
+            return None
+
+    @staticmethod
+    def get_by_account_id(account_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetStaffByAccountId(%s)", (account_id,), fetchone=True
+            )
+            print("kết quả từ sp", result)
+            if result:
+
+                return result
             return None
         except Exception as e:
             print(f"Lỗi khi lấy nhân viên theo ID: {e}")
@@ -79,7 +93,8 @@ class StaffRepository:
                     data.username,
                     data.password,
                 ),
-                fetchone=True,commit=True
+                fetchone=True,
+                commit=True,
             )
             if result.get("error"):
                 print(f"Lỗi khi thêm nhân viên: {result['error']}")
@@ -94,20 +109,21 @@ class StaffRepository:
         try:
             result = db_instance.execute(
                 "SELECT COUNT(*) AS count FROM accounts WHERE username = %s",
-                (username,), fetchone=True
+                (username,),
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
             print(f"Lỗi khi kiểm tra username: {e}")
             return True  # giả định đã tồn tại nếu lỗi DB
 
-    
     @staticmethod
     def check_card_id_exists(card_id: str):
         try:
             result = db_instance.execute(
                 "SELECT COUNT(*) AS count FROM staffs WHERE card_id = %s",
-                (card_id,), fetchone=True
+                (card_id,),
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
@@ -119,7 +135,8 @@ class StaffRepository:
         try:
             result = db_instance.execute(
                 "SELECT COUNT(*) AS count FROM staffs WHERE phone = %s",
-                (phone,), fetchone=True
+                (phone,),
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
@@ -131,7 +148,8 @@ class StaffRepository:
         try:
             result = db_instance.execute(
                 "SELECT COUNT(*) AS count FROM staffs WHERE email = %s",
-                (email,), fetchone=True
+                (email,),
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
@@ -148,7 +166,7 @@ class StaffRepository:
                 WHERE email = %s AND id != %s
                 """,
                 (email, staff_id),
-                fetchone=True
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
@@ -165,14 +183,12 @@ class StaffRepository:
                 WHERE phone = %s AND id != %s
                 """,
                 (phone, staff_id),
-                fetchone=True
+                fetchone=True,
             )
             return result["count"] > 0
         except Exception as e:
             print(f"Lỗi khi kiểm tra số điện thoại trong cập nhật: {e}")
             return True
-
-
 
     @staticmethod
     def update(staff_id, data: StaffViewModel):
@@ -215,9 +231,10 @@ class StaffRepository:
             print(f"Lỗi khi xóa nhân viên: {e}")
             return False
 
-    
     @staticmethod
-    def search_staffs(full_name=None, account_id=None, gender=None, is_active=None, role_name=None):
+    def search_staffs(
+        full_name=None, account_id=None, gender=None, is_active=None, role_name=None
+    ):
         try:
             result = db_instance.execute(
                 "CALL SearchStaffs(%s, %s, %s, %s, %s)",
@@ -225,10 +242,14 @@ class StaffRepository:
                     full_name if full_name else None,
                     account_id if account_id else None,
                     gender if gender else None,
-                    int(is_active) if is_active != "" and is_active is not None else None,
-                    role_name if role_name else None
+                    (
+                        int(is_active)
+                        if is_active != "" and is_active is not None
+                        else None
+                    ),
+                    role_name if role_name else None,
                 ),
-                fetchall=True
+                fetchall=True,
             )
 
             staffs = []
@@ -250,4 +271,3 @@ class StaffRepository:
         except Exception as e:
             print(f"Lỗi tìm kiếm nhân viên: {e}")
             return []
-

@@ -52,11 +52,13 @@ class PaymentRepository:
             result = db_instance.execute(
                 "CALL AddPayment(%s, %s, %s, %s, %s)",
                 (
+
                     payment.subscription_id,
                     payment.total_amount,
                     payment.payment_method,
                     payment.is_paid,
                     payment.due_date,
+
                 ),
                 fetchone=True,
                 commit=True,

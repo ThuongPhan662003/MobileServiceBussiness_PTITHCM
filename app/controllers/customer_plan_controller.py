@@ -1,7 +1,9 @@
+
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 
 from app.repositories.plan_repository import PlanRepository
 from app.repositories.subscriber_repository import SubscriberRepository
+
 from app.services.plan_service import PlanService
 
 customer_plan_bp = Blueprint("customer_plan", __name__, url_prefix="/customer_plan")
@@ -37,6 +39,7 @@ def plan_details(plan_id):
             return render_template("Plan_customer/detail.html", plan=plan)
         return "Plan not found", 404
     except Exception as e:
+
         return render_template("Plan_customer/detail.html", plan=None, error=str(e)), 500
 @customer_plan_bp.route("/register-plan", methods=["POST"])
 def register_plan():
@@ -66,3 +69,4 @@ def register_plan():
         "message": "Đủ điều kiện đăng ký, đang tiến hành đăng ký gói...",
         "plan_id": plan.id
     }), 200
+

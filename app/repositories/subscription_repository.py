@@ -56,6 +56,7 @@ class SubscriptionRepository:
                     data.is_renewal,
                     data.cancel_at,
                     data.activation_date,
+
                 ),
                 fetchone=True,
                 commit=True,
@@ -65,7 +66,9 @@ class SubscriptionRepository:
                 return {"error": "Kết quả trả về không hợp lệ."}
             if result.get("error"):
                 print(f"Lỗi khi thêm subscription: {result['error']}")
+
                 return {"error": result["error"]}
+
             return result
         except Exception as e:
             print(f"Lỗi khi thêm subscription: {e}")
