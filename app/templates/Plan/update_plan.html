@@ -7,7 +7,7 @@
     .container { width: 60%; margin: 40px auto; }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
     .form-group input[type="checkbox"] { width: auto; }
     .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
     .btn-submit { background-color: #3498db; }
@@ -60,43 +60,54 @@
         </div>
         <div class="form-group">
             <label for="free_data">Dữ liệu miễn phí (MB)</label>
-            <input type="number" id="free_data" name="free_data" value="{{ plan['free_data'] or '' }}" min="0">
+            <input type="number" id="free_data" name="free_data" value="{{ plan['free_data'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_on_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi nội mạng</label>
-            <input type="number" id="free_on_network_a_call" name="free_on_network_a_call" value="{{ plan['free_on_network_a_call'] or '' }}" min="0">
+            <input type="number" id="free_on_network_a_call" name="free_on_network_a_call" value="{{ plan['free_on_network_a_call'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_on_network_call">Thời lượng gọi nội mạng miễn phí (Phút)</label>
-            <input type="number" id="free_on_network_call" name="free_on_network_call" value="{{ plan['free_on_network_call'] or '' }}" min="0">
+            <input type="number" id="free_on_network_call" name="free_on_network_call" value="{{ plan['free_on_network_call'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_on_network_SMS">Số tin nhắn SMS nội mạng miễn phí</label>
-            <input type="number" id="free_on_network_SMS" name="free_on_network_SMS" value="{{ plan['free_on_network_SMS'] or '' }}" min="0">
+            <input type="number" id="free_on_network_SMS" name="free_on_network_SMS" value="{{ plan['free_on_network_SMS'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_off_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi ngoại mạng</label>
-            <input type="number" id="free_off_network_a_call" name="free_off_network_a_call" value="{{ plan['free_off_network_a_call'] or '' }}" min="0">
+            <input type="number" id="free_off_network_a_call" name="free_off_network_a_call" value="{{ plan['free_off_network_a_call'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_off_network_call">Thời lượng gọi ngoại mạng miễn phí (Phút)</label>
-            <input type="number" id="free_off_network_call" name="free_off_network_call" value="{{ plan['free_on_network_call'] or '' }}" min="0">
+            <input type="number" id="free_off_network_call" name="free_off_network_call" value="{{ plan['free_off_network_call'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="free_off_network_SMS">Số tin nhắn SMS ngoại mạng miễn phí</label>
-            <input type="number" id="free_off_network_SMS" name="free_off_network_SMS" value="{{ plan['free_off_network_SMS'] or '' }}" min="0">
+            <input type="number" id="free_off_network_SMS" name="free_off_network_SMS" value="{{ plan['free_off_network_SMS'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="maximum_on_network_call">Thời lượng tối đa cuộc gọi nội mạng (Phút)</label>
-            <input type="number" id="maximum_on_network_call" name="maximum_on_network_call" value="{{ plan['maximum_on_network_call'] or '' }}" min="0">
+            <input type="number" id="maximum_on_network_call" name="maximum_on_network_call" value="{{ plan['maximum_on_network_call'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="ON_SMS_cost">Chi phí SMS nội mạng (VND)</label>
-            <input type="number" id="ON_SMS_cost" name="ON_SMS_cost" step="0.01" value="{{ plan['ON_SMS_cost'] or '' }}" min="0">
+            <input type="number" id="ON_SMS_cost" name="ON_SMS_cost" step="0.01" value="{{ plan['ON_SMS_cost'] or '0' }}" min="0">
         </div>
         <div class="form-group">
             <label for="ON_a_call_cost">Chi phí gọi nội mạng (VND/phút)</label>
-            <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ plan['ON_a_call_cost'] or '' }}" min="0">
+            <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ plan['ON_a_call_cost'] or '0' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="object_type" class="required">Hình thức thanh toán</label>
+            <select id="object_type" name="object_type" required>
+                <option value="TRATRUOC" {% if plan['object_type'] == 'TRATRUOC' %}selected{% endif %}>Trả trước</option>
+                <option value="TRASAU" {% if plan['object_type'] == 'TRASAU' %}selected{% endif %}>Trả sau</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="duration" class="required">Thời hạn (ngày)</label>
+            <input type="number" id="duration" name="duration" value="{{ plan['duration'] }}" min="1" required>
         </div>
         <div class="form-group">
             <label for="is_active">Kích hoạt</label>
@@ -108,11 +119,11 @@
         </div>
         <div class="form-group">
             <label for="service_id">ID Dịch vụ</label>
-            <input type="number" id="service_id" name="service_id" value="{{ plan['service_id'] or '' }}" min="1">
+            <input type="number" id="service_id" name="service_id" value="{{ plan['service_id'] if plan['service_id'] else '' }}" min="1">
         </div>
         <div class="form-group">
             <label for="staff_id">ID Nhân viên</label>
-            <input type="number" id="staff_id" name="staff_id" value="{{ plan['staff_id'] or '' }}" min="1">
+            <input type="number" id="staff_id" name="staff_id" value="{{ plan['staff_id'] if plan['staff_id'] else '' }}" min="1">
         </div>
         <button type="submit" class="btn btn-submit">Cập nhật</button>
         <a href="{{ url_for('plan.get_all_plans') }}" class="btn btn-cancel">Hủy</a>
