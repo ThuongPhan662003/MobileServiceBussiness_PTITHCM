@@ -6,7 +6,9 @@ class PlanService:
     @staticmethod
     def get_all_plans():
         return PlanRepository.get_all()
-
+    @staticmethod
+    def get_all_codes():
+        return PlanRepository.get_all_codes()
     @staticmethod
     def get_plan_by_id(plan_id):
         return PlanRepository.get_by_id(plan_id)
