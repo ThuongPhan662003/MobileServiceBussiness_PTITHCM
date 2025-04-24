@@ -51,6 +51,7 @@ class Database:
 
                 while not result and cursor.nextset():
                     result = cursor.fetchone()
+                print("kết quả execute", result)
                 return result
 
             # Nếu muốn lấy tất cả dữ liệu từ tất cả result sets

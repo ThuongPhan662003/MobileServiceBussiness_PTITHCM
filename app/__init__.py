@@ -13,7 +13,10 @@ import paypalrestsdk
 from app.utils import vnpay, ip
 
 
-from app.controllers.customer_plan_controller import customer_plan_bp  # Import Blueprint
+from app.controllers.customer_plan_controller import (
+    customer_plan_bp,
+)  # Import Blueprint
+
 
 def create_app():
     app = Flask(__name__, static_folder="static")
@@ -45,6 +48,7 @@ def create_app():
     app.register_blueprint(admin_main_bp)
     app.register_blueprint(payment_api_bp)
     app.register_blueprint(customer_plan_bp)
+    app.register_blueprint(report_bp)
     # Register error handlers
     app.register_blueprint(exceptions)
     app.register_blueprint(auth)
