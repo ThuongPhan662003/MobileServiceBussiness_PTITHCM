@@ -2,7 +2,6 @@ from flask import json
 from app.database import db_instance
 from app.models.voucher import Voucher
 
-from app.services.staff_service import StaffService
 
 from app.repositories.staff_repository import StaffRepository
 
