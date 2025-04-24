@@ -1,6 +1,8 @@
 from flask import json
 from app.database import db_instance
 from app.models.voucher import Voucher
+
+
 from app.repositories.staff_repository import StaffRepository
 
 
@@ -27,7 +29,9 @@ class VoucherRepository:
                 # Gán staff_id là đối tượng Staff thay vì số nguyên
                 staff_id = row.get("staff_id")
                 if staff_id:
+
                     voucher.staff_id = StaffRepository.get_by_id(staff_id)
+
                 else:
                     voucher.staff_id = None
 

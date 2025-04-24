@@ -6,7 +6,9 @@ class PlanService:
     @staticmethod
     def get_all_plans():
         return PlanRepository.get_all()
-
+    @staticmethod
+    def get_all_codes():
+        return PlanRepository.get_all_codes()
     @staticmethod
     def get_plan_by_id(plan_id):
         return PlanRepository.get_by_id(plan_id)
@@ -42,12 +44,14 @@ class PlanService:
             if result is True:
                 return {"success": True}
             return {"success": False, "error": result}
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     @staticmethod
     def update_plan(plan_id, data):
         try:
+
             plan = Plan()
             plan.code = data.get("code")
             plan.price = float(data.get("price")) if data.get("price") else None
@@ -76,6 +80,7 @@ class PlanService:
             if result is True:
                 return {"success": True}
             return {"success": False, "error": result}
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -85,6 +90,7 @@ class PlanService:
             result = PlanRepository.lock(plan_id)
             if result is True:
                 return {"success": True}
+
             return {"success": False, "error": result}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -94,6 +100,7 @@ class PlanService:
         try:
             return PlanRepository.search(code, price, is_active, object_type)
         except Exception as e:
+
             return []
 
     @staticmethod
@@ -141,4 +148,7 @@ class PlanService:
                 "ON_a_call_cost": plan_dict["ON_a_call_cost"],
                 "ON_SMS_cost": plan_dict["ON_SMS_cost"],
             }
+
         return None
+
+ 

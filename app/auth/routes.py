@@ -5,6 +5,11 @@ from app.services.account_service import AccountService
 from .forms import LoginForm, RegistrationForm
 from ..models import Account
 from . import auth
+from ..services.customer_service import CustomerService
+from ..services.plan_service import PlanService
+from ..services.subscriber_service import SubscriberService
+from ..services.subscription_service import SubscriptionService
+
 
 # auth = Blueprint("auth", __name__)
 
@@ -45,6 +50,7 @@ def login():
         if result.get("success"):
             user = result["data"]["account_id"]
             print("user", user)
+
             user_data = result.get("data", {})
             print("user_data", user_data)
             role = user_data.get("role_type")
@@ -62,6 +68,7 @@ def login():
 
             elif role == "subscriber":
                 session["subscriber_id"] = user_data.get("subscriber_id")
+
                 session["full_name"] = user_data.get(
                     "customer_name"
                 )  # lấy tên từ customer
@@ -69,6 +76,7 @@ def login():
                 session["main_balance"] = user_data.get("main_balance")
                 session["subscriber_type"] = user_data.get("subscriber_type")
                 flash(result.get("message"), "success")
+
 
             # ➤ Điều hướng theo role
             if result["data"]["role_type"] == "staff":
@@ -107,3 +115,17 @@ def register():
             # flash(result["message"])
             return redirect(url_for("auth.register"))
     return render_template("auth/register.html", form=form)
+@auth.route("/customers/<int:subscriber_id>", methods=["GET"])
+def view_customer(subscriber_id):
+    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
+    if subscriber:
+        customer = CustomerService.get_customer_by_id(subscriber.customer_id)
+        return render_template("home/tb.html", subscriber=subscriber, customer=customer)
+    return "Thuê bao không tồn tại", 404
+@auth.route("/subscribers/<int:subscriber_id>", methods=["GET"])
+def view_subscriber(subscriber_id):
+    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
+    if subscriber:
+        customer = CustomerService.get_customer_by_id(subscriber.customer_id)
+        return render_template("home/cuoc.html", subscriber=subscriber, customer=customer)
+    return "Thuê bao không tồn tại", 404

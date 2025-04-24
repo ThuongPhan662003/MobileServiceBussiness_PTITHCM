@@ -64,3 +64,11 @@ class PaymentService:
         return PaymentRepository.create_full_payment_transaction(
             plan_code, subscriber_id
         )
+
+    @staticmethod
+    def search_payments(
+        subscription_id=None, payment_date=None, payment_method=None, is_paid=None
+    ):
+        return PaymentRepository.search_payments(
+            subscription_id, payment_date, payment_method, is_paid
+        )

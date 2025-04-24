@@ -33,8 +33,22 @@ payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process"
 
 @payment_api_bp.route("/", methods=["GET"])
 def index():
-    print(".")
-    return render_template("payments/user/index.html")
+    print("vô")
+    code = request.args.get("code")
+    price = request.args.get("price", type=int)
+    plan_id = request.args.get("plan_id", type=int)
+    print("dữ liệu", code, price, plan_id)
+    if not code or not price or not plan_id:
+        flash("Thiếu thông tin gói cước cần thanh toán", "danger")
+        return redirect(url_for("main_bp.index"))
+
+    return render_template(
+        "payments/user/index.html",
+        item_name=code,
+        vnd_price=price,
+        usd_price=round(price / 25000, 2),
+        plan_id=plan_id,
+    )
 
 
 @payment_api_bp.route("/vnpay_pay", methods=["POST", "GET"])

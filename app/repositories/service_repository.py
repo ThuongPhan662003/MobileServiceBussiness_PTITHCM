@@ -24,6 +24,17 @@ class ServiceRepository:
             return []
 
     @staticmethod
+    def get_all_services():
+        try:
+            result = db_instance.execute(
+                "SELECT id, service_name FROM services", fetchall=True
+            )
+            return result[0] if result else []
+        except Exception as e:
+            print("Lỗi khi lấy danh sách dịch vụ:", e)
+            return []
+
+    @staticmethod
     def get_by_id(service_id):
         try:
             result = db_instance.execute(

@@ -14,6 +14,38 @@ class StaffService:
     def get_staff_by_id(staff_id):
         return StaffRepository.get_by_id(staff_id)
 
+    # @staticmethod
+    # def create_staff(data: dict):
+    # try:
+    # birthday_str = data.get("birthday")
+    # birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
+
+    # staff_model = Staff(
+    # full_name=data.get("full_name"),
+    # card_id=data.get("card_number"),
+    # phone=data.get("phone"),
+    # email=data.get("email"),
+    # gender=data.get("gender"),
+    # birthday=birthday,
+
+    # )
+
+    # staff = StaffViewModel(
+    # staff_model,
+    # role_name=data.get("role_name"),
+    # username=data.get("username"),
+    # password=data.get("password")
+    # )
+    # print(staff)
+    # result = StaffRepository.insert(staff)
+    # if result is True:
+    # return {"success": True}
+    # else:
+    # return {"error": result}
+
+    # except Exception as e:
+    # return {"error": str(e)}
+
     @staticmethod
     def get_staff_by_account_id(account_id):
         return StaffRepository.get_by_account_id(account_id)
@@ -54,6 +86,7 @@ class StaffService:
     def create_staff(data: dict):
         try:
             # Check required fields
+
             required_fields = [
                 "full_name",
                 "card_id",
@@ -65,6 +98,7 @@ class StaffService:
                 "username",
                 "password",
             ]
+
             for field in required_fields:
                 if not data.get(field):
                     return {"error": f"Trường '{field}' là bắt buộc."}
@@ -74,6 +108,7 @@ class StaffService:
             email = data.get("email")
             username = data.get("username")
             birthday_str = data.get("birthday")
+
             birthday = (
                 datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
             )
@@ -136,6 +171,7 @@ class StaffService:
     @staticmethod
     def update_staff(staff_id, data: dict):
         try:
+
             # Check required fields
             required_fields = [
                 "full_name",
@@ -145,6 +181,7 @@ class StaffService:
                 "gender",
                 "role_name",
             ]
+
             for field in required_fields:
                 if not data.get(field):
                     return {"error": f"Trường '{field}' là bắt buộc."}
@@ -152,9 +189,11 @@ class StaffService:
             phone = data.get("phone")
             email = data.get("email")
             birthday_str = data.get("birthday")
+
             birthday = (
                 datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
             )
+
             # Kiểm tra SĐT
             if not re.fullmatch(r"\d{10}", phone):
                 return {"error": "Số điện thoại phải là số và gồm đúng 10 chữ số."}

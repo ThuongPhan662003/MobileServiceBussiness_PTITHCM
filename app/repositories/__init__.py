@@ -18,3 +18,4 @@ from app.repositories.customer_repository import Customer
 from app.repositories.plannetwork_repository import PlanNetwork
 from app.repositories.network_repository import Network
 from app.repositories.country_repository import Country
+from app.repositories.report_repository import ReportRepository

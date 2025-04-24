@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify
+
 from flask_login import current_user
 from app.services.staff_service import StaffService
+
 from app.services.voucher_service import VoucherService
 
 voucher_bp = Blueprint("voucher", __name__, url_prefix="/vouchers")
@@ -22,6 +24,7 @@ def voucher_create():
     print("Service result:", result)
 
     if result.get("success"):
+
         return (
             jsonify(
                 {

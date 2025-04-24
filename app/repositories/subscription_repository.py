@@ -9,7 +9,7 @@ class SubscriptionRepository:
             result = db_instance.execute("SELECT * FROM v_subscriptions", fetchall=True)
             subscriptions = []
 
-            for row in result:
+            for row in result[0]:
                 s = Subscription()
                 s.id = row.get("id")
                 s.plan_id = row.get("plan_id")
@@ -21,7 +21,6 @@ class SubscriptionRepository:
                 s.cancel_at = row.get("cancel_at")
                 s.activation_date = row.get("activation_date")
                 subscriptions.append(s.to_dict())
-
             return subscriptions
         except Exception as e:
             print(f"Lỗi khi lấy danh sách subscription: {e}")
@@ -46,38 +45,13 @@ class SubscriptionRepository:
     @staticmethod
     def insert(data: Subscription):
         try:
+            # Thực thi câu lệnh SQL
             result = db_instance.execute(
-                "CALL AddSubscription(%s, %s)",
+                "CALL AddSubscription(%s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     data.plan_id,
                     data.subscriber_id,
-                    # data.expiration_date,
-                    # data.renewal_total,
-                    # data.is_renewal,
-                    # data.cancel_at,
-                    # data.activation_date,
-                ),
-                fetchone=True,
-                commit=True,
-            )
-
-            if result.get("error"):
-                print(f"Lỗi khi thêm subscription: {result['error']}")
-                return result["error"]
-            return result
-        except Exception as e:
-            print(f"Lỗi khi thêm subscription: {e}")
-            return False
-
-    @staticmethod
-    def update(subscription_id, data: Subscription):
-        try:
-            result = db_instance.execute(
-                "CALL UpdateSubscription(%s, %s, %s, %s, %s, %s, %s, %s)",
-                (
-                    subscription_id,
-                    data.plan_id,
-                    data.subscriber_id,
+                    data.created_at,
                     data.expiration_date,
                     data.renewal_total,
                     data.is_renewal,
@@ -85,15 +59,48 @@ class SubscriptionRepository:
                     data.activation_date,
                 ),
                 fetchone=True,
+                commit=True,
+            )
+            if not isinstance(result, dict):
+                print(f"Kết quả trả về không phải dictionary: {result}")
+                return {"error": "Kết quả trả về không hợp lệ."}
+            if result.get("error"):
+                print(f"Lỗi khi thêm subscription: {result['error']}")
+
+                return {"error": result["error"]}
+
+            return result
+        except Exception as e:
+            print(f"Lỗi khi thêm subscription: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def update(subscription_id, data: Subscription):
+        try:
+            # Giả sử bạn thực hiện cập nhật trong DB
+            result = db_instance.execute(
+                "CALL UpdateSubscription(%s, %s, %s, %s, %s, %s, %s)",
+                (
+                    subscription_id,
+                    data.created_at,
+                    data.expiration_date,
+                    data.renewal_total,
+                    data.is_renewal,
+                    data.cancel_at,
+                    data.activation_date,
+                ),
+                fetchone=True,
+                commit=True,
             )
 
-            if result.get("error"):
-                print(f"Lỗi khi cập nhật subscription: {result['error']}")
-                return result["error"]
-            return True
+            # Nếu DB trả về kết quả hợp lệ, kiểm tra và trả kết quả thành công
+            if result and isinstance(result, dict) and result.get("success"):
+                return {"success": True}
+            else:
+                return {"error": "Không thể cập nhật subscription"}
         except Exception as e:
             print(f"Lỗi khi cập nhật subscription: {e}")
-            return False
+            return {"error": str(e)}
 
     @staticmethod
     def delete(subscription_id):
@@ -108,3 +115,50 @@ class SubscriptionRepository:
         except Exception as e:
             print(f"Lỗi khi xóa subscription: {e}")
             return False
+
+    @staticmethod
+    def get_by_subscriber_and_plan(subscriber_id, plan_id):
+        try:
+            result = db_instance.execute(
+                """
+                SELECT * FROM subscriptions 
+                WHERE subscriber_id = %s AND plan_id = %s 
+                ORDER BY created_at DESC LIMIT 1
+                """,
+                (subscriber_id, plan_id),
+                fetchone=True,
+            )
+
+            if result:
+                s = Subscription()
+                for key, value in result.items():
+                    if key == "is_renewal":
+                        setattr(s, key, bool(value))
+                    else:
+                        setattr(s, key, value)
+                return s
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy subscription theo subscriber_id và plan_id: {e}")
+            return None
+
+    @staticmethod
+    def get_subscription_by_subscriber_and_plan(subscriber_id, plan_id):
+        try:
+            query = """
+                   SELECT id AS subscription_id
+FROM subscriptions
+WHERE subscriber_id = %s AND plan_id = %s 
+ORDER BY created_at DESC
+LIMIT 1;
+
+                """
+            result = db_instance.execute(query, (subscriber_id, plan_id), fetchone=True)
+
+            if result:
+                return result.get("subscription_id")
+            else:
+                return None  # Không tìm thấy subscription phù hợp
+        except Exception as e:
+            print(f"Lỗi khi truy vấn subscription: {e}")
+            return None

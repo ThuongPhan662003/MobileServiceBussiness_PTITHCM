@@ -1,0 +1,364 @@
+{% extends "admin_base.html" %}
+{% block title %}Báo Cáo Doanh Thu{% endblock %}
+
+{% block content %}
+<style>
+    /* Tổng thể container */
+    .report-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #FFFFFF;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Tiêu đề */
+    .report-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .report-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    /* Form lọc */
+    .filter-form {
+        background: #F9F9F9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-form .row {
+        align-items: center;
+    }
+
+    .filter-form .form-control,
+    .filter-form .form-select {
+        border-radius: 5px;
+        border: 1px solid #E5E5E5;
+        padding: 8px 12px;
+        font-size: 0.95rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-form .form-control:focus,
+    .filter-form .form-select:focus {
+        border-color: #EE2B47;
+        box-shadow: 0 0 5px rgba(238, 43, 71, 0.2);
+        outline: none;
+    }
+
+    /* Nút xuất báo cáo */
+    .export-btn {
+        background: #EE2B47;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+
+    .export-btn:hover {
+        background: #D70000;
+    }
+
+    /* Biểu đồ */
+    #chart-container {
+        background: #FFFFFF;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    #revenueChart {
+        max-height: 400px;
+    }
+
+    /* Bảng dữ liệu */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+    .table thead {
+        background: #EE2B47;
+        color: white;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #E5E5E5;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background: #F9F9F9;
+    }
+
+    .table tbody tr:hover {
+        background: #F5F5F5;
+    }
+
+    .table th {
+        font-weight: 600;
+    }
+
+    .table td {
+        color: #555;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .report-container {
+            padding: 10px;
+        }
+
+        .report-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .filter-form {
+            padding: 15px;
+        }
+
+        .filter-form .row {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-form .col-md-3,
+        .filter-form .col-md-2 {
+            width: 100%;
+        }
+
+        .table th,
+        .table td {
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+    }
+</style>
+
+<!-- <div class="report-container"> -->
+<div class="report-header">
+    <h2>Báo Cáo Doanh Thu</h2>
+</div>
+
+<form id="filterForm" class="filter-form row g-3">
+    <div class="col-md-3">
+        <input type="date" name="start_date" class="form-control auto-fetch" value="{{ filters.start_date }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="end_date" class="form-control auto-fetch" value="{{ filters.end_date }}">
+    </div>
+    <div class="col-md-3">
+        <select name="plan_code" class="form-select auto-fetch">
+            <option value="">-- Tất cả gói cước --</option>
+            {% for code in plan_codes %}
+            <option value="{{ code }}" {% if filters.plan_code==code %}selected{% endif %}>{{ code }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="service_id" class="form-select auto-fetch">
+            <option value="">-- Tất cả dịch vụ --</option>
+            {% for service in services %}
+            <option value="{{ service.id }}" {% if filters.service_id==service.id %}selected{% endif %}>{{
+                service.service_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="chart_type" class="form-select auto-fetch">
+            <option value="bar" {% if filters.chart_type=='bar' %}selected{% endif %}>Biểu đồ cột</option>
+            <option value="line" {% if filters.chart_type=='line' %}selected{% endif %}>Biểu đồ đường</option>
+            <option value="pie" {% if filters.chart_type=='pie' %}selected{% endif %}>Biểu đồ tròn</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="button" class="export-btn" onclick="exportReport()">Xuất báo cáo</button>
+    </div>
+</form>
+
+<div id="chart-container">
+    <!-- Nội dung động -->
+</div>
+<!-- </div> -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let chart;
+
+    function renderChart(data) {
+        const container = document.getElementById("chart-container");
+
+        // Dựng HTML phần canvas + bảng
+        let html = `
+        <div class="chart-wrapper">
+            <canvas id="revenueChart" height="100"></canvas>
+        </div>
+        <hr class="my-4">
+        <div class="table-container">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Mã gói</th>
+                        <th>Dịch vụ</th>
+                        <th>Số giao dịch</th>
+                        <th>Số thuê bao</th>
+                        <th>Tổng doanh thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.table.map(row => `
+                        <tr>
+                            <td>${row.payment_day}</td>
+                            <td>${row.plan_code}</td>
+                            <td>${row.service_id}</td>
+                            <td>${row.total_payments}</td>
+                            <td>${row.unique_subscribers}</td>
+                            <td>${Number(row.total_revenue).toLocaleString("vi-VN")} ₫</td>
+                        </tr>`).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+        container.innerHTML = html;
+
+        const ctx = document.getElementById("revenueChart").getContext("2d");
+        if (chart) chart.destroy();
+
+        // Tùy chỉnh màu sắc cho biểu đồ
+        const chartColors = {
+            bar: "rgba(238, 43, 71, 0.7)", // Đỏ Viettel cho bar
+            line: "#EE2B47", // Đỏ Viettel cho line
+            pie: data.labels.map((_, i) => `hsl(${i * 40}, 70%, 70%)`) // Màu đa dạng cho pie
+        };
+
+        chart = new Chart(ctx, {
+            type: data.chart_type,
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Tổng doanh thu (VNĐ)",
+                    data: data.values,
+                    backgroundColor: data.chart_type === "pie" ? chartColors.pie : chartColors[data.chart_type],
+                    borderColor: data.chart_type === "line" ? chartColors.line : "#fff",
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: {
+                            font: {
+                                size: 14,
+                                family: "'Roboto', sans-serif"
+                            },
+                            color: "#333"
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: "#EE2B47",
+                        titleColor: "#fff",
+                        bodyColor: "#fff",
+                        callbacks: {
+                            label: function (ctx) {
+                                let value = ctx.parsed || ctx.raw;
+                                return ctx.label + ": " + value.toLocaleString("vi-VN") + " ₫";
+                            }
+                        }
+                    }
+                },
+                ...(data.chart_type !== "pie" && {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => value.toLocaleString("vi-VN") + " ₫",
+                                color: "#555",
+                                font: {
+                                    size: 12,
+                                    family: "'Roboto', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: "#E5E5E5"
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: "#555",
+                                font: {
+                                    size: 12,
+                                    family: "'Roboto', sans-serif"
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                })
+            }
+        });
+    }
+
+    // Gửi request khi có thay đổi
+    async function fetchAndRenderChart() {
+        const form = document.getElementById("filterForm");
+        const query = new URLSearchParams(new FormData(form)).toString();
+
+        try {
+            const res = await fetch(`/reports/revenue/data?${query}`);
+            if (!res.ok) throw new Error("Lỗi khi tải dữ liệu");
+            const json = await res.json();
+            renderChart(json);
+        } catch (error) {
+            console.error(error);
+            document.getElementById("chart-container").innerHTML = `
+                <p class="text-center text-danger">Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau.</p>
+            `;
+        }
+    }
+
+    // Hàm giả lập xuất báo cáo
+    function exportReport() {
+        alert("Chức năng xuất báo cáo đang được phát triển!");
+        // Thực tế: Gọi API để xuất file Excel/PDF
+    }
+
+    // Lắng nghe thay đổi input
+    document.querySelectorAll(".auto-fetch").forEach(el => {
+        el.addEventListener("change", fetchAndRenderChart);
+    });
+
+    // Tải ban đầu
+    window.addEventListener("DOMContentLoaded", fetchAndRenderChart);
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
+</script>
+{% endblock %}

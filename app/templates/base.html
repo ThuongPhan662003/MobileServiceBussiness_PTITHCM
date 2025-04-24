@@ -87,10 +87,15 @@
         <h1>Flask Business</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Home
+                    </a></li>
                 {% if current_user %}
-                <li><a href="#"><i class="fas fa-user"></i> {{ current_user.username }}</a>
+                <li>
+                    <a href="/auth/subscribers/{{ session['subscriber_id'] }}">
+                        <i class="fas fa-user"></i> {{ current_user.username }}
+                    </a>
                 </li>
+
                 <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 {% else %}
                 <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
