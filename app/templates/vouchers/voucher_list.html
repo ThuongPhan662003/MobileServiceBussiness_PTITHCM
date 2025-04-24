@@ -196,7 +196,14 @@
     }
 
     .modal-body {
-        padding: 20px;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .modal-body input,
@@ -303,6 +310,12 @@
 
         .modal-dialog {
             width: 95%;
+            max-height: 90vh;
+        }
+
+        .modal-body {
+            max-height: 55vh;
+            overflow-y: auto;
         }
     }
 </style>
@@ -359,6 +372,35 @@
     </table>
 </div>
 
+<!-- Modal Sửa -->
+<div id="editVoucherModal" class="modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa Mã Khuyến Mãi</h5>
+                <button type="button" class="btn-close" onclick="closeModal('editVoucherModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editVoucherId">
+                <input type="text" id="editCode" class="form-control" required>
+                <textarea id="editDescription" class="form-control" rows="8" cols="60" placeholder="Mô tả"></textarea>
+                <input type="text" id="editPackages" class="form-control" placeholder="Gói áp dụng">
+                <input type="date" id="editStartDate" class="form-control" required>
+                <input type="date" id="editEndDate" class="form-control" required>
+                <input type="number" id="editUsageLimit" class="form-control" placeholder="Số lượt sử dụng" required>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="editIsActive">
+                    <label class="form-check-label" for="editIsActive">Kích hoạt</label>
+                </div>
+                <label>Điều kiện và Ưu đãi (conandpro)</label>
+                <textarea id="editConAndPro" class="form-control" rows="6" cols="60" placeholder='JSON'></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-update" onclick="updateVoucher()">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal Thêm -->
 <div id="addVoucherModal" class="modal">
     <div class="modal-dialog modal-dialog-centered">
@@ -377,7 +419,7 @@
                 <input type="number" id="addUsageLimit" class="form-control" placeholder="Số lượt sử dụng" required>
                 <label><input type="checkbox" id="addIsActive" checked> Kích hoạt</label>
                 <label>Điều kiện và Ưu đãi (JSON)</label>
-                <textarea id="addConAndPro" class="form-control" rows="6"
+                <textarea id="addConAndPro" class="form-control" rows="6" cols="60"
                     placeholder='Dán JSON hoặc để trống để tự động sinh'></textarea>
 
             </div>
@@ -388,7 +430,7 @@
     </div>
 </div>
 
-<!-- Modal Sửa -->
+<!-- Modal Sửa
 <div id="editVoucherModal" class="modal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -399,7 +441,10 @@
             <div class="modal-body">
                 <input type="hidden" id="editVoucherId">
                 <input type="text" id="editCode" class="form-control" required>
-                <input type="text" id="editDescription" class="form-control">
+
+                <textarea id="editDescription" class="form-control" rows="10">
+
+                </textarea>
                 <input type="text" id="editPackages" class="form-control">
                 <input type="date" id="editStartDate" class="form-control" required>
                 <input type="date" id="editEndDate" class="form-control" required>
@@ -438,7 +483,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
     // Ensure modals are hidden on page load
@@ -448,6 +493,12 @@
     });
 
     function openModal(id) {
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('active');
+            modal.style.display = 'flex';  // 👈 Bắt buộc
+        }
+
         document.getElementById(id).classList.add('active');
         document.getElementById(id).style.display = 'flex';
         if (id === 'addVoucherModal') {
@@ -489,11 +540,12 @@
             start_date: document.getElementById('addStartDate').value,
             end_date: document.getElementById('addEndDate').value,
             usage_limit: parseInt(document.getElementById('addUsageLimit').value),
+            remaining_count: parseInt(document.getElementById('addUsageLimit').value),
             is_active: document.getElementById('addIsActive').checked,
-            conandpro: JSON.parse(document.getElementById('addConAndPro').value)
+            conandpro: document.getElementById('addConAndPro').value
         };
-
-        fetch("/vouchers/", {
+        console.log(data)
+        fetch("/vouchers", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -505,6 +557,7 @@
         fetch(`/vouchers/${id}`)
             .then(r => r.json())
             .then(data => {
+                // ⚠️ Chờ DOM đã hiển thị trước khi gán
                 document.getElementById('editVoucherId').value = id;
                 document.getElementById('editCode').value = data.code;
                 document.getElementById('editDescription').value = data.description;
@@ -513,7 +566,10 @@
                 document.getElementById('editEndDate').value = data.end_date;
                 document.getElementById('editUsageLimit').value = data.usage_limit;
                 document.getElementById('editIsActive').checked = data.is_active;
-                openModal('editVoucherModal');
+                document.getElementById('editConAndPro').value = JSON.stringify(data.conandpro || {}, null, 2);
+
+                // ✅ Hiển thị modal SAU khi set dữ liệu
+                setTimeout(() => openModal('editVoucherModal'), 50); // hoặc không cần timeout
             });
     }
 

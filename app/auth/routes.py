@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, session, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app.services.account_service import AccountService
@@ -45,10 +45,30 @@ def login():
         if result.get("success"):
             user = result["data"]["account_id"]
             print("user", user)
-
+            user_data = result.get("data", {})
+            print("user_data", user_data)
+            role = user_data.get("role_type")
             login_user(user)  # cần đảm bảo `user` là instance của UserMixin
+            session.permanent = True
+            # ✅ Gán session theo role_type
+            session["role_type"] = role
 
-            flash(result.get("message"), "success")
+            if role == "staff":
+                session["staff_id"] = user_data.get("staff_id")
+                session["full_name"] = user_data.get("full_name")
+                session["email"] = user_data.get("email")
+                session["phone"] = user_data.get("phone")
+                session["gender"] = user_data.get("gender")
+
+            elif role == "subscriber":
+                session["subscriber_id"] = user_data.get("subscriber_id")
+                session["full_name"] = user_data.get(
+                    "customer_name"
+                )  # lấy tên từ customer
+                session["phone"] = user_data.get("phone_number")
+                session["main_balance"] = user_data.get("main_balance")
+                session["subscriber_type"] = user_data.get("subscriber_type")
+                flash(result.get("message"), "success")
 
             # ➤ Điều hướng theo role
             if result["data"]["role_type"] == "staff":
@@ -67,6 +87,7 @@ def login():
 def logout():
     print("logout", current_user)
     logout_user()
+    session.clear()
     return redirect(url_for("main_bp.index"))
 
 
