@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,43 +8,47 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         function initiatePayment(paymentId) {
-            fetch(`/ui/payments/pay/${paymentId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.approval_url) {
-                    window.location.href = data.approval_url;
-                } else {
-                    alert(data.error || 'Lỗi khi khởi tạo thanh toán');
-                }
-            })
-            .catch(error => alert('Lỗi: ' + error));
+            // Lấy thông tin từ thẻ HTML (hoặc từ server tuỳ bạn triển khai)
+            const planCode = document.getElementById(`plan-code-${paymentId}`).value;
+            const planPrice = document.getElementById(`plan-price-${paymentId}`).value;
+            const planId = document.getElementById(`plan-id-${paymentId}`).value;
+            console.log("url", planId, planCode)
+            const url = new URL("/pay-process", window.location.origin);
+            url.searchParams.append("plan_code", planCode);
+            url.searchParams.append("price", planPrice);
+            url.searchParams.append("plan_id", planId);
+
+            window.location.href = url.toString();
         }
     </script>
+
 </head>
+
 <body class="bg-gray-100">
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4">Quản lý lịch sử thanh toán</h1>
-        
+
         <!-- Search Form -->
-        <form action="{{ url_for('payment_ui_bp.search_payments') }}" method="POST" class="mb-4 bg-white p-4 rounded shadow">
+        <form action="{{ url_for('payment_ui_bp.search_payments') }}" method="POST"
+            class="mb-4 bg-white p-4 rounded shadow">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium">Subscription ID</label>
-                    <input type="number" name="subscription_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="number" name="subscription_id"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Ngày thanh toán</label>
-                    <input type="date" name="payment_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="date" name="payment_date"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Phương thức thanh toán</label>
                     <select name="payment_method" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="Tất cả" {% if payment_method == "Tất cả" %}selected{% endif %}>Tất cả</option>
-                        <option value="Paypal" {% if payment_method == "Paypal" %}selected{% endif %}>Paypal</option>
-                        <option value="Main balance" {% if payment_method == "Main balance" %}selected{% endif %}>Main balance</option>
+                        <option value="Tất cả" {% if payment_method=="Tất cả" %}selected{% endif %}>Tất cả</option>
+                        <option value="Paypal" {% if payment_method=="Paypal" %}selected{% endif %}>Paypal</option>
+                        <option value="Main balance" {% if payment_method=="Main balance" %}selected{% endif %}>Main
+                            balance</option>
                     </select>
                 </div>
                 <div>
@@ -56,8 +61,10 @@
                 </div>
             </div>
             <div class="mt-4 flex space-x-2">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Tìm kiếm</button>
-                <a href="{{ url_for('payment_ui_bp.reset_search') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Đặt lại</a>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Tìm
+                    kiếm</button>
+                <a href="{{ url_for('payment_ui_bp.reset_search') }}"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Đặt lại</a>
             </div>
         </form>
 
@@ -87,22 +94,27 @@
                         <td class="border p-2">{{ 'Đã thanh toán' if payment.is_paid else 'Chưa thanh toán' }}</td>
                         <td class="border p-2">{{ payment.due_date }}</td>
                         <td class="border p-2 flex space-x-2">
-                            <button 
-                                onclick="initiatePayment({{ payment.id }})" 
+                            <button onclick="initiatePayment({{ payment.id }})"
                                 class="px-2 py-1 rounded {{ 'bg-blue-500 text-white hover:bg-blue-600' if not payment.is_paid else 'bg-gray-400 text-gray-700 cursor-not-allowed' }}"
                                 {{ 'disabled' if payment.is_paid else '' }}>
                                 Thanh toán
+
                             </button>
-                            <a href="{{ url_for('payment_ui_bp.payment_details', payment_id=payment.id) }}" 
-                               class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">
+                            <a href="{{ url_for('payment_ui_bp.payment_details', payment_id=payment.id) }}"
+                                class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">
                                 Xem chi tiết
                             </a>
                         </td>
                     </tr>
+                    <input type="hidden" id="plan-code-{{ payment.id }}" value="{{ payment.plan_code }}">
+                    <input type="hidden" id="plan-price-{{ payment.id }}" value="{{ payment.total_amount }}">
+                    <input type="hidden" id="plan-id-{{ payment.id }}" value="{{ payment.plan_id }}">
+
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </body>
+
 </html>
