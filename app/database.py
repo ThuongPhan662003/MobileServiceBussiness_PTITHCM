@@ -48,7 +48,7 @@ class Database:
             if fetchone:
                 result = cursor.fetchone()
                 # Nếu có nhiều result sets, tìm result đầu tiên có dữ liệu
-                # print("result=", result)
+                print("result=", result)
                 while not result and cursor.nextset():
                     result = cursor.fetchone()
                 print("result=", result)

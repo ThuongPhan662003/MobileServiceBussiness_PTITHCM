@@ -1,0 +1,21 @@
+{
+    "code": "vz",
+    "description": "z",
+    "packages": "cdzf",
+    "start_date": "2025-04-04",
+    "end_date": "2025-04-04",
+    "usage_limit": None,
+    "remaining_count": None,
+    "is_active": True,
+    "conandpro": '{\n  "condition": {\n    "plan_id": [\n      13\n    ],\n    "subscriber": [\n      "TRASAU"\n    ],\n    "created_at": "DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))",\n    "renewal_total": 2\n  },\n  "promotion": {\n    "payments": {\n      "total_amount": {\n        "operator": "*",\n        "value": 0.5\n      }\n    },\n    "payment_detail": {\n      "free_data": {\n        "operator": "+",\n        "value": 5\n      }\n    }\n  }\n}',
+    "staff_id": {
+        "id": 7,
+        "full_name": "Nguyễn Văn A",
+        "card_id": "CARD12345",
+        "phone": "0987654321",
+        "email": "nguyenvana@example.com",
+        "is_active": 1,
+        "gender": "Nam",
+        "birthday": datetime.date(1990, 5, 20),
+    },
+}

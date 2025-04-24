@@ -14,25 +14,34 @@ class VoucherService:
     @staticmethod
     def create_voucher(data: dict):
         try:
-            voucher = Voucher(
-                code=data.get("code"),
-                description=data.get("description"),
-                conandpromo=data.get("conandpromo"),
-                start_date=data.get("start_date"),
-                end_date=data.get("end_date"),
-                usage_limit=data.get("usage_limit"),
-                remaining_count=data.get("remaining_count", 0),
-                is_active=data.get("is_active", True),
-                staff_id=data.get("staff_id"),
-                packages=data.get("packages"),
-            )
-            result = VoucherRepository.insert(voucher)
-            if result is True:
-                return {"success": True}
+            # In ra dữ liệu để debug nếu cần
+            print("[DEBUG] Dữ liệu đầu vào create_voucher:", data)
+
+            # Gọi hàm insert trong repository
+            result = VoucherRepository.insert(data)
+
+            # Xử lý kết quả trả về
+            if result.get("success"):
+                return {
+                    "success": True,
+                    "error": False,
+                    "message": result.get("message", "Thêm voucher thành công."),
+                }
             else:
-                return {"error": result}
+                print("[DEBUG] Insert voucher thất bại:", result)
+                return {
+                    "success": False,
+                    "error": True,
+                    "message": result.get("message", "Không thể thêm voucher."),
+                }
+
         except Exception as e:
-            return {"error": str(e)}
+            print("[ERROR] Exception trong create_voucher:", str(e))
+            return {
+                "success": False,
+                "error": True,
+                "message": f"Lỗi trong quá trình tạo voucher: {str(e)}",
+            }
 
     @staticmethod
     def update_voucher(voucher_id, data: dict):
