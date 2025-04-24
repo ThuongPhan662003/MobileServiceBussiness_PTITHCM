@@ -656,3 +656,32 @@ class Plan:
             "ON_SMS_cost": self.ON_SMS_cost,
             "ON_a_call_cost": self.ON_a_call_cost,
         }
+
+    def to_dict_plan(self, duration=None, object_type=None):
+        return {
+            "id": self.id,
+            "code": self.code,
+            "price": self.price,
+            "description": self.description,
+            "service_id": self.service_id,
+            "is_active": self.is_active,
+            "renewal_syntax": self.renewal_syntax,
+            "registration_syntax": self.registration_syntax,
+            "cancel_syntax": self.cancel_syntax,
+            "free_data": self.free_data,
+            "free_on_network_a_call": self.free_on_network_a_call,
+            "free_on_network_call": self.free_on_network_call,
+            "free_on_network_SMS": self.free_on_network_SMS,
+            "free_off_network_a_call": self.free_off_network_a_call,
+            "free_off_network_call": self.free_off_network_call,
+            "free_off_network_SMS": self.free_off_network_SMS,
+            "auto_renew": self.auto_renew,
+            "staff_id": self.staff_id,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "maximum_on_network_call": self.maximum_on_network_call,
+            "ON_SMS_cost": self.ON_SMS_cost,
+            "ON_a_call_cost": self.ON_a_call_cost,
+            "duration": duration,
+            "object_type": object_type,
+        }

@@ -7,7 +7,7 @@
     .container { width: 60%; margin: 40px auto; }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
     .form-group input[type="checkbox"] { width: auto; }
     .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
     .btn-submit { background-color: #2ecc71; }
@@ -97,6 +97,17 @@
         <div class="form-group">
             <label for="ON_a_call_cost">Chi phí gọi nội mạng (VND/phút)</label>
             <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ data.ON_a_call_cost if data else '' }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="object_type" class="required">Hình thức thanh toán</label>
+            <select id="object_type" name="object_type" required>
+                <option value="TRATRUOC" {% if data and data.object_type == 'TRATRUOC' %}selected{% endif %}>Trả trước</option>
+                <option value="TRASAU" {% if data and data.object_type == 'TRASAU' %}selected{% endif %}>Trả sau</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="duration" class="required">Thời hạn (ngày)</label>
+            <input type="number" id="duration" name="duration" value="{{ data.duration if data else '' }}" min="1" required>
         </div>
         <div class="form-group">
             <label for="is_active">Kích hoạt</label>
