@@ -18,6 +18,10 @@ class SubscriberService:
         return SubscriberRepository.get_by_id(subscriber_id)
 
     @staticmethod
+    def get_by_account_id(account_id: int):
+        return SubscriberRepository.get_by_account_id(account_id)
+
+    @staticmethod
     def create_subscriber(data: dict):
         try:
             # In ra dữ liệu nhận được từ client

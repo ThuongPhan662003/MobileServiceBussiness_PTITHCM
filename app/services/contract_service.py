@@ -15,15 +15,16 @@ class ContractService:
     @staticmethod
     def create_contract(data: dict):
         try:
-            contract = Contract(
-                contents=data.get("contents"),
-                title=data.get("title"),
-                start_date=data.get("start_date"),
-                end_date=data.get("end_date"),
-                is_active=data.get("is_active", True),
-                subscriber_id=data.get("subscriber_id"),
-            )
-            result = ContractRepository.insert(contract)
+            # contract = Contract(
+            #     contents=data.get("contents"),
+            #     title=data.get("title"),
+            #     start_date=data.get("start_date"),
+            #     end_date=data.get("end_date"),
+            #     is_active=data.get("is_active", True),
+            #     subscriber_id=data.get("subscriber_id"),
+            # )
+            # print("data.start_date", data.start_date)
+            result = ContractRepository.insert(data)
             if result is True:
                 return {"success": True}
             else:
@@ -35,15 +36,15 @@ class ContractService:
     def update_contract(contract_id, data: dict):
         try:
             start_date = datetime.strptime(data.get("start_date"), "%Y-%m-%d").date()
-            contract = Contract(
-                contents=data.get("contents"),
-                title=data.get("title"),
-                start_date=start_date,
-                end_date=None,
-                is_active=data.get("is_active", True),
-                subscriber_id=data.get("subscriber_id"),
-            )
-            result = ContractRepository.update(contract_id, contract)
+            # contract = Contract(
+            #     contents=data.get("contents"),
+            #     title=data.get("title"),
+            #     start_date=start_date,
+            #     end_date=None,
+            #     is_active=data.get("is_active", True),
+            #     subscriber_id=data.get("subscriber_id"),
+            # )
+            result = ContractRepository.update(contract_id, data)
             if result is True:
                 return {"success": True}
             else:

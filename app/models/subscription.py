@@ -128,16 +128,12 @@ class Subscription:
     def to_dict(self):
         return {
             "id": self.id,
-            "plan_id": self.plan_id.to_dict(),
-            "subscriber_id": self.subscriber_id.to_dict(),
+            "plan_id": self.plan_id,  # Không gọi to_dict() trên plan_id nếu nó là int
+            "subscriber_id": self.subscriber_id,  # Không gọi to_dict() trên subscriber_id nếu nó là int
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "expiration_date": (
-                self.expiration_date.isoformat() if self.expiration_date else None
-            ),
+            "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
             "renewal_total": self.renewal_total,
             "is_renewal": self.is_renewal,
             "cancel_at": self.cancel_at.isoformat() if self.cancel_at else None,
-            "activation_date": (
-                self.activation_date.isoformat() if self.activation_date else None
-            ),
+            "activation_date": self.activation_date.isoformat() if self.activation_date else None,
         }

@@ -1,5 +1,6 @@
 from app.database import db_instance
 from app.models.voucher import Voucher
+from app.services.staff_service import StaffService
 
 
 class VoucherRepository:
@@ -9,7 +10,8 @@ class VoucherRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_vouchers", fetchall=True)
             vouchers = []
-            for row in result:
+
+            for row in result[0]:
                 voucher = Voucher()
                 voucher.id = row.get("id")
                 voucher.code = row.get("code")
@@ -19,11 +21,22 @@ class VoucherRepository:
                 voucher.end_date = row.get("end_date")
                 voucher.usage_limit = row.get("usage_limit")
                 voucher.remaining_count = row.get("remaining_count")
-                voucher.is_active = row.get("is_active")
-                voucher.staff_id = row.get("staff_id")
+                voucher.is_active = True if row.get("is_active") else False
+
+                # Gán staff_id là đối tượng Staff thay vì số nguyên
+                staff_id = row.get("staff_id")
+                if staff_id:
+                    voucher.staff_id = StaffService.get_staff_by_id(staff_id)
+                else:
+                    voucher.staff_id = None
+
                 voucher.packages = row.get("packages")
+
                 vouchers.append(voucher.to_dict())
+                print(voucher)
+
             return vouchers
+
         except Exception as e:
             print(f"Lỗi khi lấy danh sách voucher: {e}")
             return []

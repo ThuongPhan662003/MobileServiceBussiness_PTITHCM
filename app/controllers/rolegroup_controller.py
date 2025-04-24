@@ -1,5 +1,6 @@
 from flask import Blueprint, json, render_template, request, jsonify
 from app.services.rolegroup_service import RoleGroupService
+from app.services.staff_service import StaffService
 
 role_group_bp = Blueprint("role_group", __name__, url_prefix="/role_groups")
 
@@ -18,6 +19,27 @@ def get_staffs_by_role_group(role_group_id):
         staffs = RoleGroupService.get_staffs_by_role_group(role_group_id)
         # Trả về danh sách nhân viên dưới dạng JSON
         return jsonify(staffs), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@role_group_bp.route("/AddstaffsByRoleGroup", methods=["POST"])
+def add_staffs_by_role_group():
+    try:
+        data = request.get_json()
+        role_group_id = data.get("role_group_id")
+        account_ids_csv = data.get("account_ids")  # dạng "3,5,7,10"
+
+        if not role_group_id or not account_ids_csv:
+            return jsonify({"error": "Thiếu role_group_id hoặc account_ids"}), 400
+
+        # Gọi stored procedure trong service layer
+        result = RoleGroupService.add_accounts_to_role_group(
+            role_group_id, account_ids_csv
+        )
+
+        return jsonify({"success": True, "message": result}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -116,6 +138,27 @@ def get_role_group_by_id(role_group_id):
     if role_group:
         return jsonify(role_group.to_dict()), 200
     return jsonify({"error": "Role group not found"}), 404
+
+
+@role_group_bp.route(
+    "/remove_staff/role_group=<int:role_group_id>&account_id=<int:account_id>",
+    methods=["DELETE"],
+)
+def remove_staff_from_role_group(role_group_id, account_id):
+    try:
+        print("reomoce")
+        result = RoleGroupService.remove_staff_from_group(role_group_id, account_id)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@role_group_bp.route(
+    "/get_staffs_not_in_role_group/<int:role_group_id>", methods=["GET"]
+)
+def get_staffs_not_in_role_group(role_group_id):
+    staffs = RoleGroupService.get_staffs_not_in_role_group(role_group_id)
+    return jsonify(staffs), 200
 
 
 @role_group_bp.route("/", methods=["POST"])

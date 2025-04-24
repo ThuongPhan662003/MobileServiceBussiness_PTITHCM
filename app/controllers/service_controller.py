@@ -41,23 +41,75 @@ def service_list():
 
 @service_bp.route("/create", methods=["POST"])
 def service_create():
-    data = request.get_json()
-    print("data", data)
+    try:
+        data = request.get_json()
+        print("[REQUEST DATA]", data)
 
-    result = ServiceService.create_service(data)
-    if result.get("success"):
-        print("success")
-        return jsonify({"message": "Service created successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+        result = ServiceService.create_service(data)
+        print("[SERVICE RESULT]", result)
+
+        if result.get("success") is True:
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": result.get("message", "Tạo dịch vụ thành công."),
+                    }
+                ),
+                200,
+            )
+        else:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": result.get("message", "Tạo dịch vụ thất bại."),
+                        "error": result.get("error", None),
+                    }
+                ),
+                400,
+            )
+
+    except Exception as e:
+        print("[EXCEPTION]", str(e))
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Đã xảy ra lỗi khi xử lý yêu cầu.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
 
 
 @service_bp.route("/<int:service_id>", methods=["PUT"])
 def service_edit(service_id):
     data = request.get_json()
     result = ServiceService.update_service(service_id, data)
+
     if result.get("success"):
-        return jsonify({"message": "Service updated successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": result.get("message", "Cập nhật dịch vụ thành công."),
+                }
+            ),
+            200,
+        )
+
+    return (
+        jsonify(
+            {
+                "success": False,
+                "error": True,
+                "message": result.get("message", "Cập nhật dịch vụ thất bại."),
+            }
+        ),
+        400,
+    )
 
 
 @service_bp.route("/<int:service_id>", methods=["DELETE"])

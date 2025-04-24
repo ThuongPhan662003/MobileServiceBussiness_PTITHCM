@@ -92,7 +92,7 @@ class SubscriberRepository:
     def update(subscriber_id, data: Subscriber):
         try:
             result = db_instance.execute(
-                "CALL UpdateSubscriber(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",  # Thêm parameter subscriber_type
+                "CALL UpdateSubscriber(%s, %s, %s, %s, %s, %s, %s, %s, %s)",  # Thêm parameter subscriber_type
                 (
                     subscriber_id,
                     data.phone_number,
@@ -101,7 +101,6 @@ class SubscriberRepository:
                     data.is_active,
                     data.customer_id,
                     data.warning_date,
-                    data.is_messaged,
                     data.subscriber_type,  # Thêm subscriber_type
                     data.account_id
                 ),

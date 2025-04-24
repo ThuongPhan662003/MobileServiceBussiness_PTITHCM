@@ -18,6 +18,12 @@ class RoleGroupService:
             return []
 
     @staticmethod
+    def add_accounts_to_role_group(role_group_id, account_ids):
+        return RoleGroupRepository.add_accounts_to_role_group(
+            role_group_id, account_ids
+        )
+
+    @staticmethod
     def get_role_group_functions(role_group_id):
         # Lấy các chức năng đã gán và chưa gán cho nhóm quyền
         assigned_functions, unassigned_functions = (
@@ -94,3 +100,11 @@ class RoleGroupService:
                 return {"error": result}
         except Exception as e:
             return {"error": str(e)}
+
+    @staticmethod
+    def get_staffs_not_in_role_group(role_group_id):
+        return RoleGroupRepository.get_staffs_not_in_role_group(role_group_id)
+
+    @staticmethod
+    def remove_staff_from_group(role_group_id, account_id):
+        return RoleGroupRepository.remove_staff_from_group(role_group_id, account_id)
