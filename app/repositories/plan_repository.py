@@ -78,7 +78,7 @@ class PlanRepository:
         try:
             print("data", data.to_dict())
             result = db_instance.execute(
-                "CALL AddPlan(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL AddPlan( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     data.code,
                     data.price,
@@ -106,6 +106,7 @@ class PlanRepository:
                 fetchone=True,
                 commit=True,
             )
+            print("result", result)
             if result and result.get("error"):
                 print(f"Lỗi khi thêm plan: {result['error']}")
                 return result["error"]

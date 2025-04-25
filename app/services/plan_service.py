@@ -49,7 +49,7 @@ class PlanService:
             )
             object_type = data.get("object_type")
             duration = int(data.get("duration")) if data.get("duration") else None
-
+            print("service",plan.to_dict(), object_type, duration )
             result = PlanRepository.insert(plan, object_type, duration)
             if result is True:
                 return {"success": True}

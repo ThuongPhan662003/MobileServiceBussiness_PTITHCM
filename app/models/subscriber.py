@@ -11,6 +11,7 @@ class Subscriber:
     __expiration_date: Optional[date]
     __is_active: Optional[bool]
     __customer_id: Optional["Customer"]  # or int, tùy hệ thống
+
     __warning_date: Optional[datetime]
     __ON_a_call_cost: Optional[float]
     __ON_SMS_cost: Optional[float]
