@@ -296,6 +296,7 @@ async function confirmRegister() {
 
                 const packagePriceRaw = document.getElementById("packagePrice").textContent;
                 const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
+                
                 const balance = parseFloat(balanceData.main_balance);
 
 
@@ -308,6 +309,21 @@ async function confirmRegister() {
                 return;
             }
 
+        }
+        if (method === "qr") {
+            const packagePriceRaw = document.getElementById("packagePrice").textContent;
+            console.log(packagePriceRaw)
+            const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
+            const packageName = document.getElementById("packageName").textContent;
+
+            const url = new URL("/pay-process", window.location.origin);
+            url.searchParams.append("subscriber_id", subscriberId);
+            url.searchParams.append("plan_id", currentPlanId);
+            url.searchParams.append("price",  packagePrice);
+            url.searchParams.append("plan_code", packageName);
+
+            window.location.href = url.toString();
+            return;
         }
     }
 
