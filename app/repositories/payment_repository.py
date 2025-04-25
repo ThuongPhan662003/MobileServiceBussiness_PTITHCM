@@ -49,16 +49,15 @@ class PaymentRepository:
     @staticmethod
     def insert(payment: Payment):
         try:
+            # Thực thi stored procedure
             result = db_instance.execute(
                 "CALL AddPayment(%s, %s, %s, %s, %s)",
                 (
-
                     payment.subscription_id,
                     payment.total_amount,
                     payment.payment_method,
                     payment.is_paid,
                     payment.due_date,
-
                 ),
                 fetchone=True,
                 commit=True,
@@ -67,8 +66,11 @@ class PaymentRepository:
             if not result:
                 return {"error": "Không có phản hồi từ stored procedure"}
 
+            # Kiểm tra kết quả từ stored procedure
             if result.get("success") == 1:
-                return {"success": True}
+                # Giả sử stored procedure trả về id_payment
+                id_payment = result.get("id_payment")  # Giả sử bạn nhận id_payment từ kết quả
+                return {"success": True, "id_payment": id_payment}  # Trả về id_payment
             else:
                 return {"error": result.get("message", "Lỗi không xác định")}
 

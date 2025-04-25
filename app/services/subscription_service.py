@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from app.repositories.plan_repository import PlanRepository
 from app.repositories.plandetail_repository import PlanDetailRepository
+from app.repositories.subscriber_repository import SubscriberRepository
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.models.subscription import Subscription
 
@@ -18,54 +19,58 @@ class SubscriptionService:
     @staticmethod
     def create_subscription(subscriber_id: int, plan_id: int):
         try:
+            subscriber = SubscriberRepository.get_by_id(subscriber_id)
 
             created_at = datetime.now()
-
-            # Lấy thông tin gói cước từ repository
             plan = PlanDetailRepository.get_by_id(plan_id)
             if not plan:
                 return {"error": "Không tìm thấy gói cước."}
-
-            expiration_date = created_at + timedelta(days=plan.duration)
-
-            # Kiểm tra subscription đã tồn tại chưa
-            existing = SubscriptionRepository.get_by_subscriber_and_plan(subscriber_id, plan_id)
-
-            if existing:
-                # Cập nhật subscription đã có
-                existing.created_at = created_at
-                existing.expiration_date = expiration_date
-                existing.activation_date = existing.activation_date  # Không thay đổi activation_date
-                existing.is_renewal = True
-                existing.cancel_at = None
-                existing.renewal_total = existing.renewal_total + 1
-
-                result = SubscriptionRepository.update(existing.id, existing)
-
-                if isinstance(result, dict) and result.get("success"):
-                    return {"success": True, "updated": True, "subscription_id": existing.id}
+            activation_date=datetime.now()
+            if subscriber.subscriber_type == "TRATRUOC":
+                if plan.duration < 1:
+                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
                 else:
-                    return {"error": "Lỗi khi cập nhật subscription."}
-
+                    today = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+                    expiration_date = today + timedelta(days=int(plan.duration))
             else:
-                # Tạo mới subscription
-                subscription = Subscription(
-                    plan_id=plan_id,
-                    subscriber_id=subscriber_id,
-                    created_at=created_at,
-                    expiration_date=expiration_date,
-                    renewal_total=0,
-                    is_renewal=True,
-                    cancel_at=None,
-                    activation_date=created_at,
-                )
+                if plan.duration < 1:
+                    # Trường hợp nhỏ hơn 1: cộng số giờ (duration * 24)
+                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
 
-                result = SubscriptionRepository.insert(subscription)
+                elif 1 <= plan.duration <= 30:
+                    # Trường hợp từ 1 đến 30: cộng số ngày, reset về 0h
+                    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                    expiration_date = today + timedelta(days=int(plan.duration))
 
-                if isinstance(result, dict) and result.get("subscription_id"):
-                    return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
                 else:
-                    return {"error": "Lỗi khi tạo subscription."}
+                    # Trường hợp lớn hơn 30: quy đổi thành số tháng
+                    now = datetime.now()
+                    months_to_add = int(plan.duration // 30)
+
+                    # Tính tổng tháng mới
+                    new_month = now.month + months_to_add
+                    new_year = now.year + (new_month - 1) // 12
+                    new_month = (new_month - 1) % 12 + 1
+
+                    # Tạo ngày hết hạn: ngày 1, giờ 0:00
+                    expiration_date = datetime(new_year, new_month, 1, 0, 0, 0)
+            subscription = Subscription(
+                plan_id=plan_id,
+                subscriber_id=subscriber_id,
+                created_at=created_at,
+                expiration_date=expiration_date,
+                renewal_total=0,
+                is_renewal=True,
+                cancel_at=None,
+                activation_date=activation_date,
+            )
+
+            result = SubscriptionRepository.insert(subscription)
+
+            if isinstance(result, dict) and result.get("subscription_id"):
+                return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
+            else:
+                return {"error": "Lỗi khi tạo subscription."}
         except Exception as e:
             return {"error": str(e)}
     @staticmethod
@@ -99,3 +104,21 @@ class SubscriptionService:
                 return {"error": result}
         except Exception as e:
             return {"error": str(e)}
+
+    @staticmethod
+    def get_plan_exp(subscriber_id):
+        try:
+            # Gọi method của repository để lấy thông tin gói cước
+            result = SubscriptionRepository.get_by(subscriber_id)
+            print("Kết quả từ get_by:", result)
+
+            # Kiểm tra nếu kết quả hợp lệ
+            if result:
+                return result
+            else:
+                print("Không tìm thấy thông tin gói cước cho subscriber_id:", subscriber_id)
+                return None  # Hoặc có thể trả về một danh sách rỗng nếu cần
+        except Exception as e:
+            print(f"Lỗi khi lấy thông tin gói cước: {e}")
+            return None
+

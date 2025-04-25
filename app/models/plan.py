@@ -7,7 +7,7 @@ class Plan:
     __code: Optional[str]
     __price: Optional[float]
     __description: Optional[str]
-    __service_id: Optional[int]
+    __service_id: Optional["Service"]
     __is_active: Optional[bool]
     __renewal_syntax: Optional[str]
     __registration_syntax: Optional[str]
@@ -123,8 +123,8 @@ class Plan:
 
     @service_id.setter
     def service_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("service_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("service_id must be an integer")
         self.__service_id = value
 
     @property
@@ -253,8 +253,8 @@ class Plan:
 
     @staff_id.setter
     def staff_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("staff_id must be an integer")
+        # if value is not None and not isinstance(value, int):
+        #     raise ValueError("staff_id must be an integer")
         self.__staff_id = value
 
     @property
@@ -313,7 +313,7 @@ class Plan:
             "code": self.code,
             "price": self.price,
             "description": self.description,
-            "service_id": self.service_id,
+            "service_id": self.service_id.to_dict() if self.service_id else None,
             "is_active": self.is_active,
             "renewal_syntax": self.renewal_syntax,
             "registration_syntax": self.registration_syntax,
@@ -326,13 +326,12 @@ class Plan:
             "free_off_network_call": self.free_off_network_call,
             "free_off_network_SMS": self.free_off_network_SMS,
             "auto_renew": self.auto_renew,
-            "staff_id": self.staff_id,
+            "staff_id": self.staff_id.to_dict() if self.staff_id else None,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "maximum_on_network_call": self.maximum_on_network_call,
             "ON_SMS_cost": self.ON_SMS_cost,
             "ON_a_call_cost": self.ON_a_call_cost,
-
         }
 
     def to_dict_plan(self, duration=None, object_type=None):

@@ -161,3 +161,33 @@ LIMIT 1;
             except Exception as e:
                 print(f"Lỗi khi truy vấn subscription: {e}")
                 return None
+
+    @staticmethod
+    def get_by(subscriber_id):
+        try:
+            result = db_instance.execute(
+                """
+                CALL GetActiveSubscriptionDetailsBySubscriber(%s)
+                """, (subscriber_id,), fetchall=True
+            )
+            print("Kết quả trả về từ stored procedure:", result)
+
+            # Kiểm tra nếu kết quả trả về không trống
+            if result and isinstance(result[0], list):  # Kiểm tra kiểu dữ liệu của phần tử đầu tiên
+                subscriptions = []
+                for row in result[0]:  # Truy cập phần tử đầu tiên trong danh sách (mảng 2 chiều)
+                    subscription = {
+                        'subscription_id': row['subscription_id'],
+                        'plan_code': row['plan_code'],
+                        'free_data': row['free_data'],
+                        'expiration_date': row['expiration_date']
+                    }
+                    subscriptions.append(subscription)
+                return subscriptions
+
+            return []
+        except Exception as e:
+            print(f"Lỗi khi lấy thông tin gói cước theo subscriber_id: {e}")
+            return []
+
+

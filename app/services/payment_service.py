@@ -14,6 +14,7 @@ class PaymentService:
     @staticmethod
     def create_payment(data: dict):
         try:
+            # Tạo đối tượng Payment
             payment = Payment(
                 subscription_id=data.get("subscription_id"),
                 total_amount=data.get("total_amount"),
@@ -22,10 +23,14 @@ class PaymentService:
                 due_date=data.get("due_date"),
             )
 
+            # Chèn vào cơ sở dữ liệu
             result = PaymentRepository.insert(payment)
 
+            # Kiểm tra kết quả từ repository
             if result.get("success"):
-                return {"success": True}
+                # Nếu thành công, lấy id_payment của payment vừa tạo
+                payment_id = payment.id  # Giả sử `payment.id` là ID của bản ghi vừa được tạo
+                return {"success": True, "id_payment": payment_id}  # Trả về id_payment
 
             else:
                 return {"error": result.get("error", "Không thể thêm payment")}

@@ -57,31 +57,34 @@ class PaymentDetailRepository:
             return None
 
     @staticmethod
-    def insert(data: PaymentDetail):
+    def insert(payment_detail_data: dict):
         try:
+            # Thực thi câu lệnh SQL để chèn thông tin vào paymentdetail
             result = db_instance.execute(
-                "CALL AddPaymentDetail(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO payment_detail (payment_id, free_data, free_ON_a_call, free_OffN_a_call, free_ON_call, free_OffN_call, free_ON_SMS, free_OffN_SMS, ON_a_call_cost, ON_SMS_cost) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
-                    data.payment_id,
-                    data.free_data,
-                    data.free_ON_a_call,
-                    data.free_OffN_a_call,
-                    data.free_ON_call,
-                    data.free_OffN_call,
-                    data.free_ON_SMS,
-                    data.free_OffN_SMS,
-                    data.ON_a_call_cost,
-                    data.ON_SMS_cost,
+                    payment_detail_data['payment_id'],
+                    payment_detail_data['free_data'],
+                    payment_detail_data['free_ON_a_call'],
+                    payment_detail_data['free_OffN_a_call'],
+                    payment_detail_data['free_ON_call'],
+                    payment_detail_data['free_OffN_call'],
+                    payment_detail_data['free_ON_SMS'],
+                    payment_detail_data['free_OffN_SMS'],
+                    payment_detail_data['ON_a_call_cost'],
+                    payment_detail_data['ON_SMS_cost'],
                 ),
-                fetchone=True,
+                commit=True,
             )
-            if result.get("error"):
-                print(f"Lỗi khi thêm payment detail: {result['error']}")
-                return result["error"]
-            return True
+
+            if result:
+                return {"success": True}
+            else:
+                return {"error": "Không thể thêm payment detail"}
+
         except Exception as e:
-            print(f"Lỗi khi thêm payment detail: {e}")
-            return False
+            return {"error": str(e)}
 
     @staticmethod
     def update(detail_id, data: PaymentDetail):
