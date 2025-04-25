@@ -1,8 +1,6 @@
 from typing import Optional, List
 
 
-
-
 class Country:
     __id: Optional[int]
     __country_name: Optional[str]

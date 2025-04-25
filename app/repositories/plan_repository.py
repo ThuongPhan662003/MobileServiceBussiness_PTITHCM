@@ -267,3 +267,34 @@ class PlanRepository:
         except Exception as e:
             print(f"Lỗi khi lấy danh sách gói cước theo service_id: {e}")
             return []
+
+    @staticmethod
+    def get_plan_by_subscription_id(subscription_id):
+        try:
+            result = db_instance.execute(
+                "CALL sp_get_plan_by_subscription_id(%s)",
+                [subscription_id],
+                fetchone=True,
+            )
+            if not result:
+                return None
+            return {
+                "plan_id": result.get("plan_id"),
+                "plan_code": result.get("plan_code"),
+                "price": result.get("price"),
+                "description": result.get("description"),
+                "service_id": result.get("service_id"),
+                "free_data": result.get("free_data"),
+                "free_on_network_a_call": result.get("free_on_network_a_call"),
+                "free_off_network_a_call": result.get("free_off_network_a_call"),
+                "free_on_network_call": result.get("free_on_network_call"),
+                "free_off_network_call": result.get("free_off_network_call"),
+                "free_on_network_SMS": result.get("free_on_network_SMS"),
+                "free_off_network_SMS": result.get("free_off_network_SMS"),
+                "auto_renew": result.get("auto_renew"),
+                "ON_a_call_cost": result.get("ON_a_call_cost"),
+                "ON_SMS_cost": result.get("ON_SMS_cost"),
+            }
+        except Exception as e:
+            print(f"[Repository] Lỗi khi gọi SP get_plan_by_subscription_id: {e}")
+            return None

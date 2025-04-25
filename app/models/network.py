@@ -2,6 +2,7 @@ from typing import Optional
 
 from . import *
 
+
 class Network:
     __id: Optional[int]
     __network_name: Optional[str]

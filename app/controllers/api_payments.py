@@ -34,8 +34,8 @@ payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process"
 @payment_api_bp.route("/", methods=["GET"])
 def index():
     print("vô")
-    code = request.args.get("code")
-    price = request.args.get("price", type=int)
+    code = request.args.get("plan_code")
+    price = request.args.get("price", type=float)
     plan_id = request.args.get("plan_id", type=int)
     print("dữ liệu", code, price, plan_id)
     if not code or not price or not plan_id:
@@ -147,48 +147,6 @@ def vnpay_return():
     )
 
 
-# @payment_api_bp.route("/pay")
-# def pay_paypal():
-#     payment = paypalrestsdk.Payment(
-#         {
-#             "intent": "sale",
-#             "payer": {"payment_method": "paypal"},
-#             "redirect_urls": {
-#                 "return_url": url_for(
-#                     "payment_api_bp.payment_paypal_execute", _external=True
-#                 ),
-#                 "cancel_url": url_for(
-#                     "payment_api_bp.payment_paypal_cancel", _external=True
-#                 ),
-#             },
-#             "transactions": [
-#                 {
-#                     "item_list": {
-#                         "items": [
-#                             {
-#                                 "name": "Test Item",
-#                                 "sku": "12345",
-#                                 "price": "10.00",
-#                                 "currency": "USD",
-#                                 "quantity": 1,
-#                             }
-#                         ]
-#                     },
-#                     "amount": {"total": "10.00", "currency": "USD"},
-#                     "description": "Thanh toán thử nghiệm với PayPal",
-#                 }
-#             ],
-#         }
-#     )
-
-#     if payment.create():
-#         # Tìm link redirect tới PayPal để người dùng thanh toán
-#         for link in payment.links:
-#             if link.method == "REDIRECT":
-#                 return redirect(link.href)
-#     else:
-#         flash("Tạo payment thất bại: " + payment.error["message"])
-#         return redirect(url_for("payment_api_bp.index"))
 
 
 @payment_api_bp.route("/pay")
@@ -291,7 +249,7 @@ def payment_paypal_execute():
 
         # Gọi thanh toán nếu đủ thông tin
         if plan_code and subscriber_id:
-            result = PaymentService.create_transaction(plan_code, subscriber_id)
+            result = PaymentService.create_transaction(plan_code, subscriber_id, "QRCode")
             print("Kết quả thanh toán:", result)
 
             session["payment_result"] = {

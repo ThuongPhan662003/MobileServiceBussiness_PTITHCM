@@ -6,9 +6,11 @@ class PlanService:
     @staticmethod
     def get_all_plans():
         return PlanRepository.get_all()
+
     @staticmethod
     def get_all_codes():
         return PlanRepository.get_all_codes()
+
     @staticmethod
     def get_plan_by_id(plan_id):
         return PlanRepository.get_by_id(plan_id)
@@ -20,7 +22,9 @@ class PlanService:
             plan.code = data.get("code")
             plan.price = float(data.get("price")) if data.get("price") else None
             plan.description = data.get("description")
-            plan.service_id = int(data.get("service_id")) if data.get("service_id") else None
+            plan.service_id = (
+                int(data.get("service_id")) if data.get("service_id") else None
+            )
             plan.is_active = data.get("is_active", False)
             plan.renewal_syntax = data.get("renewal_syntax")
             plan.registration_syntax = data.get("registration_syntax")
@@ -35,8 +39,14 @@ class PlanService:
             plan.auto_renew = data.get("auto_renew", False)
             plan.staff_id = int(data.get("staff_id")) if data.get("staff_id") else None
             plan.maximum_on_network_call = int(data.get("maximum_on_network_call", 0))
-            plan.ON_SMS_cost = float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
-            plan.ON_a_call_cost = float(data.get("ON_a_call_cost", 0)) if data.get("ON_a_call_cost") else None
+            plan.ON_SMS_cost = (
+                float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
+            )
+            plan.ON_a_call_cost = (
+                float(data.get("ON_a_call_cost", 0))
+                if data.get("ON_a_call_cost")
+                else None
+            )
             object_type = data.get("object_type")
             duration = int(data.get("duration")) if data.get("duration") else None
 
@@ -56,7 +66,9 @@ class PlanService:
             plan.code = data.get("code")
             plan.price = float(data.get("price")) if data.get("price") else None
             plan.description = data.get("description")
-            plan.service_id = int(data.get("service_id")) if data.get("service_id") else None
+            plan.service_id = (
+                int(data.get("service_id")) if data.get("service_id") else None
+            )
             plan.is_active = data.get("is_active", False)
             plan.renewal_syntax = data.get("renewal_syntax")
             plan.registration_syntax = data.get("registration_syntax")
@@ -71,8 +83,14 @@ class PlanService:
             plan.auto_renew = data.get("auto_renew", False)
             plan.staff_id = int(data.get("staff_id")) if data.get("staff_id") else None
             plan.maximum_on_network_call = int(data.get("maximum_on_network_call", 0))
-            plan.ON_SMS_cost = float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
-            plan.ON_a_call_cost = float(data.get("ON_a_call_cost", 0)) if data.get("ON_a_call_cost") else None
+            plan.ON_SMS_cost = (
+                float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
+            )
+            plan.ON_a_call_cost = (
+                float(data.get("ON_a_call_cost", 0))
+                if data.get("ON_a_call_cost")
+                else None
+            )
             object_type = data.get("object_type")
             duration = int(data.get("duration")) if data.get("duration") else None
 
@@ -134,7 +152,9 @@ class PlanService:
                 "description": plan_dict["description"],
                 "free_data": plan_dict["free_data"],
                 "service_id": plan_dict["service_id"],
-                "registration_syntax": plan_dict["registration_syntax"],  # Thêm cú pháp đăng ký
+                "registration_syntax": plan_dict[
+                    "registration_syntax"
+                ],  # Thêm cú pháp đăng ký
                 "renewal_syntax": plan_dict["renewal_syntax"],  # Thêm cú pháp gia hạn
                 "cancel_syntax": plan_dict["cancel_syntax"],  # Thêm cú pháp hủy
                 "free_off_network_SMS": plan_dict["free_off_network_SMS"],
@@ -151,4 +171,6 @@ class PlanService:
 
         return None
 
- 
+    @staticmethod
+    def get_plan_detail_from_subscription(subscription_id):
+        return PlanRepository.get_plan_by_subscription_id(subscription_id)

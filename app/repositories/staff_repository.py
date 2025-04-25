@@ -54,6 +54,7 @@ class StaffRepository:
                 staff = Staff()
                 for key in result:
                     setattr(staff, key, result[key])
+                staff["is_active"] = True if staff["is_active"] else False
                 return staff
             return None
         except Exception as e:

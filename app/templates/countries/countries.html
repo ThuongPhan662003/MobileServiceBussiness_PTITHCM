@@ -1,0 +1,175 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Quản Lý Đất Nước{% endblock %}
+
+{% block content %}
+<style>
+    .country-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .country-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .country-header h2 {
+        font-size: 2rem;
+        color: #222;
+        font-weight: 700;
+    }
+
+    .country-controls {
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-control {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .btn-add {
+        background: linear-gradient(90deg, #ee2b47, #ff6b6b);
+        color: white;
+        font-weight: 600;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(90deg, #d81f3a, #e65f5f);
+    }
+
+    .country-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .country-table th,
+    .country-table td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .country-table th {
+        background-color: #ee2b47;
+        color: white;
+    }
+
+    .btn-delete {
+        background-color: transparent;
+        border: 1px solid #ee2b47;
+        color: #ee2b47;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-delete:hover {
+        background-color: #ee2b47;
+        color: white;
+    }
+</style>
+
+<div class="country-container">
+    <div class="country-header">
+        <h2><i class="fas fa-globe"></i> Quản Lý Đất Nước</h2>
+        <div class="country-controls">
+            <input id="newCountryName" type="text" class="form-control" placeholder="Tên quốc gia mới">
+            <button class="btn-add" onclick="createCountry()">Thêm</button>
+        </div>
+    </div>
+
+    <table class="country-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên Quốc Gia</th>
+                <th>Hành Động</th>
+            </tr>
+        </thead>
+        <tbody id="countryList">
+            <!-- List will be rendered by JS -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", fetchCountries);
+
+    function fetchCountries() {
+        fetch("/countries/get-all")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById("countryList");
+                tbody.innerHTML = "";
+                data.forEach(country => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${country.id}</td>
+                            <td>${country.country_name}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteCountry(${country.id})">Xóa</button>
+                            </td>
+                        </tr>`;
+                });
+            });
+    }
+
+    function createCountry() {
+        const name = document.getElementById("newCountryName").value.trim();
+        if (!name) return alert("⚠️ Vui lòng nhập tên quốc gia!");
+
+        fetch("/countries/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ country_name: name })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("✅ Thêm quốc gia thành công!");
+                    fetchCountries();
+                    document.getElementById("newCountryName").value = "";
+                } else {
+                    alert("❌ Lỗi: " + (data.message || "Thêm quốc gia thất bại!"));
+                }
+            })
+            .catch(err => alert("🚨 Đã xảy ra lỗi khi thêm quốc gia!"));
+    }
+
+    function deleteCountry(id) {
+        if (!confirm("❓ Bạn có chắc chắn muốn xóa quốc gia này không?")) return;
+
+        fetch(`/countries/${id}`, {
+            method: "DELETE"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    alert("🗑️ Xóa quốc gia thành công!");
+                    fetchCountries();
+                } else {
+                    alert("❌ Lỗi: " + (data.message || "Không thể xóa quốc gia này!"));
+                }
+            })
+            .catch(err => alert("🚨 Đã xảy ra lỗi khi xóa quốc gia!"));
+    }
+</script>
+
+{% endblock %}

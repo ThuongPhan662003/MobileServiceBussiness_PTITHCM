@@ -190,7 +190,7 @@ class AccountRepository:
                 "CALL create_account_from_phone(%s)",  # Gọi stored procedure
                 (phone_number,),  # Tham số truyền vào là số điện thoại
                 fetchone=True,  # Lấy một dòng duy nhất
-                commit=True  # Commit sau khi thực thi
+                commit=True,  # Commit sau khi thực thi
             )
 
             # In ra kết quả trả về để kiểm tra
@@ -205,4 +205,3 @@ class AccountRepository:
         except Exception as e:
             print(f"Lỗi khi tạo account từ số điện thoại: {e}")
             return {"error": str(e)}
-

@@ -51,9 +51,11 @@ def voucher_create():
 @voucher_bp.route("/<int:voucher_id>", methods=["PUT"])
 def voucher_edit(voucher_id):
     data = request.get_json()
+    print("data", type(data["start_date"]))
     result = VoucherService.update_voucher(voucher_id, data)
     if result.get("success"):
         return jsonify({"message": "Voucher updated successfully"}), 200
+    print("controller", result)
     return jsonify({"error": result.get("error")}), 400
 
 
