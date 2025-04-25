@@ -12,6 +12,7 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         padding: 30px;
         animation: fadeIn 0.5s ease-in-out;
+        margin-top: 100px;
     }
 
     .payment-header {
@@ -163,27 +164,27 @@
         </div>
         <div class="order-item">
             <span>Giá</span>
-            <span>${{ usd_price }} / {{ "{:,.0f}".format(vnd_price) }}₫</span>
+            <span>${{ usd_price }} / {{vnd_price}}₫</span>
         </div>
         <div class="order-total">
             <span>Tổng cộng</span>
-            <span>${{ usd_price }} / {{ "{:,.0f}".format(vnd_price) }}₫</span>
+            <span>${{ usd_price }} / {{ vnd_price }}₫</span>
         </div>
 
         <div class="payment-buttons">
             <a href="{{ url_for('payment_api_bp.pay_paypal', item_name=item_name, item_price_vnd=vnd_price, package_id=plan_id) }}"
                 class="btn-payment btn-paypal">
                 <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal">
-                Thanh Toán Với PayPal ({{ "{:,.0f}".format(vnd_price) }}₫)
+                Thanh Toán Với PayPal ({{ vnd_price }}₫)
             </a>
 
             <a href="{{ url_for('payment_api_bp.vnpay_pay', item_name=item_name, item_price_vnd=vnd_price, package_id=plan_id) }}"
                 class="btn-payment btn-vnpay">
                 <img src="https://vnpay.vn/assets/images/logo-icon.svg" alt="VNPAY">
-                Thanh Toán Với VNPAY ({{ "{:,.0f}".format(vnd_price) }}₫)
+                Thanh Toán Với VNPAY ({{ vnd_price }}₫)
             </a>
 
         </div>
     </div>
-    <!-- </div> -->
-    {% endblock %}
+</div>
+{% endblock %}

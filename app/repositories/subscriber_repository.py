@@ -64,17 +64,22 @@ class SubscriberRepository:
             )
             if result:
                 s = Subscriber()
-                for key, val in result.items():
-                    if key == "main_balance":
-                        setattr(
-                            s, key, Decimal(val) if val is not None else Decimal("0.00")
-                        )
-                    elif key in ["is_active", "is_messaged"]:
-                        setattr(s, key, bool(val))
-                    else:
-                        setattr(s, key, val)
+                s.id = result.get("id")
+                s.phone_number = result.get("phone_number")
+                s.main_balance = Decimal(result.get("main_balance", 0.0))
+                s.activation_date = result.get("activation_date")
+                s.expiration_date = result.get("expiration_date")
+                s.is_active = result.get("is_active") == 1
+                s.customer_id = result.get("customer_id")
+                s.warning_date = result.get("warning_date")
+                s.subscriber = result.get("subscriber")
+                s.account_id = result.get("account_id")
+                s.subscriber_type = result.get("subscriber_type")
+                s.ON_a_call_cost = result.get("ON_a_call_cost")
+                s.ON_SMS_cost = result.get("ON_SMS_cost")
                 return s
-            return None
+            else:
+                return None
         except Exception as e:
             print(f"Lỗi khi lấy subscriber theo ID: {e}")
             return None

@@ -1,3 +1,5 @@
+from datetime import datetime
+from flask import session
 from app.repositories.voucher_repository import VoucherRepository
 from app.models.voucher import Voucher
 
@@ -46,24 +48,40 @@ class VoucherService:
     @staticmethod
     def update_voucher(voucher_id, data: dict):
         try:
+            # Ép kiểu từ chuỗi → datetime
+            start_date_str = data.get("start_date")
+            end_date_str = data.get("end_date")
+
+            start_date = (
+                datetime.strptime(start_date_str, "%Y-%m-%d")
+                if start_date_str
+                else None
+            )
+            end_date = (
+                datetime.strptime(end_date_str, "%Y-%m-%d") if end_date_str else None
+            )
             voucher = Voucher(
+                id=data.get("id"),
                 code=data.get("code"),
                 description=data.get("description"),
                 conandpromo=data.get("conandpromo"),
-                start_date=data.get("start_date"),
-                end_date=data.get("end_date"),
+                start_date=start_date,
+                end_date=end_date,
                 usage_limit=data.get("usage_limit"),
                 remaining_count=data.get("remaining_count", 0),
-                is_active=data.get("is_active", True),
-                staff_id=data.get("staff_id"),
+                is_active=True if data.get("is_active") else False,
+                staff_id=session["staff_id"],
                 packages=data.get("packages"),
             )
             result = VoucherRepository.update(voucher_id, voucher)
-            if result is True:
-                return {"success": True}
+            print("result", result)
+            if result and result["success"]:
+                return result
             else:
-                return {"error": result}
+                print("lỗi")
+                return result
         except Exception as e:
+            print("exception")
             return {"error": str(e)}
 
     @staticmethod

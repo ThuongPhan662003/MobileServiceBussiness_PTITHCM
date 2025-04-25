@@ -6,7 +6,7 @@ class Customer:
     __full_name: Optional[str]
     __is_active: Optional[bool]
     __card_id: Optional[str]
-    __subscribers: Optional[List["Subscriber"]]
+    # __subscribers: Optional[List["Subscriber"]]
 
     def __init__(
         self,
@@ -79,7 +79,7 @@ class Customer:
             "full_name": self.full_name,
             "is_active": self.is_active,
             "card_id": self.card_id,
-            "subscribers": (
-                [s.to_dict() for s in self.subscribers] if self.subscribers else []
-            ),
+            # "subscribers": (
+            #     [s.to_dict() for s in self.subscribers] if self.subscribers else []
+            # ),
         }

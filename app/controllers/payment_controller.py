@@ -32,7 +32,7 @@ from datetime import datetime
 @payment_bp.route("/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
 def create_payment(subscriber_id, plan_id):
     try:
-        subscription_id = SubscriptionRepository.get_subscription_by_subscriber_and_plan(subscriber_id,plan_id)
+        subscription_id = SubscriptionRepository.get_subscription_by_subscriber_and_plan(subscriber_id, plan_id)
         subscriber = SubscriberRepository.get_by_id(subscriber_id)
         if not subscriber:
             print("Không tìm thấy thuê bao.")
@@ -43,18 +43,33 @@ def create_payment(subscriber_id, plan_id):
             print("Không tìm thấy gói cước.")
             return jsonify({"error": "Không tìm thấy gói cước."}), 404
 
-        # Chuyển đổi due_date sang đối tượng datetime
-        due_date_str = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")  # Chuỗi ngày
-        due_date = datetime.strptime(due_date_str, "%Y-%m-%d")  # Chuyển thành datetime object
+        # Kiểm tra loại thuê bao (trả trước hoặc không)
+        if subscriber.subscriber_type == "TRATRUOC":
+            payment_data = {
+                "subscription_id": subscription_id,
+                "payment_date":datetime.now(),
+                "total_amount": float(plan.price),
+                "payment_method": request.json.get("payment_method", "QRcode"),
+                "is_paid": True,
+                "due_date": datetime.now(),  # Đảm bảo là đối tượng datetime
+            }
 
-        payment_data = {
-            "subscription_id":subscription_id,
-            "payment_date": datetime.now(),
-            "total_amount": float(plan.price),
-            "payment_method": request.json.get("payment_method", "qr"),
-            "is_paid": False,
-            "due_date": due_date,  # Đảm bảo là đối tượng datetime
-        }
+        else:
+            current_year = datetime.now().year
+            current_month = datetime.now().month
+            if current_month == 12:
+                due_date = datetime(current_year + 1, 1, 1, 0, 0, 0)  # 00:00 ngày 1 tháng 1 của năm tiếp theo
+            else:
+                due_date = datetime(current_year, current_month + 1, 1, 0, 0, 0)  # 00:00 ngày 1 tháng sau
+
+            payment_data = {
+                "subscription_id": subscription_id,
+                "payment_date": datetime.now(),
+                "total_amount": float(plan.price),
+                "payment_method": "QRcode",
+                "is_paid": False,
+                "due_date": due_date,  # Đảm bảo là đối tượng datetime
+            }
 
         print("📦 payment_data:", payment_data)
 
@@ -62,12 +77,15 @@ def create_payment(subscriber_id, plan_id):
         print("📥 Kết quả từ create_payment:", result)
 
         if result.get("success"):
-            return jsonify({"message": "Tạo thanh toán thành công."}), 201
+            # Trả về id_payment trong kết quả
+            return jsonify({"message": "Tạo thanh toán thành công.", "id_payment": result.get("id_payment")}), 201
         return jsonify({"error": result.get("error")}), 400
 
     except Exception as e:
         print("🔥 Lỗi trong create_payment:", str(e))
         return jsonify({"error": str(e)}), 500
+
+
 
 
 @payment_bp.route("/<int:payment_id>", methods=["PUT"])

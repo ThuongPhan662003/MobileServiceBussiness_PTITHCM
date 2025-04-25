@@ -131,23 +131,25 @@ class Staff:
         return {
             "id": self.id,
 
-            "full_name": self.full_name,
-            "card_id": self.card_id,
-            "phone": self.phone,
-            "email": self.email,
-            "is_active": self.is_active,
-            "gender": self.gender,
-            "birthday": self.birthday.isoformat() if self.birthday else None,
-            "account_id": self.account_id.to_dict() if hasattr(self.account_id, 'to_dict') else self.account_id,
+            #
+            # "full_name": self.full_name,
+            # "card_id": self.card_id,
+            # "phone": self.phone,
+            # "email": self.email,
+            # "is_active": self.is_active,
+            # "gender": self.gender,
+            # "birthday": self.birthday.isoformat() if self.birthday else None,
+            # "account_id": self.account_id.to_dict() if hasattr(self.account_id, 'to_dict') else self.account_id,
 
-#             "full_name": self.full_name or "",
-#             "card_id": self.card_id or "",
-#             "phone": self.phone or "",
-#             "email": self.email or "",
-#             "is_active": self.is_active if self.is_active is not None else False,
-#             "gender": self.gender or "",
-#             "birthday": self.birthday.isoformat() if self.birthday else "",
-#             "account_id": self.account_id.to_dict() if self.account_id else {},
+            "full_name": self.full_name or "",
+            "card_id": self.card_id or "",
+            "phone": self.phone or "",
+            "email": self.email or "",
+            "is_active": self.is_active if self.is_active is not None else False,
+            "gender": self.gender or "",
+            "birthday": self.birthday.isoformat() if self.birthday else "",
+            "account_id": self.account_id.to_dict() if self.account_id else {},
+
 
         }
 

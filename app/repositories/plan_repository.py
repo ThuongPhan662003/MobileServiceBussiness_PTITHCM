@@ -1,5 +1,8 @@
 from app.database import db_instance
+from app.models import Service, Staff
 from app.models.plan import Plan
+from app.repositories.service_repository import ServiceRepository
+from app.repositories.staff_repository import StaffRepository
 
 
 class PlanRepository:
@@ -244,7 +247,10 @@ class PlanRepository:
                 plan.code = row.get("code")
                 plan.price = row.get("price")
                 plan.description = row.get("description")
-                plan.service_id = row.get("service_id")
+                print("ind",type(row.get("service_id")))
+                plan.service_id = ServiceRepository.get_by_id(int(row.get("service_id")))
+
+
                 plan.is_active = True if row.get("is_active") else False
                 plan.renewal_syntax = row.get("renewal_syntax")
                 plan.registration_syntax = row.get("registration_syntax")
@@ -257,7 +263,7 @@ class PlanRepository:
                 plan.free_off_network_call = row.get("free_off_network_call")
                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
                 plan.auto_renew = True if row.get("auto_renew") else False
-                plan.staff_id = row.get("staff_id")
+                plan.staff_id =StaffRepository.get_by_id(row.get("staff_id"))
                 plan.created_at = row.get("created_at")
                 plan.updated_at = row.get("updated_at")
                 plan.maximum_on_network_call = row.get("maximum_on_network_call")
@@ -268,3 +274,34 @@ class PlanRepository:
         except Exception as e:
             print(f"Lỗi khi lấy danh sách gói cước theo service_id: {e}")
             return []
+
+    @staticmethod
+    def get_plan_by_subscription_id(subscription_id):
+        try:
+            result = db_instance.execute(
+                "CALL sp_get_plan_by_subscription_id(%s)",
+                [subscription_id],
+                fetchone=True,
+            )
+            if not result:
+                return None
+            return {
+                "plan_id": result.get("plan_id"),
+                "plan_code": result.get("plan_code"),
+                "price": result.get("price"),
+                "description": result.get("description"),
+                "service_id": result.get("service_id"),
+                "free_data": result.get("free_data"),
+                "free_on_network_a_call": result.get("free_on_network_a_call"),
+                "free_off_network_a_call": result.get("free_off_network_a_call"),
+                "free_on_network_call": result.get("free_on_network_call"),
+                "free_off_network_call": result.get("free_off_network_call"),
+                "free_on_network_SMS": result.get("free_on_network_SMS"),
+                "free_off_network_SMS": result.get("free_off_network_SMS"),
+                "auto_renew": result.get("auto_renew"),
+                "ON_a_call_cost": result.get("ON_a_call_cost"),
+                "ON_SMS_cost": result.get("ON_SMS_cost"),
+            }
+        except Exception as e:
+            print(f"[Repository] Lỗi khi gọi SP get_plan_by_subscription_id: {e}")
+            return None
