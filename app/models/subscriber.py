@@ -20,7 +20,6 @@ class Subscriber:
     __subscriber: Optional[str]
     __account_id: Optional["Account"]
 
-
     def __init__(
         self,
         id=None,
@@ -38,7 +37,7 @@ class Subscriber:
         subscriber_type=None,
         account_id=None,
         ON_a_call_cost=None,
-        ON_SMS_cost=None
+        ON_SMS_cost=None,
     ):
         self.id = id
         self.phone_number = phone_number
@@ -204,7 +203,6 @@ class Subscriber:
         self.__account_id = value
 
     @property
-
     def subscriptions(self):
         return self.__subscriptions
 
@@ -258,19 +256,40 @@ class Subscriber:
         return {
             "id": self.id,
             "phone_number": self.phone_number,
-
-            "main_balance": float(self.main_balance) if self.main_balance is not None else 0.0,
-            "activation_date": self.activation_date.isoformat() if self.activation_date else None,
-            "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
+            "main_balance": (
+                float(self.main_balance) if self.main_balance is not None else 0.0
+            ),
+            "activation_date": (
+                self.activation_date.isoformat() if self.activation_date else None
+            ),
+            "expiration_date": (
+                self.expiration_date.isoformat() if self.expiration_date else None
+            ),
             "is_active": self.is_active,
-            "customer_id": self.customer_id.to_dict() if hasattr(self.customer_id, "to_dict") else self.customer_id,
-            "account_id": self.account_id.to_dict() if hasattr(self.account_id, "to_dict") else self.account_id,
+            "customer_id": (
+                self.customer_id.to_dict()
+                if hasattr(self.customer_id, "to_dict")
+                else self.customer_id
+            ),
+            "account_id": (
+                self.account_id.to_dict()
+                if hasattr(self.account_id, "to_dict")
+                else self.account_id
+            ),
             "subscriber": self.subscriber,
             "subscriber_type": self.subscriber_type,
-            "warning_date": self.warning_date.isoformat() if self.warning_date else None,
+            "warning_date": (
+                self.warning_date.isoformat() if self.warning_date else None
+            ),
             "ON_a_call_cost": self.ON_a_call_cost,
             "ON_SMS_cost": self.ON_SMS_cost,
-            "contracts": [c.to_dict() for c in self.contracts] if self.contracts else [],
-            "subscriptions": [s.to_dict() for s in self.subscriptions] if self.subscriptions else [],
-            "usage_logs": [u.to_dict() for u in self.usage_logs] if self.usage_logs else []
-
+            "contracts": (
+                [c.to_dict() for c in self.contracts] if self.contracts else []
+            ),
+            "subscriptions": (
+                [s.to_dict() for s in self.subscriptions] if self.subscriptions else []
+            ),
+            "usage_logs": (
+                [u.to_dict() for u in self.usage_logs] if self.usage_logs else []
+            ),
+        }
