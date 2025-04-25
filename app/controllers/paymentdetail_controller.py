@@ -18,10 +18,9 @@ def get_payment_detail_by_id(payment_detail_id):
     return jsonify({"error": "Payment detail not found"}), 404
 
 
-@payment_detail_bp.route("/", methods=["POST"])
-def create_payment_detail():
-    data = request.get_json()
-    result = PaymentDetailService.create_payment_detail(data)
+@payment_detail_bp.route("/<int:payment_id>/<int:plan_id>", methods=["POST"])
+def create_payment_detail(payment_id: int, plan_id: int):
+    result = PaymentDetailService.create_payment_detail(payment_id, plan_id)
     if result.get("success"):
         return jsonify({"message": "Payment detail created successfully"}), 201
     return jsonify({"error": result.get("error")}), 400

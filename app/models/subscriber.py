@@ -10,14 +10,16 @@ class Subscriber:
     __activation_date: Optional[date]
     __expiration_date: Optional[date]
     __is_active: Optional[bool]
-    __customer_id: Optional[int]
+    __customer_id: Optional["Customer"]  # or int, tùy hệ thống
     __warning_date: Optional[datetime]
-
+    __ON_a_call_cost: Optional[float]
+    __ON_SMS_cost: Optional[float]
     __contracts: Optional[List["Contract"]]
     __subscriptions: Optional[List["Subscription"]]
     __usage_logs: Optional[List["UsageLog"]]
     __subscriber: Optional[str]
     __account_id: Optional["Account"]
+
 
     def __init__(
         self,
@@ -33,7 +35,10 @@ class Subscriber:
         subscriptions=None,
         usage_logs=None,
         subscriber=None,
+        subscriber_type=None,
         account_id=None,
+        ON_a_call_cost=None,
+        ON_SMS_cost=None
     ):
         self.id = id
         self.phone_number = phone_number
@@ -43,12 +48,14 @@ class Subscriber:
         self.is_active = is_active
         self.customer_id = customer_id
         self.warning_date = warning_date
-        self.account_id = account_id
         self.contracts = contracts or []
         self.subscriptions = subscriptions or []
         self.usage_logs = usage_logs or []
-        self.account_id = account_id
         self.subscriber = subscriber
+        self.subscriber_type = subscriber_type
+        self.account_id = account_id
+        self.ON_a_call_cost = ON_a_call_cost
+        self.ON_SMS_cost = ON_SMS_cost
 
     @property
     def id(self):
@@ -116,8 +123,6 @@ class Subscriber:
 
     @customer_id.setter
     def customer_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("customer_id must be an integer")
         self.__customer_id = value
 
     @property
@@ -146,8 +151,6 @@ class Subscriber:
 
     @account_id.setter
     def account_id(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("account_id must be an integer")
         self.__account_id = value
 
     @property
@@ -156,6 +159,8 @@ class Subscriber:
 
     @contracts.setter
     def contracts(self, value):
+        if value is not None and not isinstance(value, list):
+            raise ValueError("contracts must be a list")
         self.__contracts = value
 
     @property
@@ -199,11 +204,14 @@ class Subscriber:
         self.__account_id = value
 
     @property
+
     def subscriptions(self):
         return self.__subscriptions
 
     @subscriptions.setter
     def subscriptions(self, value):
+        if value is not None and not isinstance(value, list):
+            raise ValueError("subscriptions must be a list")
         self.__subscriptions = value
 
     @property
@@ -212,48 +220,57 @@ class Subscriber:
 
     @usage_logs.setter
     def usage_logs(self, value):
+        if value is not None and not isinstance(value, list):
+            raise ValueError("usage_logs must be a list")
         self.__usage_logs = value
+
+    @property
+    def subscriber(self):
+        return self.__subscriber
+
+    @subscriber.setter
+    def subscriber(self, value):
+        if value is not None and not isinstance(value, str):
+            raise ValueError("subscriber must be a string")
+        self.__subscriber = value
+
+    @property
+    def ON_a_call_cost(self):
+        return self.__ON_a_call_cost
+
+    @ON_a_call_cost.setter
+    def ON_a_call_cost(self, value):
+        if value is not None and not isinstance(value, (int, float)):
+            raise ValueError("ON_a_call_cost must be a float")
+        self.__ON_a_call_cost = value
+
+    @property
+    def ON_SMS_cost(self):
+        return self.__ON_SMS_cost
+
+    @ON_SMS_cost.setter
+    def ON_SMS_cost(self, value):
+        if value is not None and not isinstance(value, (int, float)):
+            raise ValueError("ON_SMS_cost must be a float")
+        self.__ON_SMS_cost = value
 
     def to_dict(self):
         return {
             "id": self.id,
             "phone_number": self.phone_number,
-            # <<<<<<< HEAD
-            #             "main_balance": float(self.main_balance) if self.main_balance else 0.0,
-            #             "activation_date": self.activation_date.isoformat() if self.activation_date else None,
-            #             "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
-            #             "is_active": self.is_active,
-            #             "customer_id": self.customer_id,
-            #             "warning_date": self.warning_date.isoformat() if self.warning_date else None,
-            #             "contracts": [c.to_dict() for c in self.contracts] if self.contracts else [],
-            #             "subscriptions": [s.to_dict() for s in self.subscriptions] if self.subscriptions else [],
-            #             "usage_logs": [u.to_dict() for u in self.usage_logs] if self.usage_logs else [],
-            #             "subscriber_type": self.subscriber_type,
-            #             "account_id": self.account_id,
-            # =======
-            "main_balance": (
-                float(self.main_balance) if self.main_balance is not None else 0.0
-            ),
-            "activation_date": (
-                self.activation_date.isoformat() if self.activation_date else None
-            ),
-            "expiration_date": (
-                self.expiration_date.isoformat() if self.expiration_date else None
-            ),
+
+            "main_balance": float(self.main_balance) if self.main_balance is not None else 0.0,
+            "activation_date": self.activation_date.isoformat() if self.activation_date else None,
+            "expiration_date": self.expiration_date.isoformat() if self.expiration_date else None,
             "is_active": self.is_active,
-            "customer_id": self.customer_id.to_dict() if self.customer_id else None,
-            "account_id": self.account_id.to_dict() if self.account_id else None,
-            "subscriber": self.subscriber.to_dict() if self.subscriber else None,
-            "warning_date": (
-                self.warning_date.isoformat() if self.warning_date else None
-            ),
-            "contracts": (
-                [c.to_dict() for c in self.contracts] if self.contracts else []
-            ),
-            "subscriptions": (
-                [s.to_dict() for s in self.subscriptions] if self.subscriptions else []
-            ),
-            "usage_logs": (
-                [u.to_dict() for u in self.usage_logs] if self.usage_logs else []
-            ),
-        }
+            "customer_id": self.customer_id.to_dict() if hasattr(self.customer_id, "to_dict") else self.customer_id,
+            "account_id": self.account_id.to_dict() if hasattr(self.account_id, "to_dict") else self.account_id,
+            "subscriber": self.subscriber,
+            "subscriber_type": self.subscriber_type,
+            "warning_date": self.warning_date.isoformat() if self.warning_date else None,
+            "ON_a_call_cost": self.ON_a_call_cost,
+            "ON_SMS_cost": self.ON_SMS_cost,
+            "contracts": [c.to_dict() for c in self.contracts] if self.contracts else [],
+            "subscriptions": [s.to_dict() for s in self.subscriptions] if self.subscriptions else [],
+            "usage_logs": [u.to_dict() for u in self.usage_logs] if self.usage_logs else []
+

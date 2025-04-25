@@ -115,17 +115,18 @@ def register():
             # flash(result["message"])
             return redirect(url_for("auth.register"))
     return render_template("auth/register.html", form=form)
-@auth.route("/customers/<int:subscriber_id>", methods=["GET"])
-def view_customer(subscriber_id):
-    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
-    if subscriber:
-        customer = CustomerService.get_customer_by_id(subscriber.customer_id)
-        return render_template("home/tb.html", subscriber=subscriber, customer=customer)
-    return "Thuê bao không tồn tại", 404
+
 @auth.route("/subscribers/<int:subscriber_id>", methods=["GET"])
 def view_subscriber(subscriber_id):
+    # Lấy thông tin của subscriber, customer và subscription
     subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
-    if subscriber:
-        customer = CustomerService.get_customer_by_id(subscriber.customer_id)
-        return render_template("home/cuoc.html", subscriber=subscriber, customer=customer)
-    return "Thuê bao không tồn tại", 404
+    customer = CustomerService.get_customer_by_id(subscriber.customer_id)
+    subscriptions = SubscriptionService.get_plan_exp(subscriber_id)
+
+    # In ra các dữ liệu trước khi truyền vào HTML
+    print("Subscriber: ", subscriber)
+    print("Customer: ", customer)
+    print("Subscription: ", subscriptions)
+
+    # Truyền các dữ liệu vào HTML template
+    return render_template("home/cuoc.html", subscriber=subscriber, customer=customer, subscriptions=subscriptions)
