@@ -1,10 +1,16 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from app.services.country_service import CountryService
 
 country_bp = Blueprint("country", __name__, url_prefix="/countries")
 
 
 @country_bp.route("/", methods=["GET"])
+def index():
+    print("hi")
+    return render_template("countries/countries.html")
+
+
+@country_bp.route("/get-all", methods=["GET"])
 def get_all_countries():
     countries = CountryService.get_all_countries()
     return jsonify(countries), 200
@@ -22,9 +28,31 @@ def get_country_by_id(country_id):
 def create_country():
     data = request.get_json()
     result = CountryService.create_country(data)
+
     if result.get("success"):
-        return jsonify({"message": "Country created successfully"}), 201
-    return jsonify({"error": result.get("error")}), 400
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": result.get(
+                        "message", "Quốc gia đã được tạo thành công."
+                    ),
+                }
+            ),
+            201,
+        )
+
+    # Trả về lỗi kèm thông điệp rõ ràng
+    return (
+        jsonify(
+            {
+                "success": False,
+                "error": result.get("error", True),
+                "message": result.get("message", "Đã xảy ra lỗi khi tạo quốc gia."),
+            }
+        ),
+        400,
+    )
 
 
 @country_bp.route("/<int:country_id>", methods=["PUT"])

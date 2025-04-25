@@ -11,7 +11,7 @@ class PaymentDetailRepository:
             )
             details = []
 
-            for row in result:
+            for row in result[0]:
                 detail = PaymentDetail()
                 detail.id = row.get("id")
                 detail.payment_id = row.get("payment_id")
@@ -24,7 +24,7 @@ class PaymentDetailRepository:
                 detail.free_OffN_SMS = row.get("free_OffN_SMS")
                 detail.ON_a_call_cost = row.get("ON_a_call_cost")
                 detail.ON_SMS_cost = row.get("ON_SMS_cost")
-                details.append(detail.to_dict())
+                details.append(detail)
 
             return details
         except Exception as e:
@@ -127,3 +127,31 @@ class PaymentDetailRepository:
         except Exception as e:
             print(f"Lỗi khi xóa payment detail: {e}")
             return False
+
+    @staticmethod
+    def get_by_payment_id(payment_id):
+        try:
+            result = db_instance.execute(
+                "SELECT * FROM v_payment_details WHERE payment_id = %s",
+                (payment_id,),
+                fetchall=True
+            )
+            details = []
+            for row in result[0]:
+                detail = PaymentDetail()
+                detail.id = row.get("id")
+                detail.payment_id = row.get("payment_id")
+                detail.free_data = row.get("free_data")
+                detail.free_ON_a_call = row.get("free_on_a_call")
+                detail.free_OffN_a_call = row.get("free_offn_a_call")
+                detail.free_ON_call = row.get("free_on_call")
+                detail.free_OffN_call = row.get("free_offn_call")
+                detail.free_ON_SMS = row.get("free_on_sms")
+                detail.free_OffN_SMS = row.get("free_offn_sms")
+                detail.ON_a_call_cost = row.get("on_a_call_cost")
+                detail.ON_SMS_cost = row.get("on_sms_cost")
+                details.append(detail)
+            return details
+        except Exception as e:
+            print(f"Lỗi khi lấy payment detail theo payment_id: {e}")
+            return []

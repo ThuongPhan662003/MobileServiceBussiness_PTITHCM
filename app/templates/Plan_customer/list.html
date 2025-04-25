@@ -276,6 +276,19 @@ function closeModal() {
 // Xác nhận đăng ký gói cước
 async function confirmRegister() {
     const selectedMethod = document.querySelector('input[name="method"]:checked');
+    if (method === "qr") {
+            const packagePrice = parseInt(document.getElementById("packagePrice").textContent);
+            const packageName = document.getElementById("packageName").textContent;
+
+            const url = new URL("/pay-process", window.location.origin);
+            url.searchParams.append("subscriber_id", subscriberId);
+            url.searchParams.append("plan_id", currentPlanId);
+            url.searchParams.append("price", packagePrice);
+            url.searchParams.append("code", packageName);
+
+            window.location.href = url.toString();
+            return;
+        }
 
     // Kiểm tra nếu cần chọn phương thức (dành cho TRATRUOC)
     {% if session['subscriber_type'] == 'TRATRUOC' %}
@@ -287,7 +300,7 @@ async function confirmRegister() {
     {% else %}
     const method = 'account';
     {% endif %}
-
+    
     if (method === 'account') {
         try {
             const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
@@ -297,12 +310,15 @@ async function confirmRegister() {
                 alert("Không thể lấy số dư tài khoản: " + (balanceData.error || 'Lỗi không xác định.'));
                 return;
             }
+
+            console.log("Số dư tài khoản:", balanceData.main_balance);
             const packagePrice = parseInt(document.getElementById("packagePrice").textContent);
-            if (balanceData.main_balance < packagePrice) {
+            console.log("Giá gói cước:", packagePrice);
+
+            if (parseFloat(balanceData.main_balance) < parseFloat(packagePrice)) {
                 alert("Số dư tài khoản không đủ để đăng ký gói này.");
                 return;
             }
-
             const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
                 method: "POST"
             });
@@ -361,5 +377,6 @@ async function confirmRegister() {
         alert("Đăng ký qua QR code sẽ được hỗ trợ sau!");
     }
 }
+
 </script>
 {% endblock %}

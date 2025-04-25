@@ -382,19 +382,54 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editVoucherId">
-                <input type="text" id="editCode" class="form-control" required>
-                <textarea id="editDescription" class="form-control" rows="8" cols="60" placeholder="Mô tả"></textarea>
+                <input type="text" id="editCode" class="form-control" placeholder="Mã khuyến mãi" readonly>
+                <textarea id="editDescription" class="form-control" rows="4" cols="60" placeholder="Mô tả"></textarea>
                 <input type="text" id="editPackages" class="form-control" placeholder="Gói áp dụng">
                 <input type="date" id="editStartDate" class="form-control" required>
                 <input type="date" id="editEndDate" class="form-control" required>
-                <input type="number" id="editUsageLimit" class="form-control" placeholder="Số lượt sử dụng" required>
-                <div class="form-check">
+                <input type="number" id="editUsageLimit" class="form-control" placeholder="Số lượt sử dụng" readonly>
+                <div class="form-check mb-3">
                     <input type="checkbox" class="form-check-input" id="editIsActive">
                     <label class="form-check-label" for="editIsActive">Kích hoạt</label>
                 </div>
-                <label>Điều kiện và Ưu đãi (conandpro)</label>
-                <textarea id="editConAndPro" class="form-control" rows="6" cols="60" placeholder='JSON'></textarea>
+
+                <label>🎯 Điều kiện áp dụng:</label>
+                <input type="text" id="promo_subscriber_type" class="form-control"
+                    placeholder="Loại thuê bao (TRASAU/TRATRUOC)">
+                <input type="number" id="promo_renewal_times" class="form-control" placeholder="Số lần gia hạn">
+                <input type="text" id="promo_created_expr" class="form-control"
+                    placeholder="VD: DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))">
+
+                <label class="mt-3">🎁 Ưu đãi:</label>
+                <div class="mb-2">
+                    <span>Giảm tổng tiền thanh toán:</span>
+                    <div class="d-flex gap-2">
+                        <select id="promo_discount_operator" class="form-control">
+                            <option value="">--Phép toán--</option>
+                            <option value="*">*</option>
+                            <option value="-">-</option>
+                            <option value="-=">-=</option>
+                        </select>
+                        <input type="number" id="promo_discount_value" class="form-control" placeholder="VD: 0.5 = 50%">
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <span>Thêm dung lượng data:</span>
+                    <div class="d-flex gap-2">
+                        <select id="promo_data_operator" class="form-control">
+                            <option value="">--Phép toán--</option>
+                            <option value="+">+</option>
+                            <option value="+=">+=</option>
+                        </select>
+                        <input type="number" id="promo_free_data" class="form-control" placeholder="MB tặng thêm">
+                    </div>
+                </div>
+
+                <label class="mt-3">🧾 JSON Raw:</label>
+                <textarea id="editConAndPro" class="form-control" rows="6" required></textarea>
             </div>
+
             <div class="modal-footer">
                 <button class="btn-update" onclick="updateVoucher()">Cập Nhật</button>
             </div>
@@ -429,61 +464,6 @@
         </div>
     </div>
 </div>
-
-<!-- Modal Sửa
-<div id="editVoucherModal" class="modal">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa Mã Khuyến Mãi</h5>
-                <button type="button" class="btn-close" onclick="closeModal('editVoucherModal')">×</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editVoucherId">
-                <input type="text" id="editCode" class="form-control" required>
-
-                <textarea id="editDescription" class="form-control" rows="10">
-
-                </textarea>
-                <input type="text" id="editPackages" class="form-control">
-                <input type="date" id="editStartDate" class="form-control" required>
-                <input type="date" id="editEndDate" class="form-control" required>
-                <input type="number" id="editUsageLimit" class="form-control" required>
-                <label><input type="checkbox" id="editIsActive"> Kích hoạt</label>
-                <label>Điều kiện và Ưu đãi (conandpro)</label>
-                <textarea id="addConAndPro" class="form-control" rows="10">
-                {
-                  "condition": {
-                    "plan_id": [13],
-                    "subscriber": ["TRASAU"],
-                    "created_at": "DAY(created_at) BETWEEN 21 AND DAY(LAST_DAY(created_at))",
-                    "renewal_total": 2
-                  },
-                  "promotion": {
-                    "payments": {
-                      "total_amount": {
-                        "operator": "*",
-                        "value": 0.5
-                      }
-                    },
-                    "payment_detail": {
-                      "free_data": {
-                        "operator": "+",
-                        "value": 5
-                      }
-                    }
-                  }
-                }
-                </textarea>
-
-
-            </div>
-            <div class="modal-footer">
-                <button class="btn-update" onclick="updateVoucher()">Cập Nhật</button>
-            </div>
-        </div>
-    </div>
-</div> -->
 
 <script>
     // Ensure modals are hidden on page load
@@ -533,6 +513,7 @@
     }
 
     function saveVoucher() {
+        const conAndProData = document.getElementById('addConAndPro').value;  // ✅ Tạo JSON chuẩn từ form
         const data = {
             code: document.getElementById('addCode').value,
             description: document.getElementById('addDescription').value,
@@ -542,9 +523,9 @@
             usage_limit: parseInt(document.getElementById('addUsageLimit').value),
             remaining_count: parseInt(document.getElementById('addUsageLimit').value),
             is_active: document.getElementById('addIsActive').checked,
-            conandpro: document.getElementById('addConAndPro').value
+            conandpromo: JSON.stringify(conAndProData, null, 2)  // ✅ Ép về dạng JSON chuẩn
         };
-        console.log(data)
+
         fetch("/vouchers", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -553,11 +534,11 @@
     }
 
 
+
     function openEditModal(id) {
         fetch(`/vouchers/${id}`)
             .then(r => r.json())
             .then(data => {
-                // ⚠️ Chờ DOM đã hiển thị trước khi gán
                 document.getElementById('editVoucherId').value = id;
                 document.getElementById('editCode').value = data.code;
                 document.getElementById('editDescription').value = data.description;
@@ -566,12 +547,49 @@
                 document.getElementById('editEndDate').value = data.end_date;
                 document.getElementById('editUsageLimit').value = data.usage_limit;
                 document.getElementById('editIsActive').checked = data.is_active;
-                document.getElementById('editConAndPro').value = JSON.stringify(data.conandpro || {}, null, 2);
+                // document.getElementById('editConAndPro').value = typeof data.conandpromo === 'string'
+                //     ? JSON.parse(data.conandpromo)
+                //     : data.conandpromo || {};
+                // ✅ Parse conandpro nếu là chuỗi JSON
+                let conpro = {};
 
-                // ✅ Hiển thị modal SAU khi set dữ liệu
-                setTimeout(() => openModal('editVoucherModal'), 50); // hoặc không cần timeout
+                try {
+                    conpro = typeof data.conandpromo === 'string'
+                        ? JSON.parse(data.conandpromo)
+                        : data.conandpromo || {};
+                } catch (e) {
+                    console.warn("Lỗi parse conandpro:", e);
+                    conpro = {};
+                }
+
+                const cond = conpro.condition || {};
+                const promo = conpro.promotion || {};
+
+                document.getElementById('promo_subscriber_type').value = (cond.subscriber && cond.subscriber[0]) || '';
+                document.getElementById('promo_renewal_times').value = cond.renewal_total || '';
+                document.getElementById('promo_created_expr').value = cond.created_at || '';
+
+                if (promo.payments?.total_amount) {
+                    document.getElementById('promo_discount_operator').value = promo.payments.total_amount.operator || '';
+                    document.getElementById('promo_discount_value').value = promo.payments.total_amount.value || '';
+                }
+
+                if (promo.payment_detail?.free_data) {
+                    document.getElementById('promo_data_operator').value = promo.payment_detail.free_data.operator || '';
+                    document.getElementById('promo_free_data').value = promo.payment_detail.free_data.value || '';
+                }
+                console.log(conpro.promotion)
+                document.getElementById('editConAndPro').value = JSON.stringify(data.conandpromo, null, 2);
+
+                // ✅ Hiển thị modal sau khi đã load xong
+                setTimeout(() => openModal('editVoucherModal'), 50);
+            })
+            .catch(error => {
+                console.error("Lỗi khi fetch voucher:", error);
+                alert("Không thể tải dữ liệu khuyến mãi.");
             });
     }
+
 
     function updateVoucher() {
         const id = document.getElementById('editVoucherId').value;
@@ -589,6 +607,8 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         }).then(res => res.ok ? location.reload() : res.json().then(j => alert(j.error)));
+        data.conandpro = JSON.stringify(buildConAndProJsonFromForm(), null, 2);
+
     }
 
     function deleteVoucher(id) {

@@ -1,14 +1,14 @@
 from typing import Optional
-from decimal import Decimal
 from datetime import datetime
+import logging
 
-from . import *
+logger = logging.getLogger(__name__)
 
 class Payment:
     __id: Optional[int]
-    __subscription_id: Optional["Subscription"]
+    __subscription_id: Optional[int]  # Sửa thành int thay vì Subscription
     __payment_date: Optional[datetime]
-    __total_amount: Optional[Decimal]
+    __total_amount: Optional[float]
     __payment_method: Optional[str]
     __is_paid: Optional[bool]
     __due_date: Optional[datetime]
@@ -47,8 +47,8 @@ class Payment:
 
     @subscription_id.setter
     def subscription_id(self, value):
-        # if value is not None and not isinstance(value, int):
-        #     raise ValueError("subscription_id must be an integer")
+        if value is not None and not isinstance(value, int):
+            raise ValueError("subscription_id must be an integer")
         self.__subscription_id = value
 
     @property
@@ -67,9 +67,16 @@ class Payment:
 
     @total_amount.setter
     def total_amount(self, value):
-        if value is not None and not isinstance(value, (Decimal, float, int)):
-            raise ValueError("total_amount must be a number or Decimal")
-        self.__total_amount = Decimal(value)
+        if value is None:
+            self.__total_amount = 0.0
+            logger.debug(f"total_amount is None, set to 0.0")
+        else:
+            try:
+                self.__total_amount = float(value)
+                logger.debug(f"total_amount set to {self.__total_amount}")
+            except (TypeError, ValueError) as e:
+                self.__total_amount = 0.0
+                logger.warning(f"Invalid total_amount: {value}, defaulting to 0.0, error: {e}")
 
     @property
     def payment_method(self):
@@ -104,13 +111,9 @@ class Payment:
     def to_dict(self):
         return {
             "id": self.id,
-            "subscription_id": self.subscription_id.to_dict(),
-            "payment_date": (
-                self.payment_date.isoformat() if self.payment_date else None
-            ),
-            "total_amount": (
-                float(self.total_amount) if self.total_amount is not None else None
-            ),
+            "subscription_id": self.subscription_id,  # Chỉ trả về int, không gọi to_dict()
+            "payment_date": self.payment_date.isoformat() if self.payment_date else None,
+            "total_amount": self.total_amount,
             "payment_method": self.payment_method,
             "is_paid": self.is_paid,
             "due_date": self.due_date.isoformat() if self.due_date else None,

@@ -20,36 +20,29 @@ class NetworkService:
                 country_id=data.get("country_id"),
             )
             result = NetworkRepository.insert(network)
-            if result is True:
-                return {"success": True}
-            else:
-                return {"error": result}
+            return result  # result đã là dict có success, message
         except Exception as e:
-            return {"error": str(e)}
+            return {"success": False, "error": True, "message": str(e)}
 
     @staticmethod
     def update_network(network_id, data: dict):
         try:
             network = Network(
-                network_name=data.get("network_name"),
+                network_name=data.get(
+                    "network_name"
+                ),  # dùng nếu cần validate name không đổi
                 display_name=data.get("display_name"),
                 country_id=data.get("country_id"),
             )
             result = NetworkRepository.update(network_id, network)
-            if result is True:
-                return {"success": True}
-            else:
-                return {"error": result}
+            return result
         except Exception as e:
-            return {"error": str(e)}
+            return {"success": False, "error": True, "message": str(e)}
 
     @staticmethod
     def delete_network(network_id):
         try:
             result = NetworkRepository.delete(network_id)
-            if result is True:
-                return {"success": True}
-            else:
-                return {"error": result}
+            return result
         except Exception as e:
-            return {"error": str(e)}
+            return {"success": False, "error": True, "message": str(e)}
