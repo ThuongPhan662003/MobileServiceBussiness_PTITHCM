@@ -15,7 +15,6 @@ def voucher_list():
     return render_template("vouchers/voucher_list.html", vouchers=all_vouchers)
 
 
-
 @voucher_bp.route("/", methods=["POST"])
 def voucher_create():
     data = request.get_json()
@@ -49,13 +48,14 @@ def voucher_create():
     )
 
 
-
 @voucher_bp.route("/<int:voucher_id>", methods=["PUT"])
 def voucher_edit(voucher_id):
     data = request.get_json()
+    print("data", type(data["start_date"]))
     result = VoucherService.update_voucher(voucher_id, data)
     if result.get("success"):
         return jsonify({"message": "Voucher updated successfully"}), 200
+    print("controller", result)
     return jsonify({"error": result.get("error")}), 400
 
 

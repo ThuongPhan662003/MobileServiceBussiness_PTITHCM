@@ -8,6 +8,10 @@ class ServiceService:
         return ServiceRepository.get_all()
 
     @staticmethod
+    def get_all_services():
+        return ServiceRepository.get_all_services()
+
+    @staticmethod
     def get_service_by_id(service_id):
         return ServiceRepository.get_by_id(service_id)
 

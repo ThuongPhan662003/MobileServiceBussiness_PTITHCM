@@ -1,6 +1,6 @@
-
 from typing import Optional
 from datetime import datetime
+
 
 class Plan:
     __id: Optional[int]
@@ -361,5 +361,4 @@ class Plan:
             "ON_a_call_cost": self.ON_a_call_cost,
             "duration": duration,
             "object_type": object_type,
-
         }

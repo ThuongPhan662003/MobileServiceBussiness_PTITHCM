@@ -272,6 +272,7 @@ function closeModal() {
 }
 
 async function confirmRegister() {
+
     let method = 'account';
 
     // Nếu là TRẢ TRƯỚC thì cần chọn phương thức và kiểm tra số dư
@@ -297,6 +298,7 @@ async function confirmRegister() {
                 const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
                 const balance = parseFloat(balanceData.main_balance);
 
+
                 if (balance < packagePrice) {
                     alert("Số dư tài khoản không đủ để đăng ký gói này.");
                     return;
@@ -305,6 +307,7 @@ async function confirmRegister() {
                 alert("Lỗi kiểm tra số dư: " + err.message);
                 return;
             }
+
         }
     }
 
@@ -353,6 +356,7 @@ async function confirmRegister() {
             const idPayment = paymentData.id_payment;
 
             const paymentDetailResponse = await fetch(`/payment-details/${idPayment}/${currentPlanId}`, {
+
                 method: "POST"
             });
 
@@ -369,5 +373,6 @@ async function confirmRegister() {
         alert("Lỗi xảy ra: " + error.message);
     }
 }
+
 </script>
 {% endblock %}

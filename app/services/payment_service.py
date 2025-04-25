@@ -23,6 +23,7 @@ class PaymentService:
                 due_date=data.get("due_date"),
             )
 
+
             # Chèn vào cơ sở dữ liệu
             result = PaymentRepository.insert(payment)
 
@@ -32,9 +33,9 @@ class PaymentService:
                 payment_id = payment.id  # Giả sử `payment.id` là ID của bản ghi vừa được tạo
                 return {"success": True, "id_payment": payment_id}  # Trả về id_payment
 
-            else:
-                return {"error": result.get("error", "Không thể thêm payment")}
 
+            else:
+                return {"error": result}
         except Exception as e:
             return {"error": str(e)}
 
@@ -69,7 +70,15 @@ class PaymentService:
             return {"error": str(e)}
 
     @staticmethod
-    def create_transaction(plan_code: str, subscriber_id: int):
+    def create_transaction(plan_code: str, subscriber_id: int, payment_method: str):
         return PaymentRepository.create_full_payment_transaction(
-            plan_code, subscriber_id
+            plan_code, subscriber_id, payment_method
+        )
+
+    @staticmethod
+    def search_payments(
+        subscription_id=None, payment_date=None, payment_method=None, is_paid=None
+    ):
+        return PaymentRepository.search_payments(
+            subscription_id, payment_date, payment_method, is_paid
         )

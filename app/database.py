@@ -35,7 +35,7 @@ class Database:
     def execute(self, sql, params=None, fetchone=False, fetchall=False, commit=False):
         if not self.connection:
             raise Exception("Chưa kết nối tới database")
-
+        
         with self.connection.cursor(self.cursor_class) as cursor:
             cursor.execute(sql, params or ())
 
@@ -48,9 +48,9 @@ class Database:
             if fetchone:
                 result = cursor.fetchone()
                 # Nếu có nhiều result sets, tìm result đầu tiên có dữ liệu
-
                 while not result and cursor.nextset():
                     result = cursor.fetchone()
+                print("oke fetchone", result)
                 return result
 
             # Nếu muốn lấy tất cả dữ liệu từ tất cả result sets

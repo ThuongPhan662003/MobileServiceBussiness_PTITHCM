@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết thanh toán</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Chi tiết thanh toán</h1>
+        
+        <!-- Payment Info -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">Thông tin thanh toán</h2>
+            <p><strong>ID:</strong> {{ payment.id }}</p>
+            <p><strong>Subscription ID:</strong> {{ payment.subscription_id }}</p>
+            <p><strong>Ngày thanh toán:</strong> {{ payment.payment_date }}</p>
+            <p><strong>Tổng tiền:</strong> {{ payment.total_amount }}</p>
+            <p><strong>Phương thức:</strong> {{ payment.payment_method }}</p>
+            <p><strong>Trạng thái:</strong> {{ 'Đã thanh toán' if payment.is_paid else 'Chưa thanh toán' }}</p>
+            <p><strong>Ngày đến hạn:</strong> {{ payment.due_date }}</p>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-semibold mb-2">Chi tiết sử dụng</h2>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border p-2">ID</th>
+                        <th class="border p-2">Dữ liệu miễn phí (MB)</th>
+                        <th class="border p-2">Gọi nội mạng miễn phí (phút)</th>
+                        <th class="border p-2">Gọi ngoại mạng miễn phí (phút)</th>
+                        <th class="border p-2">Gọi nội mạng (phút)</th>
+                        <th class="border p-2">Gọi ngoại mạng (phút)</th>
+                        <th class="border p-2">SMS nội mạng miễn phí</th>
+                        <th class="border p-2">SMS ngoại mạng miễn phí</th>
+                        <th class="border p-2">Chi phí gọi nội mạng (USD/phút)</th>
+                        <th class="border p-2">Chi phí SMS nội mạng (USD/SMS)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in details %}
+                    <tr>
+                        <td class="border p-2">{{ detail.id }}</td>
+                        <td class="border p-2">{{ detail.free_data }}</td>
+                        <td class="border p-2">{{ detail.free_ON_a_call }}</td>
+                        <td class="border p-2">{{ detail.free_OffN_a_call }}</td>
+                        <td class="border p-2">{{ detail.free_ON_call }}</td>
+                        <td class="border p-2">{{ detail.free_OffN_call }}</td>
+                        <td class="border p-2">{{ detail.free_ON_SMS }}</td>
+                        <td class="border p-2">{{ detail.free_OffN_SMS }}</td>
+                        <td class="border p-2">{{ detail.ON_a_call_cost }}</td>
+                        <td class="border p-2">{{ detail.ON_SMS_cost }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="{{ url_for('payment_ui_bp.payment_history') }}" 
+               class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Quay lại
+            </a>
+        </div>
+    </div>
+</body>
+</html>

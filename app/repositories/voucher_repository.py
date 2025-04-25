@@ -6,7 +6,6 @@ from app.models.voucher import Voucher
 from app.repositories.staff_repository import StaffRepository
 
 
-
 class VoucherRepository:
 
     @staticmethod
@@ -58,13 +57,14 @@ class VoucherRepository:
                 voucher.id = result.get("id")
                 voucher.code = result.get("code")
                 voucher.description = result.get("description")
+                print("conandpromo", result.get("conandpromo"))
                 voucher.conandpromo = result.get("conandpromo")
                 voucher.start_date = result.get("start_date")
                 voucher.end_date = result.get("end_date")
                 voucher.usage_limit = result.get("usage_limit")
                 voucher.remaining_count = result.get("remaining_count")
-                voucher.is_active = result.get("is_active")
-                voucher.staff_id = result.get("staff_id")
+                voucher.is_active = True if result.get("is_active") else False
+                voucher.staff_id = StaffRepository.get_by_id(result.get("staff_id"))
                 voucher.packages = result.get("packages")
                 return voucher
             return None
@@ -76,13 +76,13 @@ class VoucherRepository:
     def insert(voucher: dict):
         try:
             # Xử lý trường hợp conandpro là dict → chuỗi JSON
-            conandpromo = voucher.get("conandpro", "")
-            if isinstance(conandpromo, dict):
-                conandpromo = json.dumps(conandpromo, ensure_ascii=False)
-                print("dict", conandpromo)
-            elif not isinstance(conandpromo, str):
-                conandpromo = str(conandpromo)
-                print("str", conandpromo)
+            # conandpromo = voucher.get("conandpro", "")
+            # if isinstance(conandpromo, dict):
+            #     conandpromo = json.dumps(conandpromo, ensure_ascii=False)
+            #     print("dict", conandpromo)
+            # elif not isinstance(conandpromo, str):
+            #     conandpromo = str(conandpromo)
+            print("str", type(voucher.get("conandpromo")))
 
             # Gọi stored procedure AddVoucher
             result = db_instance.execute(
@@ -90,7 +90,7 @@ class VoucherRepository:
                 (
                     voucher.get("code"),
                     voucher.get("description"),
-                    conandpromo,
+                    voucher.get("conandpromo"),
                     voucher.get("start_date"),
                     voucher.get("end_date"),
                     voucher.get("usage_limit"),
@@ -127,6 +127,7 @@ class VoucherRepository:
     @staticmethod
     def update(voucher_id, voucher: Voucher):
         try:
+            print("con", type(voucher.conandpromo))
             result = db_instance.execute(
                 "CALL UpdateVoucher(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
@@ -143,10 +144,12 @@ class VoucherRepository:
                     voucher.packages,
                 ),
                 fetchone=True,
+                commit=True,
             )
-            if result.get("error"):
-                return result.get("error")
-            return True
+            print("kees qua", result)
+            if not result.get("error"):
+                return result
+            return result
         except Exception as e:
             return {"error": f"Lỗi khi cập nhật voucher: {e}"}
 

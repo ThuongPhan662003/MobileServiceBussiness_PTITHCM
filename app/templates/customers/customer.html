@@ -1,4 +1,6 @@
+
 {% extends 'admin_base.html' %}
+
 
 {% block title %}Quản lý Khách Hàng{% endblock %}
 
@@ -130,6 +132,11 @@
             <tr>
                 <td>{{ customer.id }}</td>
                 <td>{{ customer.full_name }}</td>
+
+                <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
+                    {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
+                </td>
+
                 <td>{{ customer.card_id }}</td>
                 <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
                     {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
@@ -228,6 +235,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         })
+
         .then(async (response) => {
             if (!response.ok) {
                 const result = await response.json();
@@ -241,6 +249,7 @@
             document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
             console.error('Lỗi:', error);
         });
+
     });
 </script>
 {% endblock %}

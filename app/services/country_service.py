@@ -16,12 +16,21 @@ class CountryService:
         try:
             country = Country(country_name=data.get("country_name"))
             result = CountryRepository.insert(country)
-            if result is True:
-                return {"success": True}
-            else:
-                return {"error": result}
+
+            # Đồng nhất định dạng trả về
+            return {
+                "success": result.get("success", False),
+                "error": result.get("error", not result.get("success", False)),
+                "message": result.get("message", "Không rõ thông báo"),
+            }
+
         except Exception as e:
-            return {"error": str(e)}
+            print(f"[Service] Lỗi khi tạo quốc gia: {e}")
+            return {
+                "success": False,
+                "error": True,
+                "message": f"Lỗi hệ thống khi tạo quốc gia: {str(e)}",
+            }
 
     @staticmethod
     def update_country(country_id, data: dict):
