@@ -1,44 +1,142 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.services.usagelog_service import UsageLogService
 
 usagelog_bp = Blueprint("usagelog", __name__, url_prefix="/usagelogs")
 
-
 @usagelog_bp.route("/", methods=["GET"])
 def get_all_usagelogs():
-    usagelogs = UsageLogService.get_all_usagelogs()
-    return jsonify(usagelogs), 200
-
+    try:
+        tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
+        cuocgoi_logs = UsageLogService.get_logs_by_type("CUOCGOI")
+        dulieu_logs = UsageLogService.get_logs_by_type("DULIEU")
+        return render_template(
+            "UsagelogHistory/index.html",
+            tinnhan_logs=tinnhan_logs,
+            cuocgoi_logs=cuocgoi_logs,
+            dulieu_logs=dulieu_logs,
+            active_tab="tinnhan"  # Mặc định là tab Tin nhắn
+        ), 200
+    except Exception as e:
+        print(f"Lỗi trong get_all_usagelogs: {e}")
+        return render_template(
+            "UsagelogHistory/index.html",
+            error=str(e),
+            active_tab="tinnhan"
+        ), 500
 
 @usagelog_bp.route("/<int:log_id>", methods=["GET"])
 def get_usagelog_by_id(log_id):
-    usagelog = UsageLogService.get_usagelog_by_id(log_id)
-    if usagelog:
-        return jsonify(usagelog.to_dict()), 200
-    return jsonify({"error": "Usage log not found"}), 404
-
+    try:
+        usagelog = UsageLogService.get_usagelog_by_id(log_id)
+        if usagelog:
+            return jsonify(usagelog.to_dict()), 200
+        return jsonify({"error": "Usage log not found"}), 404
+    except Exception as e:
+        print(f"Lỗi trong get_usagelog_by_id: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @usagelog_bp.route("/", methods=["POST"])
 def create_usagelog():
-    data = request.get_json()
-    result = UsageLogService.create_usagelog(data)
-    if result.get("success"):
-        return jsonify({"message": "Usage log created successfully"}), 201
-    return jsonify({"error": result.get("error")}), 400
+    try:
+        data = request.get_json()
+        result = UsageLogService.create_usagelog(data)
+        if result.get("success"):
+            return jsonify({"message": "Usage log created successfully"}), 201
+        return jsonify({"error": result.get("error")}), 400
+    except Exception as e:
+        print(f"Lỗi trong create_usagelog: {e}")
+        return jsonify({"error": str(e)}), 500
 
+@usagelog_bp.route("/history", methods=["GET"])
+def usage_log_history():
+    try:
+        tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
+        cuocgoi_logs = UsageLogService.get_logs_by_type("CUOCGOI")
+        dulieu_logs = UsageLogService.get_logs_by_type("DULIEU")
+        return render_template(
+            "UsagelogHistory/index.html",
+            tinnhan_logs=tinnhan_logs,
+            cuocgoi_logs=cuocgoi_logs,
+            dulieu_logs=dulieu_logs,
+            active_tab="tinnhan"  # Mặc định là tab Tin nhắn
+        ), 200
+    except Exception as e:
+        print(f"Lỗi trong usage_log_history: {e}")
+        return render_template(
+            "UsagelogHistory/index.html",
+            error=str(e),
+            active_tab="tinnhan"
+        ), 500
 
-@usagelog_bp.route("/<int:log_id>", methods=["PUT"])
-def update_usagelog(log_id):
-    data = request.get_json()
-    result = UsageLogService.update_usagelog(log_id, data)
-    if result.get("success"):
-        return jsonify({"message": "Usage log updated successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+@usagelog_bp.route("/search/<string:log_type>", methods=["POST"])
+def search_usagelogs(log_type):
+    try:
+        data = request.form
+        subscriber_id = data.get("subscriber_id")
+        start_date = data.get("start_date")
+        logs = UsageLogService.search_usagelogs(log_type.upper(), subscriber_id, start_date)
+        tinnhan_logs = logs if log_type.upper() == "TINNHAN" else UsageLogService.get_logs_by_type("TINNHAN")
+        cuocgoi_logs = logs if log_type.upper() == "CUOCGOI" else UsageLogService.get_logs_by_type("CUOCGOI")
+        dulieu_logs = logs if log_type.upper() == "DULIEU" else UsageLogService.get_logs_by_type("DULIEU")
+        return render_template(
+            "UsagelogHistory/index.html",
+            tinnhan_logs=tinnhan_logs,
+            cuocgoi_logs=cuocgoi_logs,
+            dulieu_logs=dulieu_logs,
+            active_tab=log_type.lower()  # Đặt tab hiện tại dựa trên log_type
+        ), 200
+    except Exception as e:
+        print(f"Lỗi trong search_usagelogs: {e}")
+        return render_template(
+            "UsagelogHistory/index.html",
+            error=str(e),
+            active_tab=log_type.lower()
+        ), 500
 
+@usagelog_bp.route("/add/<string:log_type>", methods=["POST"])
+def add_usagelog(log_type):
+    try:
+        data = request.form
+        result = UsageLogService.add_usagelog(log_type.upper(), data)
+        if result.get("success"):
+            return usage_log_history()  # Gọi lại history, mặc định tab Tin nhắn
+        else:
+            tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
+            cuocgoi_logs = UsageLogService.get_logs_by_type("CUOCGOI")
+            dulieu_logs = UsageLogService.get_logs_by_type("DULIEU")
+            return render_template(
+                "UsagelogHistory/index.html",
+                tinnhan_logs=tinnhan_logs,
+                cuocgoi_logs=cuocgoi_logs,
+                dulieu_logs=dulieu_logs,
+                error=result.get("error"),
+                active_tab=log_type.lower()  # Giữ tab hiện tại
+            ), 400
+    except Exception as e:
+        print(f"Lỗi trong add_usagelog: {e}")
+        return render_template(
+            "UsagelogHistory/index.html",
+            error=str(e),
+            active_tab=log_type.lower()
+        ), 500
 
-@usagelog_bp.route("/<int:log_id>", methods=["DELETE"])
-def delete_usagelog(log_id):
-    result = UsageLogService.delete_usagelog(log_id)
-    if result.get("success"):
-        return jsonify({"message": "Usage log deleted successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+@usagelog_bp.route("/reset/<string:log_type>", methods=["GET"])
+def reset_usagelogs(log_type):
+    try:
+        tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
+        cuocgoi_logs = UsageLogService.get_logs_by_type("CUOCGOI")
+        dulieu_logs = UsageLogService.get_logs_by_type("DULIEU")
+        return render_template(
+            "UsagelogHistory/index.html",
+            tinnhan_logs=tinnhan_logs,
+            cuocgoi_logs=cuocgoi_logs,
+            dulieu_logs=dulieu_logs,
+            active_tab=log_type.lower()  # Đặt tab hiện tại dựa trên log_type
+        ), 200
+    except Exception as e:
+        print(f"Lỗi trong reset_usagelogs: {e}")
+        return render_template(
+            "UsagelogHistory/index.html",
+            error=str(e),
+            active_tab=log_type.lower()
+        ), 500

@@ -140,7 +140,7 @@ def create_plan():
         data["staff_id"] = int(data.get("staff_id")) if data.get("staff_id") else None
 
         data["duration"] = int(data.get("duration")) if data.get("duration") else None
-
+        print(data)
         result = PlanService.create_plan(data)
         if result.get("success"):
             flash("Thêm gói cước thành công!", "success")

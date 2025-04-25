@@ -10,7 +10,7 @@ class Subscriber:
     __activation_date: Optional[date]
     __expiration_date: Optional[date]
     __is_active: Optional[bool]
-    __customer_id: Optional[int]
+    __customer_id: Optional["Customer"]
     __warning_date: Optional[datetime]
 
     __contracts: Optional[List["Contract"]]
