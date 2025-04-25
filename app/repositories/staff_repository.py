@@ -54,7 +54,7 @@ class StaffRepository:
                 staff = Staff()
                 for key in result:
                     setattr(staff, key, result[key])
-                staff["is_active"] = True if staff["is_active"] else False
+                staff["is_active"] = True if result["is_active"] else False
                 return staff
             return None
         except Exception as e:
@@ -69,7 +69,7 @@ class StaffRepository:
             )
             print("kết quả từ sp", result)
             if result:
-
+                result["is_active"] = True if result["is_active"] else False
                 return result
             return None
         except Exception as e:

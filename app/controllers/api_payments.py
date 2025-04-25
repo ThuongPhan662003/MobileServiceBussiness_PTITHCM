@@ -35,7 +35,7 @@ payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process"
 def index():
     print("vô")
     code = request.args.get("plan_code")
-    price = request.args.get("price", type=float)
+    price = request.args.get("price")
     plan_id = request.args.get("plan_id", type=int)
     print("dữ liệu", code, price, plan_id)
     if not code or not price or not plan_id:
@@ -46,7 +46,7 @@ def index():
         "payments/user/index.html",
         item_name=code,
         vnd_price=price,
-        usd_price=round(price / 25000, 2),
+        usd_price=float(price) / 25000,
         plan_id=plan_id,
     )
 
@@ -145,8 +145,6 @@ def vnpay_return():
             **vnp.responseData,
         },
     )
-
-
 
 
 @payment_api_bp.route("/pay")
@@ -249,7 +247,9 @@ def payment_paypal_execute():
 
         # Gọi thanh toán nếu đủ thông tin
         if plan_code and subscriber_id:
-            result = PaymentService.create_transaction(plan_code, subscriber_id, "QRCode")
+            result = PaymentService.create_transaction(
+                plan_code, subscriber_id, "QRCode"
+            )
             print("Kết quả thanh toán:", result)
 
             session["payment_result"] = {
