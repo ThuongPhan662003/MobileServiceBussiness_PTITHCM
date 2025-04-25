@@ -199,11 +199,13 @@ class PaymentRepository:
             return []
 
     @staticmethod
-    def create_full_payment_transaction(plan_code: str, subscriber_id: int):
+    def create_full_payment_transaction(
+        plan_code: str, subscriber_id: int, payment_method
+    :str):
         try:
             result = db_instance.execute(
                 "CALL CreateFullPaymentTransaction(%s, %s)",
-                (plan_code, subscriber_id),
+                (plan_code, subscriber_id, payment_method),
                 fetchone=True,
                 commit=True,
             )

@@ -249,7 +249,7 @@ def payment_paypal_execute():
 
         # Gọi thanh toán nếu đủ thông tin
         if plan_code and subscriber_id:
-            result = PaymentService.create_transaction(plan_code, subscriber_id)
+            result = PaymentService.create_transaction(plan_code, subscriber_id, "QRCode")
             print("Kết quả thanh toán:", result)
 
             session["payment_result"] = {

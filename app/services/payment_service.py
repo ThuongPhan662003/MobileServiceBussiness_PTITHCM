@@ -60,9 +60,9 @@ class PaymentService:
             return {"error": str(e)}
 
     @staticmethod
-    def create_transaction(plan_code: str, subscriber_id: int):
+    def create_transaction(plan_code: str, subscriber_id: int, payment_method: str):
         return PaymentRepository.create_full_payment_transaction(
-            plan_code, subscriber_id
+            plan_code, subscriber_id, payment_method
         )
 
     @staticmethod
