@@ -616,7 +616,7 @@
                     if (!select) return;
                     select.innerHTML = '<option value="">— Chọn thuê bao —</option>';
                     data.forEach(sub => {
-                        select.innerHTML += `<option value="${sub.id}">${sub.customer_id.full_name} - (${sub.phone_number})</option>`;
+                        select.innerHTML += `<option value="${sub.id}">${sub.customer_id} - (${sub.phone_number})</option>`;
                     });
                 })
                 .catch(err => console.error("Lỗi khi tải danh sách thuê bao:", err));

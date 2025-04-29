@@ -4,7 +4,7 @@ from app.models.service import Service
 
 class ServiceService:
     @staticmethod
-    def get_all_services():
+    def get_all():
         return ServiceRepository.get_all()
 
     @staticmethod

@@ -29,7 +29,7 @@ def build_tree(services):
 
 @service_bp.route("/", methods=["GET"])
 def service_list():
-    all_services = ServiceService.get_all_services()
+    all_services = ServiceService.get_all()
     service_tree = build_tree(all_services)
     service_flat = all_services
     return render_template(

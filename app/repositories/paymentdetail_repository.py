@@ -64,24 +64,21 @@ class PaymentDetailRepository:
                 "INSERT INTO payment_detail (payment_id, free_data, free_ON_a_call, free_OffN_a_call, free_ON_call, free_OffN_call, free_ON_SMS, free_OffN_SMS, ON_a_call_cost, ON_SMS_cost) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
-                    payment_detail_data['payment_id'],
-                    payment_detail_data['free_data'],
-                    payment_detail_data['free_ON_a_call'],
-                    payment_detail_data['free_OffN_a_call'],
-                    payment_detail_data['free_ON_call'],
-                    payment_detail_data['free_OffN_call'],
-                    payment_detail_data['free_ON_SMS'],
-                    payment_detail_data['free_OffN_SMS'],
-                    payment_detail_data['ON_a_call_cost'],
-                    payment_detail_data['ON_SMS_cost'],
+                    payment_detail_data["payment_id"],
+                    payment_detail_data["free_data"],
+                    payment_detail_data["free_ON_a_call"],
+                    payment_detail_data["free_OffN_a_call"],
+                    payment_detail_data["free_ON_call"],
+                    payment_detail_data["free_OffN_call"],
+                    payment_detail_data["free_ON_SMS"],
+                    payment_detail_data["free_OffN_SMS"],
+                    payment_detail_data["ON_a_call_cost"],
+                    payment_detail_data["ON_SMS_cost"],
                 ),
                 commit=True,
             )
 
-            if result:
-                return {"success": True}
-            else:
-                return {"error": "Không thể thêm payment detail"}
+            return {"success": True}
 
         except Exception as e:
             return {"error": str(e)}
@@ -134,7 +131,7 @@ class PaymentDetailRepository:
             result = db_instance.execute(
                 "SELECT * FROM v_payment_details WHERE payment_id = %s",
                 (payment_id,),
-                fetchall=True
+                fetchall=True,
             )
             details = []
             for row in result[0]:

@@ -86,11 +86,11 @@ class PaymentRepository:
                 "CALL AddPayment(%s, %s, %s, %s, %s)",
                 (
 
-                    payment.subscription_id,
-                    payment.total_amount,
-                    payment.payment_method,
-                    payment.is_paid,
-                    payment.due_date,
+                    data.subscription_id,
+                    data.total_amount,
+                    data.payment_method,
+                    data.is_paid,
+                    data.due_date,
                 ),
                 fetchone=True,
             )
