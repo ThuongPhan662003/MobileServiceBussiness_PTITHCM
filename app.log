@@ -1,0 +1,71 @@
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug: * Detected change in 'D:\\MobileServiceBussiness_PTITHCM\\app\\controllers\\plan_controller.py', reloading
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug: * Detected change in 'D:\\MobileServiceBussiness_PTITHCM\\app\\services\\plan_service.py', reloading
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug: * Detected change in 'D:\\MobileServiceBussiness_PTITHCM\\app\\repositories\\plan_repository.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug: * Detected change in 'D:\\MobileServiceBussiness_PTITHCM\\app\\services\\plan_service.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:07:30] "GET /plans/ HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:07:30] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:07:37] "GET /plans/create HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:07:37] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:08:32] "[31m[1mPOST /plans/create HTTP/1.1[0m" 400 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:08:32] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:08:52] "[31m[1mPOST /plans/create HTTP/1.1[0m" 400 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:08:52] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:10:40] "[31m[1mPOST /plans/create HTTP/1.1[0m" 400 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:10:40] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:25:08] "[31m[1mPOST /plans/create HTTP/1.1[0m" 400 -
+INFO:werkzeug:192.168.1.16 - - [01/May/2025 20:25:08] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 836-216-282
+INFO:werkzeug: * Detected change in 'D:\\MobileServiceBussiness_PTITHCM\\app\\repositories\\plan_repository.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:werkzeug: * Restarting with stat

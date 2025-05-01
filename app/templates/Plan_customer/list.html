@@ -255,9 +255,9 @@
 </style>
 <script>
 <!-- JavaScript -->
-const subscriberId = {{ session['subscriber_id'] | tojson }};
-const subscriberType = {{ session['subscriber_type'] | tojson }};
-let currentPlanId = null;
+    const subscriberId = {{ session['subscriber_id']  }};
+    const subscriberType = {{ session['subscriber_type'] }};
+    let currentPlanId = null;
 
 function openModal(packageName, packagePrice, planId) {
     document.getElementById('packageName').textContent = packageName;
