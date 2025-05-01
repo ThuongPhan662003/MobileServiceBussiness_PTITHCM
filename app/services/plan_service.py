@@ -4,93 +4,64 @@ from app.repositories.plan_repository import PlanRepository
 
 class PlanService:
     @staticmethod
-    def get_all_plans():
-        return PlanRepository.get_all()
+    def _create_plan_object(data):
+        plan = Plan()
+        plan.code = data.get("code")
+        plan.price = float(data.get("price")) if data.get("price") else None
+        plan.description = data.get("description")
+        plan.service_id = int(data.get("service_id")) if data.get("service_id") else None
+        plan.is_active = data.get("is_active", False)
+        plan.renewal_syntax = data.get("renewal_syntax")
+        plan.registration_syntax = data.get("registration_syntax")
+        plan.cancel_syntax = data.get("cancel_syntax")
+        plan.free_data = int(data.get("free_data", 0))
+        plan.free_on_network_a_call = int(data.get("free_on_network_a_call", 0))
+        plan.free_on_network_call = int(data.get("free_on_network_call", 0))
+        plan.free_on_network_SMS = int(data.get("free_on_network_SMS", 0))
+        plan.free_off_network_a_call = int(data.get("free_off_network_a_call", 0))
+        plan.free_off_network_call = int(data.get("free_off_network_call", 0))
+        plan.free_off_network_SMS = int(data.get("free_off_network_SMS", 0))
+        plan.auto_renew = data.get("auto_renew", False)
+        plan.staff_id = int(data.get("staff_id")) if data.get("staff_id") else None
+        plan.maximum_on_network_call = int(data.get("maximum_on_network_call", 0))
+        plan.ON_SMS_cost = float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
+        plan.ON_a_call_cost = float(data.get("ON_a_call_cost", 0)) if data.get("ON_a_call_cost") else None
+        return plan
 
     @staticmethod
-    def get_all_codes():
-        return PlanRepository.get_all_codes()
+    def get_all_plans():
+        return PlanRepository.get_all()
 
     @staticmethod
     def get_plan_by_id(plan_id):
         return PlanRepository.get_by_id(plan_id)
 
     @staticmethod
+    def get_plan_by_code(code):
+        return PlanRepository.get_by_code(code)
+
+    @staticmethod
+    def check_syntax_exists(field, value, plan_id=None):
+        return PlanRepository.check_syntax_exists(field, value, plan_id)
+
+    @staticmethod
     def create_plan(data):
         try:
-            plan = Plan()
-            plan.code = data.get("code")
-            plan.price = float(data.get("price")) if data.get("price") else None
-            plan.description = data.get("description")
-            plan.service_id = (
-                int(data.get("service_id")) if data.get("service_id") else None
-            )
-            plan.is_active = data.get("is_active", False)
-            plan.renewal_syntax = data.get("renewal_syntax")
-            plan.registration_syntax = data.get("registration_syntax")
-            plan.cancel_syntax = data.get("cancel_syntax")
-            plan.free_data = int(data.get("free_data", 0))
-            plan.free_on_network_a_call = int(data.get("free_on_network_a_call", 0))
-            plan.free_on_network_call = int(data.get("free_on_network_call", 0))
-            plan.free_on_network_SMS = int(data.get("free_on_network_SMS", 0))
-            plan.free_off_network_a_call = int(data.get("free_off_network_a_call", 0))
-            plan.free_off_network_call = int(data.get("free_off_network_call", 0))
-            plan.free_off_network_SMS = int(data.get("free_off_network_SMS", 0))
-            plan.auto_renew = data.get("auto_renew", False)
-            plan.staff_id = int(data.get("staff_id")) if data.get("staff_id") else None
-            plan.maximum_on_network_call = int(data.get("maximum_on_network_call", 0))
-            plan.ON_SMS_cost = (
-                float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
-            )
-            plan.ON_a_call_cost = (
-                float(data.get("ON_a_call_cost", 0))
-                if data.get("ON_a_call_cost")
-                else None
-            )
+            plan = PlanService._create_plan_object(data)
             object_type = data.get("object_type")
             duration = int(data.get("duration")) if data.get("duration") else None
-            print("service",plan.to_dict(), object_type, duration )
+
             result = PlanRepository.insert(plan, object_type, duration)
             if result is True:
                 return {"success": True}
             return {"success": False, "error": result}
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     @staticmethod
     def update_plan(plan_id, data):
         try:
-
-            plan = Plan()
-            plan.code = data.get("code")
-            plan.price = float(data.get("price")) if data.get("price") else None
-            plan.description = data.get("description")
-            plan.service_id = (
-                int(data.get("service_id")) if data.get("service_id") else None
-            )
-            plan.is_active = data.get("is_active", False)
-            plan.renewal_syntax = data.get("renewal_syntax")
-            plan.registration_syntax = data.get("registration_syntax")
-            plan.cancel_syntax = data.get("cancel_syntax")
-            plan.free_data = int(data.get("free_data", 0))
-            plan.free_on_network_a_call = int(data.get("free_on_network_a_call", 0))
-            plan.free_on_network_call = int(data.get("free_on_network_call", 0))
-            plan.free_on_network_SMS = int(data.get("free_on_network_SMS", 0))
-            plan.free_off_network_a_call = int(data.get("free_off_network_a_call", 0))
-            plan.free_off_network_call = int(data.get("free_off_network_call", 0))
-            plan.free_off_network_SMS = int(data.get("free_off_network_SMS", 0))
-            plan.auto_renew = data.get("auto_renew", False)
-            plan.staff_id = int(data.get("staff_id")) if data.get("staff_id") else None
-            plan.maximum_on_network_call = int(data.get("maximum_on_network_call", 0))
-            plan.ON_SMS_cost = (
-                float(data.get("ON_SMS_cost", 0)) if data.get("ON_SMS_cost") else None
-            )
-            plan.ON_a_call_cost = (
-                float(data.get("ON_a_call_cost", 0))
-                if data.get("ON_a_call_cost")
-                else None
-            )
+            plan = PlanService._create_plan_object(data)
             object_type = data.get("object_type")
             duration = int(data.get("duration")) if data.get("duration") else None
 
@@ -98,7 +69,6 @@ class PlanService:
             if result is True:
                 return {"success": True}
             return {"success": False, "error": result}
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -108,7 +78,6 @@ class PlanService:
             result = PlanRepository.lock(plan_id)
             if result is True:
                 return {"success": True}
-
             return {"success": False, "error": result}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -118,7 +87,6 @@ class PlanService:
         try:
             return PlanRepository.search(code, price, is_active, object_type)
         except Exception as e:
-
             return []
 
     @staticmethod
@@ -132,7 +100,7 @@ class PlanService:
             {
                 "id": plan["id"],
                 "code": plan["code"],
-                "price": f"{plan['price']:,}",
+                "price": plan["price"],
                 "description": plan["description"],
                 "free_data": plan["free_data"],
                 "service_id": plan["service_id"],
@@ -148,15 +116,13 @@ class PlanService:
             return {
                 "id": plan_dict["id"],
                 "code": plan_dict["code"],
-                "price": f"{plan_dict['price']:,}",
+                "price": plan_dict["price"],
                 "description": plan_dict["description"],
                 "free_data": plan_dict["free_data"],
                 "service_id": plan_dict["service_id"],
-                "registration_syntax": plan_dict[
-                    "registration_syntax"
-                ],  # Thêm cú pháp đăng ký
-                "renewal_syntax": plan_dict["renewal_syntax"],  # Thêm cú pháp gia hạn
-                "cancel_syntax": plan_dict["cancel_syntax"],  # Thêm cú pháp hủy
+                "registration_syntax": plan_dict["registration_syntax"],
+                "renewal_syntax": plan_dict["renewal_syntax"],
+                "cancel_syntax": plan_dict["cancel_syntax"],
                 "free_off_network_SMS": plan_dict["free_off_network_SMS"],
                 "free_off_network_call": plan_dict["free_off_network_call"],
                 "free_off_network_a_call": plan_dict["free_off_network_a_call"],
@@ -168,9 +134,3 @@ class PlanService:
                 "ON_a_call_cost": plan_dict["ON_a_call_cost"],
                 "ON_SMS_cost": plan_dict["ON_SMS_cost"],
             }
-
-        return None
-
-    @staticmethod
-    def get_plan_detail_from_subscription(subscription_id):
-        return PlanRepository.get_plan_by_subscription_id(subscription_id)

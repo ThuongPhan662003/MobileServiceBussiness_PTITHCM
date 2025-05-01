@@ -15,6 +15,7 @@
     .btn:hover { opacity: 0.9; }
     .flashes { list-style: none; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
     .flashes li.error { background-color: #f8d7da; color: #721c24; }
+    .flashes li.success { background-color: #d4edda; color: #155724; }
     .required::after { content: " *"; color: red; }
 </style>
 
@@ -33,7 +34,7 @@
     {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('plan.create_plan') }}">
+    <form method="POST" action="{{ url_for('plan.create_plan') }}" id="create-plan-form">
         <div class="form-group">
             <label for="code" class="required">Mã Code</label>
             <input type="text" id="code" name="code" value="{{ data.code if data else '' }}" maxlength="50" required>
@@ -44,7 +45,7 @@
         </div>
         <div class="form-group">
             <label for="price" class="required">Giá (VND)</label>
-            <input type="number" id="price" name="price" step="0.01" value="{{ data.price if data else '' }}" min="0.01" required>
+            <input type="number" id="price" name="price" step="0.01" value="{{ data.price if data else '' }}" min="0.01" required placeholder="VND">
         </div>
         <div class="form-group">
             <label for="registration_syntax">Cú pháp đăng ký</label>
@@ -60,27 +61,27 @@
         </div>
         <div class="form-group">
             <label for="free_data">Dữ liệu miễn phí (MB)</label>
-            <input type="number" id="free_data" name="free_data" value="{{ data.free_data if data else '0' }}" min="0">
+            <input type="number" id="free_data" name="free_data" value="{{ data.free_data if data else '0' }}" min="0" placeholder="MB">
         </div>
         <div class="form-group">
-            <label for="free_on_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi nội mạng</label>
-            <input type="number" id="free_on_network_a_call" name="free_on_network_a_call" value="{{ data.free_on_network_a_call if data else '0' }}" min="0">
+            <label for="free_on_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi nội mạng (Phút)</label>
+            <input type="number" id="free_on_network_a_call" name="free_on_network_a_call" value="{{ data.free_on_network_a_call if data else '0' }}" min="0" placeholder="Phút">
         </div>
         <div class="form-group">
             <label for="free_on_network_call">Thời lượng gọi nội mạng miễn phí (Phút)</label>
-            <input type="number" id="free_on_network_call" name="free_on_network_call" value="{{ data.free_on_network_call if data else '0' }}" min="0">
+            <input type="number" id="free_on_network_call" name="free_on_network_call" value="{{ data.free_on_network_call if data else '0' }}" min="0" placeholder="Phút">
         </div>
         <div class="form-group">
             <label for="free_on_network_SMS">Số tin nhắn SMS nội mạng miễn phí</label>
             <input type="number" id="free_on_network_SMS" name="free_on_network_SMS" value="{{ data.free_on_network_SMS if data else '0' }}" min="0">
         </div>
         <div class="form-group">
-            <label for="free_off_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi ngoại mạng</label>
-            <input type="number" id="free_off_network_a_call" name="free_off_network_a_call" value="{{ data.free_off_network_a_call if data else '0' }}" min="0">
+            <label for="free_off_network_a_call">Thời lượng miễn phí cho mỗi cuộc gọi ngoại mạng (Phút)</label>
+            <input type="number" id="free_off_network_a_call" name="free_off_network_a_call" value="{{ data.free_off_network_a_call if data else '0' }}" min="0" placeholder="Phút">
         </div>
         <div class="form-group">
             <label for="free_off_network_call">Thời lượng gọi ngoại mạng miễn phí (Phút)</label>
-            <input type="number" id="free_off_network_call" name="free_off_network_call" value="{{ data.free_off_network_call if data else '0' }}" min="0">
+            <input type="number" id="free_off_network_call" name="free_off_network_call" value="{{ data.free_off_network_call if data else '0' }}" min="0" placeholder="Phút">
         </div>
         <div class="form-group">
             <label for="free_off_network_SMS">Số tin nhắn SMS ngoại mạng miễn phí</label>
@@ -88,15 +89,15 @@
         </div>
         <div class="form-group">
             <label for="maximum_on_network_call">Thời lượng tối đa cuộc gọi nội mạng (Phút)</label>
-            <input type="number" id="maximum_on_network_call" name="maximum_on_network_call" value="{{ data.maximum_on_network_call if data else '0' }}" min="0">
+            <input type="number" id="maximum_on_network_call" name="maximum_on_network_call" value="{{ data.maximum_on_network_call if data else '0' }}" min="0" placeholder="Phút">
         </div>
         <div class="form-group">
             <label for="ON_SMS_cost">Chi phí SMS nội mạng (VND)</label>
-            <input type="number" id="ON_SMS_cost" name="ON_SMS_cost" step="0.01" value="{{ data.ON_SMS_cost if data else '' }}" min="0">
+            <input type="number" id="ON_SMS_cost" name="ON_SMS_cost" step="0.01" value="{{ data.ON_SMS_cost if data else '' }}" min="0" placeholder="VND">
         </div>
         <div class="form-group">
             <label for="ON_a_call_cost">Chi phí gọi nội mạng (VND/phút)</label>
-            <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ data.ON_a_call_cost if data else '' }}" min="0">
+            <input type="number" id="ON_a_call_cost" name="ON_a_call_cost" step="0.01" value="{{ data.ON_a_call_cost if data else '' }}" min="0" placeholder="VND/phút">
         </div>
         <div class="form-group">
             <label for="object_type" class="required">Hình thức thanh toán</label>
@@ -107,7 +108,7 @@
         </div>
         <div class="form-group">
             <label for="duration" class="required">Thời hạn (ngày)</label>
-            <input type="number" id="duration" name="duration" value="{{ data.duration if data else '' }}" min="1" required>
+            <input type="number" id="duration" name="duration" value="{{ data.duration if data else '' }}" min="1" required placeholder="Ngày">
         </div>
         <div class="form-group">
             <label for="is_active">Kích hoạt</label>
@@ -118,8 +119,8 @@
             <input type="checkbox" id="auto_renew" name="auto_renew" {% if data and data.auto_renew %}checked{% endif %}>
         </div>
         <div class="form-group">
-            <label for="service_id">ID Dịch vụ</label>
-            <input type="number" id="service_id" name="service_id" value="{{ data.service_id if data else '' }}" min="1">
+            <label for="service_id" class="required">ID Dịch vụ</label>
+            <input type="number" id="service_id" name="service_id" value="{{ data.service_id if data else '' }}" min="1" required>
         </div>
         <div class="form-group">
             <label for="staff_id">ID Nhân viên</label>
@@ -129,4 +130,40 @@
         <a href="{{ url_for('plan.get_all_plans') }}" class="btn btn-cancel">Hủy</a>
     </form>
 </div>
+
+<script>
+    document.getElementById('create-plan-form').addEventListener('submit', function(e) {
+        const code = document.getElementById('code').value;
+        const price = document.getElementById('price').value;
+        const duration = document.getElementById('duration').value;
+        const registrationSyntax = document.getElementById('registration_syntax').value;
+        const renewalSyntax = document.getElementById('renewal_syntax').value;
+        const cancelSyntax = document.getElementById('cancel_syntax').value;
+
+        if (code.length > 50) {
+            alert('Mã gói cước không được vượt quá 50 ký tự');
+            e.preventDefault();
+        }
+        if (price <= 0) {
+            alert('Giá gói cước phải là số dương');
+            e.preventDefault();
+        }
+        if (duration <= 0) {
+            alert('Thời hạn phải là số dương');
+            e.preventDefault();
+        }
+        if (registrationSyntax && registrationSyntax.length > 255) {
+            alert('Cú pháp đăng ký không được vượt quá 255 ký tự');
+            e.preventDefault();
+        }
+        if (renewalSyntax && renewalSyntax.length > 255) {
+            alert('Cú pháp gia hạn không được vượt quá 255 ký tự');
+            e.preventDefault();
+        }
+        if (cancelSyntax && cancelSyntax.length > 255) {
+            alert('Cú pháp hủy không được vượt quá 255 ký tự');
+            e.preventDefault();
+        }
+    });
+</script>
 {% endblock %}
