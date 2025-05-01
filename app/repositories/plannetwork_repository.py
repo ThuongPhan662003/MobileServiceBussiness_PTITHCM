@@ -86,7 +86,7 @@ class PlanNetworkRepository:
     def delete(pn_id):
         try:
             result = db_instance.execute(
-                "CALL DeletePlanNetwork(%s)", (pn_id,), fetchone=True
+                "CALL DeletePlanNetwork(%s)", (pn_id,), fetchone=True,commit=True
             )
             if result.get("error"):
                 print(f"Lỗi khi xóa plan network: {result['error']}")

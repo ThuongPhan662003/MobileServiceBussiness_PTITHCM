@@ -1,3 +1,4 @@
+import atexit
 import pymysql
 from config import Config
 
@@ -9,10 +10,11 @@ class Database:
         self.password = Config.DB_PASSWORD
         self.db_name = Config.DB_NAME
         self.cursor_class = pymysql.cursors.DictCursor
+        self.connection = self.connect()  # ✅ Khởi tạo kết nối ban đầu
 
-        # Kết nối ngay khi khởi tạo
+    def connect(self):
         try:
-            self.connection = pymysql.connect(
+            conn = pymysql.connect(
                 host=self.host,
                 user=self.user,
                 password=self.password,
@@ -20,54 +22,72 @@ class Database:
                 cursorclass=self.cursor_class,
             )
             print("✅ Kết nối database thành công!")
+            return conn
         except Exception as e:
             print("❌ Kết nối database thất bại:", e)
-            self.connection = None
-
-    def get_connection(self):
-        return self.connection
-
-    def get_cursor(self):
-        if self.connection:
-            return self.connection.cursor()
-        return None
-
-    def execute(self, sql, params=None, fetchone=False, fetchall=False, commit=False):
-        if not self.connection:
-            raise Exception("Chưa kết nối tới database")
-        
-        with self.connection.cursor(self.cursor_class) as cursor:
-            cursor.execute(sql, params or ())
-
-            # Nếu có thay đổi dữ liệu (INSERT, UPDATE, DELETE)
-            if commit:
-                self.connection.commit()
-                print("oke commit")
-
-            # Nếu chỉ cần lấy một dòng (fetchone)
-            if fetchone:
-                result = cursor.fetchone()
-                # Nếu có nhiều result sets, tìm result đầu tiên có dữ liệu
-                while not result and cursor.nextset():
-                    result = cursor.fetchone()
-                print("oke fetchone", result)
-                return result
-
-            # Nếu muốn lấy tất cả dữ liệu từ tất cả result sets
-            if fetchall:
-                results = []
-                results.append(cursor.fetchall())
-                while cursor.nextset():
-                    results.append(cursor.fetchall())
-                return results
-
             return None
 
-    def close(self):
+    def execute(self, sql, params=None, fetchone=False, fetchall=False, commit=False):
+        conn = self.connect()
+        if not conn:
+            raise Exception("Không thể kết nối tới database")
+
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, params or ())
+
+                if commit:
+                    self.connection.commit()
+                    print("✅ Đã commit dữ liệu")
+
+                if fetchone:
+                    result = cursor.fetchone()
+                    while not result and cursor.nextset():
+                        result = cursor.fetchone()
+                    print("✅ fetchone", result)
+                    return result
+
+                if fetchall:
+                    results = []
+                    results.append(cursor.fetchall())
+                    while cursor.nextset():
+                        results.append(cursor.fetchall())
+                    return results
+
+                return None
+        except Exception as e:
+            print("❌ Lỗi khi thực thi truy vấn:", repr(e))
+            raise
+
+    def close(self):  # ✅ Đóng kết nối khi chương trình kết thúc
         if self.connection:
-            self.connection.close()
-            print("🔌 Đã đóng kết nối database")
+            try:
+                self.connection.close()
+                print("🔌 Đã đóng kết nối database")
+            except Exception as e:
+                print("⚠️ Lỗi khi đóng kết nối:", e)
+
+    def execute_with_connection(self, queries):
+        conn = self.connect()
+        if not conn:
+            raise Exception("Không thể kết nối tới database")
+        try:
+            with conn.cursor() as cursor:
+                return queries(cursor, conn)
+        except Exception as e:
+            print("❌ Lỗi execute_with_connection:", repr(e))
+            raise
+        finally:
+            try:
+                conn.close()
+            except:
+                pass
 
 
 # Tạo instance khi import
 db_instance = Database()
+
+
+@atexit.register
+def cleanup():
+    db_instance.close()

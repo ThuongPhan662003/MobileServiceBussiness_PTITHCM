@@ -42,7 +42,6 @@ class NetworkService:
     @staticmethod
     def delete_network(network_id):
         try:
-            result = NetworkRepository.delete(network_id)
-            return result
+            return NetworkRepository.delete(network_id)
         except Exception as e:
-            return {"success": False, "error": True, "message": str(e)}
+            return {"success": False, "message": str(e)}

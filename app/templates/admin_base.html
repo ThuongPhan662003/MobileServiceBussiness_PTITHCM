@@ -278,46 +278,64 @@
         <aside class="sidebar" id="sidebar">
             <h2><i class="fas fa-cogs"></i> Menu Quản Lý</h2>
             <a href="#" onclick="toggleMenu('usersMenu')"><i class="fas fa-users"></i> Người Dùng</a>
-            <!-- <div class="submenu" id="usersMenu">
-                <a href="#">Xem Người Dùng</a>
-                <a href="#">Thêm Người Dùng</a>
-            </div> -->
-            <a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-users-cog"></i> Vai Trò</a>
-            <a href="{{ url_for('service_bp.service_list') }}" onclick="toggleMenu('plansMenu')"><i
-                    class="fas fa-list"></i> Gói Dịch Vụ</a>
+
+            <a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-user-shield"></i> Vai Trò</a>
+
+            <a href="{{ url_for('service_bp.service_list') }}" onclick="toggleMenu('plansMenu')">
+                <i class="fas fa-boxes"></i> Gói Dịch Vụ
+            </a>
             <div class="submenu" id="plansMenu">
                 <a href="#">Xem Gói Dịch Vụ</a>
                 <a href="#">Tạo Gói Dịch Vụ</a>
             </div>
-            <a href="{{ url_for('report_bp.revenue_report_view') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i> Báo Cáo</a>
-            <a href="{{ url_for('role_group.get_all_role_groups') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i> Phân quyền</a>
-            <a href="{{ url_for('usagelog.get_all_usagelogs') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i> Nhật kí hoạt động</a>
-            <a href="{{ url_for('contract.index') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i> Hợp đồng</a>
-            <a href="{{ url_for('network.index') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i> Network</a>
-            <a href="{{ url_for('country.index') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i>
-                Đất nước</a>
 
-            <a href="{{ url_for('staff.get_all_staffs') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i>
-                Nhân viên</a>
-            <a href="{{ url_for('customer.get_all_customers') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i>
-                Khách hàng</a>
-            <a href="{{ url_for('subscriber_bp.get_all_subscribers') }}" onclick="toggleMenu('reportsMenu')"><i
-                    class="fas fa-chart-line"></i>
-                Thuê báo</a>
-            <div class="submenu" id="reportsMenu">
-                <!-- <a href="#">Báo Cáo Doanh Thu</a>
-                <a href="#">Hoạt Động Người Dùng</a> -->
-            </div>
-            <a href="#"><i class="fas fa-cogs"></i> Cài Đặt</a>
+            <a href="{{ url_for('report_bp.revenue_report_view') }}" onclick="toggleMenu('reportsMenu')">
+                <i class="fas fa-chart-pie"></i> Báo Cáo
+            </a>
+
+            <a href="{{ url_for('role_group.get_all_role_groups') }}">
+                <i class="fas fa-user-lock"></i> Phân quyền
+            </a>
+
+            <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
+                <i class="fas fa-clipboard-list"></i> Nhật kí hoạt động
+            </a>
+            <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
+                <i class="fas fa-clipboard-list"></i> Nhật kí hoạt động
+            </a>
+            <a href="{{ url_for('plan.get_all_plans') }}">
+                <i class="fas fa-receipt"></i> Gói cước
+            </a>
+
+            <a href="{{ url_for('contract.index') }}">
+                <i class="fas fa-file-contract"></i> Hợp đồng
+            </a>
+
+            <a href="{{ url_for('network.index') }}">
+                <i class="fas fa-network-wired"></i> Network
+            </a>
+
+            <a href="{{ url_for('country.index') }}">
+                <i class="fas fa-globe-asia"></i> Đất nước
+            </a>
+
+            <a href="{{ url_for('staff.get_all_staffs') }}">
+                <i class="fas fa-user-tie"></i> Nhân viên
+            </a>
+
+            <a href="{{ url_for('customer.get_all_customers') }}">
+                <i class="fas fa-user-friends"></i> Khách hàng
+            </a>
+
+            <a href="{{ url_for('subscriber_bp.get_all_subscribers') }}">
+                <i class="fas fa-sim-card"></i> Thuê bao
+            </a>
+
+            <div class="submenu" id="reportsMenu"></div>
+
+            <a href="#"><i class="fas fa-sliders-h"></i> Cài Đặt</a>
         </aside>
+
 
         <main class="content" id="contentArea">
             {% with messages = get_flashed_messages() %}

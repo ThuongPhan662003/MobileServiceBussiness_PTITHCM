@@ -93,9 +93,18 @@ class NetworkRepository:
                 fetchone=True,
                 commit=True,
             )
-            if result.get("error"):
-                return {"success": False, "error": True, "message": result["message"]}
-            return {"success": True, "message": result.get("message", "Xóa thành công")}
+
+            if not result.get("success", False):
+                return {
+                    "success": False,
+                    "message": result.get("message", "Không thể xóa mạng"),
+                }
+
+            return {
+                "success": True,
+                "message": result.get("message", "Xóa mạng thành công"),
+            }
+
         except Exception as e:
-            print(f"Lỗi khi xóa network: {e}")
-            return {"success": False, "error": True, "message": str(e)}
+            print(f"❌ Lỗi khi xóa network (Python-level): {e}")
+            return {"success": False, "message": str(e)}

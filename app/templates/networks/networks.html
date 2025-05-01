@@ -4,122 +4,263 @@
 
 {% block content %}
 <style>
+    :root {
+        --primary-color: #d81f3a;
+        --secondary-color: #ff6b6b;
+        --text-color: #333;
+        --bg-color: #f7fafc;
+        --white: #ffffff;
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', sans-serif;
+    }
+
     .network-container {
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 40px auto;
-        padding: 0 20px;
-        font-family: 'Roboto', sans-serif;
+        padding: 0 24px;
     }
 
     .network-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 32px;
     }
 
     .network-header h2 {
-        font-size: 2rem;
-        color: #222;
+        font-size: 1.875rem;
         font-weight: 700;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .network-controls {
         display: flex;
-        gap: 10px;
+        gap: 12px;
+        align-items: center;
     }
 
     .form-control {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+        background-color: var(--white);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(216, 31, 58, 0.1);
     }
 
     .btn-add {
-        background: linear-gradient(90deg, #ee2b47, #ff6b6b);
-        color: white;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
         font-weight: 600;
-        padding: 10px 15px;
+        padding: 10px 20px;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .btn-add:hover {
-        background: linear-gradient(90deg, #d81f3a, #e65f5f);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(216, 31, 58, 0.3);
     }
 
     .network-table {
         width: 100%;
         border-collapse: collapse;
-        background: #fff;
+        background: var(--white);
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--shadow);
         overflow: hidden;
     }
 
     .network-table th,
     .network-table td {
-        padding: 15px;
+        padding: 16px;
         text-align: center;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid #edf2f7;
+        font-size: 0.95rem;
     }
 
     .network-table th {
-        background-color: #ee2b47;
-        color: white;
+        background: var(--primary-color);
+        color: var(--white);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .network-table tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .network-table tr:hover {
+        background-color: #f8fafc;
     }
 
     .btn-action {
-        padding: 5px 12px;
-        border-radius: 6px;
+        padding: 6px 14px;
+        border-radius: 8px;
         font-size: 0.9rem;
-        border: 1px solid;
+        font-weight: 500;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
 
     .btn-edit {
-        color: #007bff;
-        border-color: #007bff;
+        color: #3182ce;
+        border: 1px solid #3182ce;
     }
 
     .btn-edit:hover {
-        background: #007bff;
-        color: white;
+        background: #3182ce;
+        color: var(--white);
+        transform: translateY(-1px);
     }
 
     .btn-delete {
-        color: #ee2b47;
-        border-color: #ee2b47;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
     }
 
     .btn-delete:hover {
-        background: #ee2b47;
-        color: white;
+        background: var(--primary-color);
+        color: var(--white);
+        transform: translateY(-1px);
     }
 
     .modal {
         display: none;
         position: fixed;
-        z-index: 9999;
+        z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.6);
         justify-content: center;
         align-items: center;
+        animation: fadeIn 0.3s ease;
     }
 
     .modal-content {
-        background-color: #fff;
-        margin: auto;
-        padding: 20px;
-        border-radius: 12px;
+        background-color: var(--white);
+        padding: 24px;
+        border-radius: 16px;
         width: 90%;
-        max-width: 500px;
+        max-width: 520px;
+        box-shadow: var(--shadow);
+        animation: slideIn 0.3s ease;
+    }
+
+    .modal-content h5 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 20px;
+    }
+
+    .modal-content label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-color);
+        margin-bottom: 8px;
+    }
+
+    .modal-content .form-control {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .modal-content .btn-add,
+    .modal-content .btn-delete {
+        margin-top: 12px;
+        width: 120px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: #718096;
+        cursor: pointer;
+    }
+
+    .modal-body .mb-4 {
+        margin-bottom: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-save {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(216, 31, 58, 0.3);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 </style>
 
@@ -128,6 +269,13 @@
         <h2><i class="fas fa-network-wired"></i> Quản Lý Mạng Viễn Thông</h2>
         <div class="network-controls">
             <input id="searchNetwork" type="text" class="form-control" placeholder="Tìm kiếm mạng...">
+
+
+            <select id="filterCountry" class="form-control">
+                <option value="">-- Tất cả quốc gia --</option>
+            </select>
+            <button class="btn-add" onclick="resetFilters()">Xóa bộ lọc</button>
+
             <button class="btn-add" onclick="openModal('addNetworkModal')">Thêm Mạng</button>
         </div>
     </div>
@@ -156,48 +304,67 @@
         <input type="text" id="addDisplayName" class="form-control">
         <label>Quốc Gia</label>
         <select id="addCountryId" class="form-control"></select>
-        <br>
-        <button class="btn-add" onclick="submitAddNetwork()">Lưu</button>
-        <button class="btn-delete" onclick="closeModal('addNetworkModal')">Hủy</button>
+        <div class="modal-footer">
+            <button class="btn-add" onclick="submitAddNetwork()">Lưu</button>
+            <button class="btn-delete" onclick="closeModal('addNetworkModal')">Hủy</button>
+        </div>
     </div>
 </div>
+
 <!-- Modal Sửa -->
 <div id="editNetworkModal" class="modal">
     <div class="modal-content">
-        <h5>Chi Tiết & Sửa Mạng</h5>
-        <input type="hidden" id="editNetworkId">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-edit"></i> Sửa Mạng Viễn Thông</h3>
+            <button class="btn-close" onclick="closeModal('editNetworkModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editNetworkId">
 
-        <label>ID Mạng</label>
-        <input type="text" id="editIdDisplay" class="form-control" readonly>
+            <div class="mb-4">
+                <label>ID Mạng</label>
+                <input type="text" id="editIdDisplay" class="form-control" readonly>
+            </div>
 
-        <label>Tên Mạng</label>
-        <input type="text" id="editNetworkName" class="form-control" readonly>
+            <div class="mb-4">
+                <label>Tên Mạng</label>
+                <input type="text" id="editNetworkName" class="form-control" readonly>
+            </div>
 
-        <label>Tên Hiển Thị</label>
-        <input type="text" id="editDisplayName" class="form-control">
+            <div class="mb-4">
+                <label>Tên Hiển Thị</label>
+                <input type="text" id="editDisplayName" class="form-control">
+            </div>
 
-        <label>Quốc Gia Hiện Tại</label>
-        <input type="text" id="editCurrentCountryName" class="form-control" readonly>
-
-        <label>Chọn Quốc Gia Khác</label>
-        <select id="editCountryId" class="form-control"></select>
-
-        <br>
-        <button class="btn-add" onclick="submitEditNetwork()">Cập Nhật</button>
-        <button class="btn-delete" onclick="closeModal('editNetworkModal')">Hủy</button>
+            <div class="mb-4">
+                <label>Quốc Gia</label>
+                <select id="editCountryId" class="form-control"></select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="submitEditNetwork()">Cập Nhật</button>
+            <!-- <button class="btn-delete" onclick="closeModal('editNetworkModal')">Hủy</button> -->
+        </div>
     </div>
 </div>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         fetchNetworks();
+
+        loadFilterCountries();
         document.getElementById("searchNetwork").addEventListener("input", searchNetwork);
+
+        document.getElementById("filterCountry").addEventListener("change", searchNetwork);
     });
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
 
     function openModal(id) {
         document.getElementById(id).style.display = "flex";
-        if (id === 'addNetworkModal' || id === 'editNetworkModal') fetchCountries(id.includes('edit') ? 'editCountryId' : 'addCountryId');
+        if (id === 'addNetworkModal') fetchCountriesForAdd();
+        if (id === 'editNetworkModal') fetchCountries(id.includes('edit') ? 'editCountryId' : 'addCountryId');
     }
 
     function closeModal(id) {
@@ -226,24 +393,38 @@
             });
     }
 
-    function fetchCountries(selectId) {
+    function fetchCountriesForAdd() {
         fetch("/countries/get-all")
             .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById(selectId);
+            .then(countries => {
+                const select = document.getElementById("addCountryId");
                 select.innerHTML = `<option value="">-- Chọn quốc gia --</option>`;
-                data.forEach(c => {
+                countries.forEach(c => {
                     select.innerHTML += `<option value="${c.id}">${c.country_name}</option>`;
                 });
             });
     }
 
     function submitAddNetwork() {
+        const countryId = document.getElementById("addCountryId").value;
+        const networkName = document.getElementById("addNetworkName").value.trim();
+        const displayName = document.getElementById("addDisplayName").value.trim();
+
+        if (!networkName) {
+            alert("Tên mạng không được để trống.");
+            return;
+        }
+        if (!countryId) {
+            alert("Vui lòng chọn quốc gia.");
+            return;
+        }
+
         const data = {
-            network_name: document.getElementById("addNetworkName").value.trim(),
-            display_name: document.getElementById("addDisplayName").value.trim(),
-            country_id: document.getElementById("addCountryId").value
+            network_name: networkName,
+            display_name: displayName,
+            country_id: countryId
         };
+
         fetch("/networks/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -258,14 +439,11 @@
         fetch(`/networks/${id}`)
             .then(res => res.json())
             .then(data => {
-                // Gán dữ liệu
                 document.getElementById("editNetworkId").value = data.id;
                 document.getElementById("editIdDisplay").value = data.id;
                 document.getElementById("editNetworkName").value = data.network_name;
                 document.getElementById("editDisplayName").value = data.display_name;
-                document.getElementById("editCurrentCountryName").value = data.country_id.country_name;
 
-                // Lấy quốc gia & chọn đúng quốc gia hiện tại
                 fetch("/countries/get-all")
                     .then(res => res.json())
                     .then(countries => {
@@ -281,34 +459,91 @@
             });
     }
 
-
     function submitEditNetwork() {
         const id = document.getElementById("editNetworkId").value;
+        const displayName = document.getElementById("editDisplayName").value.trim();
+        const countryId = document.getElementById("editCountryId").value;
+
+        if (!displayName) {
+            alert("Tên hiển thị không được để trống.");
+            return;
+        }
+        if (!countryId) {
+            alert("Vui lòng chọn quốc gia.");
+            return;
+        }
+
         const data = {
-            display_name: document.getElementById("editDisplayName").value.trim(),
-            country_id: document.getElementById("editCountryId").value
+            display_name: displayName,
+            country_id: countryId
         };
+
         fetch(`/networks/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
-        }).then(res => res.json()).then(() => {
-            closeModal("editNetworkModal");
-            fetchNetworks();
-        });
+        })
+            .then(res => res.json())
+            .then(() => {
+                closeModal("editNetworkModal");
+                fetchNetworks();
+            });
     }
 
     function deleteNetwork(id) {
         if (!confirm("Bạn có chắc chắn muốn xóa không?")) return;
+
         fetch(`/networks/${id}`, { method: "DELETE" })
-            .then(() => fetchNetworks());
+            .then(res => res.json())
+            .then(data => {
+                console.log("✅ Xóa mạng thành công:", data);
+                if (data.success) {
+                    alert(data.message || "Xóa thành công");
+                    fetchNetworks();  // Làm mới danh sách
+                } else {
+                    alert(data.message || data.error || "Không thể xóa mạng. Có thể mạng đang được sử dụng.");
+                }
+            })
+            .catch(error => {
+                console.error("❌ Lỗi khi xóa mạng:", error);
+                alert("Lỗi kết nối khi xóa mạng.");
+            });
     }
 
+
     function searchNetwork() {
-        const keyword = document.getElementById("searchNetwork").value.toLowerCase();
+        const nameKeyword = removeAccents(document.getElementById("searchNetwork").value.trim());
+        const selectedCountry = document.getElementById("filterCountry").value;
+
         document.querySelectorAll("#networkList tr").forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(keyword) ? "" : "none";
+            const name = row.cells[1].innerText + " " + row.cells[2].innerText;
+            const country = row.cells[3].innerText;
+
+            const nameMatches = removeAccents(name).includes(nameKeyword);
+            const countryMatches = !selectedCountry || country === selectedCountry;
+
+            row.style.display = nameMatches && countryMatches ? "" : "none";
         });
     }
+
+    function loadFilterCountries() {
+        fetch("/countries/get-all")
+            .then(res => res.json())
+            .then(countries => {
+                const select = document.getElementById("filterCountry");
+                select.innerHTML = `<option value="">-- Tất cả quốc gia --</option>`;
+                countries.forEach(c => {
+                    select.innerHTML += `<option value="${c.country_name}">${c.country_name}</option>`;
+                });
+            });
+    }
+    function resetFilters() {
+        document.getElementById("searchNetwork").value = "";
+        document.getElementById("filterCountry").value = "";
+        searchNetwork();  // Gọi lại để hiển thị toàn bộ danh sách
+    }
+
+
+
 </script>
 {% endblock %}

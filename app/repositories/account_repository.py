@@ -65,45 +65,46 @@ class AccountRepository:
     #         return {"success": False, "message": str(e)}
     def check_login_by_username_and_password(username, password):
         try:
-            print("username", username)
-            print("password", password)
 
-            # Gọi stored procedure (có trả ra dữ liệu nếu đăng nhập thành công)
-            acc = db_instance.execute(
-                "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
-                (username, password),
-                fetchone=True,  # acc có thể là subscriber hoặc staff tùy loại
-            )
-            print("acc", acc)
+            def run(cursor, conn):
+                print("username", username)
+                print("password", password)
 
-            # Lấy kết quả OUT từ stored procedure
-            result = db_instance.execute(
-                "SELECT @p_status AS status, @p_message AS message;", fetchone=True
-            )
-            print("Kết quả OUT:", result)
+                # Gọi stored procedure có OUT
+                cursor.execute(
+                    "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
+                    (username, password),
+                )
+
+                # Lấy dữ liệu người dùng (acc)
+                acc = cursor.fetchone()
+                print("acc", acc)
+
+                # Lấy OUT parameter
+                cursor.execute("SELECT @p_status AS status, @p_message AS message")
+                result = cursor.fetchone()
+                print("Kết quả OUT:", result)
+
+                return acc, result
+
+            acc, result = db_instance.execute_with_connection(run)
 
             if result:
                 status = result.get("status")
                 message = result.get("message")
 
                 if status == 1:
-                    # Nếu đăng nhập thành công và có trả dữ liệu acc
                     if acc:
                         print("kết quả", acc)
                         user_info = dict(acc)
-                        user_info["role_type"] = acc.get(
-                            "role_type"
-                        )  # 'subscriber' hoặc 'staff'
-                        user = AccountRepository.get_by_id(user_info["account_id"])
-                        print("người dùng", user_info)
+                        user_info["role_type"] = acc.get("role_type")
+                        user = AccountRepository.get_by_id(
+                            user_info["account_id"]
+                        )  # vẫn dùng execute()
                         user_info["account_id"] = user
                         return {"success": True, "message": message, "data": user_info}
                     else:
-                        return {
-                            "success": True,
-                            "message": message,
-                            "data": None,  # Không có dữ liệu user cụ thể
-                        }
+                        return {"success": True, "message": message, "data": None}
                 else:
                     return {"success": False, "message": message}
 
