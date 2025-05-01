@@ -18,14 +18,16 @@ from app.controllers.customer_plan_controller import (
 from app.controllers.payment_ui_controller import payment_ui_bp
 
 
+from app.controllers.customer_plan_controller import (
+    customer_plan_bp,
+)  # Import Blueprint
 
-from app.controllers.customer_plan_controller import customer_plan_bp  # Import Blueprint
 
 def create_app():
     app = Flask(__name__, static_folder="static")
     app.config.from_object(Config)
     # Initialize database connection
-    db_instance.get_connection()
+    # db_instance.connect()
     # Register blueprints here
     app.register_blueprint(voucher_bp)
     app.register_blueprint(service_bp)

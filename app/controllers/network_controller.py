@@ -53,9 +53,21 @@ def update_network(network_id):
 @network_bp.route("/<int:network_id>", methods=["DELETE"])
 def delete_network(network_id):
     result = NetworkService.delete_network(network_id)
+
     if result.get("success"):
         return (
-            jsonify({"success": True, "message": "Network deleted successfully"}),
+            jsonify(
+                {
+                    "success": True,
+                    "message": result.get("message", "Xóa mạng thành công"),
+                }
+            ),
             200,
         )
-    return jsonify(result), 400
+
+    return (
+        jsonify(
+            {"success": False, "message": result.get("message", "Xóa mạng thất bại")}
+        ),
+        400,
+    )

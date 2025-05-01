@@ -46,9 +46,13 @@ class PlanNetworkService:
     def delete_plan_network(pn_id):
         try:
             result = PlanNetworkRepository.delete(pn_id)
-            if result is True:
-                return {"success": True}
+
+            if result.get("success"):
+                return {
+                    "success": True,
+                    "message": result.get("message", "Xóa thành công"),
+                }
             else:
-                return {"error": result}
+                return {"error": result.get("message", "Không thể xóa plan network")}
         except Exception as e:
             return {"error": str(e)}

@@ -90,6 +90,8 @@
     <div class="country-header">
         <h2><i class="fas fa-globe"></i> Quản Lý Đất Nước</h2>
         <div class="country-controls">
+            <input id="searchCountry" type="text" class="form-control" placeholder="Tìm kiếm quốc gia...">
+
             <input id="newCountryName" type="text" class="form-control" placeholder="Tên quốc gia mới">
             <button class="btn-add" onclick="createCountry()">Thêm</button>
         </div>
@@ -110,7 +112,24 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", fetchCountries);
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchCountries();
+        document.getElementById("searchCountry").addEventListener("input", searchCountry);
+    });
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function searchCountry() {
+        const keyword = removeAccents(document.getElementById("searchCountry").value);
+
+        document.querySelectorAll("#countryList tr").forEach(row => {
+            const name = row.cells[1].innerText;
+            const nameNormalized = removeAccents(name);
+
+            row.style.display = nameNormalized.includes(keyword) ? "" : "none";
+        });
+    }
 
     function fetchCountries() {
         fetch("/countries/get-all")

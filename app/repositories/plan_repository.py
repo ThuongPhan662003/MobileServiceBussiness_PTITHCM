@@ -3,6 +3,7 @@ from app.models import Service, Staff
 from app.models.plan import Plan
 from app.repositories.service_repository import ServiceRepository
 from app.repositories.staff_repository import StaffRepository
+
 # import logging
 
 # logging.basicConfig(filename='app.log', level=logging.ERROR)
@@ -12,17 +13,16 @@ class PlanRepository:
     @staticmethod
     def get_all():
         try:
-            result = db_instance.execute(
-                "CALL GetAllPlans()",
-                fetchall=True
-            )
+            result = db_instance.execute("CALL GetAllPlans()", fetchall=True)
             plans = []
             for row in result[0]:
                 plan = Plan()
                 for key in row:
                     if key in ("is_active", "auto_renew"):
                         value = row[key]
-                        setattr(plan, key, bool(int(value)) if value is not None else False)
+                        setattr(
+                            plan, key, bool(int(value)) if value is not None else False
+                        )
                     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
                         value = row[key]
                         setattr(plan, key, float(value) if value is not None else None)
@@ -45,7 +45,9 @@ class PlanRepository:
                 for key in result:
                     if key in ("is_active", "auto_renew"):
                         value = result[key]
-                        setattr(plan, key, bool(int(value)) if value is not None else False)
+                        setattr(
+                            plan, key, bool(int(value)) if value is not None else False
+                        )
                     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
                         value = result[key]
                         setattr(plan, key, float(value) if value is not None else None)
@@ -113,9 +115,10 @@ class PlanRepository:
                     data.ON_SMS_cost,
                     data.ON_a_call_cost,
                     object_type,
-                    duration
+                    duration,
                 ),
-                fetchone=True, commit=True
+                fetchone=True,
+                commit=True,
             )
             if result and result.get("error"):
                 # logging.error(f"Lỗi khi thêm plan: {result['error']}")
@@ -153,9 +156,10 @@ class PlanRepository:
                     data.ON_SMS_cost,
                     data.ON_a_call_cost,
                     object_type,
-                    duration
+                    duration,
                 ),
-                fetchone=True, commit=True
+                fetchone=True,
+                commit=True,
             )
             if result and result.get("error"):
                 # logging.error(f"Lỗi khi cập nhật plan: {result['error']}")
@@ -168,7 +172,9 @@ class PlanRepository:
     @staticmethod
     def lock(plan_id):
         try:
-            result = db_instance.execute("CALL LockPlan(%s)", (plan_id,), fetchone=True, commit=True)
+            result = db_instance.execute(
+                "CALL LockPlan(%s)", (plan_id,), fetchone=True, commit=True
+            )
             if result and result.get("error"):
                 # logging.error(f"Lỗi khi khóa plan: {result['error']}")
                 return result["error"]
@@ -184,7 +190,7 @@ class PlanRepository:
                 code if code else None,
                 float(price) if price else None,
                 int(is_active) if is_active is not None else None,
-                object_type if object_type else None
+                object_type if object_type else None,
             )
             result = db_instance.execute(
                 "CALL SearchPlans(%s, %s, %s, %s)", params, fetchall=True
@@ -195,13 +201,20 @@ class PlanRepository:
                 for key in row:
                     if key in ("is_active", "auto_renew"):
                         value = row[key]
-                        setattr(plan, key, bool(int(value)) if value is not None else False)
+                        setattr(
+                            plan, key, bool(int(value)) if value is not None else False
+                        )
                     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
                         value = row[key]
                         setattr(plan, key, float(value) if value is not None else None)
                     else:
                         setattr(plan, key, row[key])
-                plans.append(plan.to_dict_plan(duration=row.get("duration", None), object_type=row.get("object_type", None)))
+                plans.append(
+                    plan.to_dict_plan(
+                        duration=row.get("duration", None),
+                        object_type=row.get("object_type", None),
+                    )
+                )
             return plans
         except Exception as e:
             # logging.error(f"Lỗi khi tìm kiếm plans: {e}")
@@ -212,9 +225,13 @@ class PlanRepository:
         try:
             result = db_instance.execute(
                 "SELECT id, service_name FROM services WHERE parent_id = %s",
-                (parent_service_id,), fetchall=True
+                (parent_service_id,),
+                fetchall=True,
             )
-            return [{"id": row["id"], "service_name": row["service_name"]} for row in result[0]]
+            return [
+                {"id": row["id"], "service_name": row["service_name"]}
+                for row in result[0]
+            ]
         except Exception as e:
             # logging.error(f"Lỗi khi lấy danh sách sub-services: {e}")
             return []
@@ -224,7 +241,8 @@ class PlanRepository:
         try:
             result = db_instance.execute(
                 "SELECT * FROM v_plans WHERE service_id = %s AND is_active = TRUE",
-                (service_id,), fetchall=True
+                (service_id,),
+                fetchall=True,
             )
             plans = []
             for row in result[0]:
@@ -256,4 +274,47 @@ class PlanRepository:
             return plans
         except Exception as e:
             # logging.error(f"Lỗi khi lấy danh sách gói cước theo service_id: {e}")
+            return []
+
+    @staticmethod
+    def get_by_plan_id(plan_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetPlanById(%s)", (plan_id,), fetchone=True
+            )
+            if result:
+                plan = Plan()
+                for key in result:
+                    if key in ("is_active", "auto_renew"):
+                        value = result[key]
+                        setattr(
+                            plan, key, bool(int(value)) if value is not None else False
+                        )
+
+                    elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+                        value = result[key]
+                        setattr(plan, key, float(value) if value is not None else None)
+                    elif key in ("service_id"):
+                        value = ServiceRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value else None)
+                    elif key in ("staff_id"):
+                        value = StaffRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value is not None else None)
+                    else:
+                        setattr(plan, key, result[key])
+                return plan
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy plan theo ID: {e}")
+            return None
+
+    @staticmethod
+    def get_all_codes():
+        try:
+            result = db_instance.execute(
+                "SELECT DISTINCT code FROM plans WHERE is_active = 1", fetchall=True
+            )
+            return [row["code"] for row in result[0]] if result else []
+        except Exception as e:
+            print("Lỗi khi lấy danh sách mã gói:", e)
             return []

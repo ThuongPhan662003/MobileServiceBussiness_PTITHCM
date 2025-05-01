@@ -42,6 +42,16 @@ def update_plan_network(pn_id):
 @plan_network_bp.route("/<int:pn_id>", methods=["DELETE"])
 def delete_plan_network(pn_id):
     result = PlanNetworkService.delete_plan_network(pn_id)
+
     if result.get("success"):
-        return jsonify({"message": "Plan network deleted successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+        return (
+            jsonify(
+                {"success": True, "message": result.get("message", "Xóa thành công")}
+            ),
+            200,
+        )
+
+    return (
+        jsonify({"success": False, "message": result.get("error", "Xóa thất bại")}),
+        400,
+    )
