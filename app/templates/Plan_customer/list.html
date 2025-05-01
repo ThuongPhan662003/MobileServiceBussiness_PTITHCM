@@ -9,33 +9,36 @@
     <!-- Tab lọc gói cước -->
     <ul class="nav nav-tabs mb-4">
         {% for sub_service in sub_services %}
-            <li class="nav-item">
-                <a class="nav-link {% if sub_service.id == selected_service_id %}active{% endif %}"
-                   href="{{ url_for('customer_plan.mobile_plans', sub_service_id=sub_service.id) }}">{{ sub_service.service_name }}</a>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link {% if sub_service.id == selected_service_id %}active{% endif %}"
+                href="{{ url_for('customer_plan.mobile_plans', sub_service_id=sub_service.id) }}">{{
+                sub_service.service_name }}</a>
+        </li>
         {% endfor %}
     </ul>
 
     {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+    <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
 
     <!-- Lưới gói cước -->
     <div class="plans-grid">
         {% if plans %}
-            {% for plan in plans %}
-                <div class="plan-card">
-                    <h5>{{ plan.code }}</h5>
-                    <p><strong>Data:</strong> {{ plan.free_data }}GB</p>
-                    <p><strong>Giá:</strong> {{ plan.price }}đ</p>
-                    <div class="button-group">
-                        <a href="{{ url_for('customer_plan.plan_details', plan_id=plan.id) }}" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
-                        <button class="btn btn-primary btn-sm" onclick="openModal('{{ plan.code }}', '{{ plan.price }}', '{{ plan.id }}')">Đăng ký</button>
-                    </div>
-                </div>
-            {% endfor %}
+        {% for plan in plans %}
+        <div class="plan-card">
+            <h5>{{ plan.code }}</h5>
+            <p><strong>Data:</strong> {{ plan.free_data }}GB</p>
+            <p><strong>Giá:</strong> {{ plan.price }}đ</p>
+            <div class="button-group">
+                <a href="{{ url_for('customer_plan.plan_details', plan_id=plan.id) }}"
+                    class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                <button class="btn btn-primary btn-sm"
+                    onclick="openModal('{{ plan.code }}', '{{ plan.price }}', '{{ plan.id }}')">Đăng ký</button>
+            </div>
+        </div>
+        {% endfor %}
         {% else %}
-            <p>Không có gói cước nào để hiển thị.</p>
+        <p>Không có gói cước nào để hiển thị.</p>
         {% endif %}
     </div>
 </div>
@@ -45,7 +48,8 @@
     <div class="modal-content">
         <span class="close-button" onclick="closeModal()">×</span>
         <h2>XÁC NHẬN ĐĂNG KÝ</h2>
-        <p>Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá <strong id="packagePrice"></strong> đồng?</p>
+        <p>Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá <strong id="packagePrice"></strong> đồng?
+        </p>
 
         <div class="note">Vui lòng chọn phương thức đăng ký:</div>
         <div class="radio-group">
@@ -66,7 +70,8 @@
     <div class="modal-content">
         <span class="close-button" onclick="closeModal()">×</span>
         <h2>XÁC NHẬN ĐĂNG KÝ</h2>
-        <p>Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá <strong id="packagePrice"></strong> đồng?</p>
+        <p>Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá <strong id="packagePrice"></strong> đồng?
+        </p>
         <div class="modal-buttons mt-3">
             <button onclick="closeModal()">ĐÓNG</button>
             <button class="confirm-btn" onclick="confirmRegister()">ĐỒNG Ý</button>
@@ -88,6 +93,7 @@
         justify-content: center;
         border-bottom: none;
     }
+
     .nav-tabs .nav-link {
         color: #555;
         font-weight: 600;
@@ -98,10 +104,12 @@
         background-color: #f8f9fa;
         transition: all 0.3s ease;
     }
+
     .nav-tabs .nav-link:hover {
         background-color: #e9ecef;
         color: #d32f2f;
     }
+
     .nav-tabs .nav-link.active {
         background-color: #d32f2f;
         color: #fff;
@@ -114,25 +122,30 @@
         gap: 20px;
         padding: 10px;
     }
+
     .plan-card {
         border-radius: 15px;
         padding: 20px;
         background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1), -5px -5px 15px rgba(255, 255, 255, 0.8);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
     .plan-card:hover {
         transform: translateY(-5px);
-        box-shadow: 8px 8px 20px rgba(0,0,0,0.15), -8px -8px 20px rgba(255,255,255,0.9);
+        box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.15), -8px -8px 20px rgba(255, 255, 255, 0.9);
     }
+
     .plan-card h5 {
         color: #d32f2f;
         font-size: 1.5rem;
     }
+
     .plan-card p {
         font-size: 1rem;
         color: #333;
     }
+
     .button-group {
         display: flex;
         gap: 10px;
@@ -145,16 +158,19 @@
         border-radius: 25px;
         padding: 8px 15px;
     }
+
     .btn-outline-primary:hover {
         background-color: #007bff;
         color: #fff;
     }
+
     .btn-primary {
         background-color: #28a745;
         border: none;
         border-radius: 25px;
         padding: 8px 15px;
     }
+
     .btn-primary:hover {
         background-color: #218838;
     }
@@ -162,26 +178,33 @@
     /* Modal */
     .modal-backdrop {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 9999;
     }
+
     .radio-group {
         text-align: left;
         margin-top: 15px;
     }
+
     .radio-group label {
         font-size: 0.95rem;
         color: #333;
         cursor: pointer;
     }
+
     .text-danger {
         color: #d32f2f;
         font-size: 0.9rem;
     }
+
     .modal-content {
         background: #fff;
         padding: 30px;
@@ -190,9 +213,10 @@
         width: 90%;
         text-align: center;
         position: relative;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         animation: fadeIn 0.3s ease;
     }
+
     .close-button {
         position: absolute;
         right: 15px;
@@ -201,24 +225,29 @@
         color: #888;
         cursor: pointer;
     }
+
     .modal-buttons {
         display: flex;
         justify-content: space-around;
         margin-top: 20px;
     }
+
     .modal-buttons button {
         padding: 8px 16px;
         border: none;
         border-radius: 25px;
         cursor: pointer;
     }
+
     .confirm-btn {
         background-color: #d32f2f;
         color: #fff;
     }
+
     .confirm-btn:hover {
         background-color: #b71c1c;
     }
+
     .note {
         color: #e53935;
         font-size: 0.9rem;
@@ -227,6 +256,7 @@
         padding: 8px;
         border-radius: 8px;
     }
+
     .qr-note {
         font-size: 0.85rem;
         color: #666;
@@ -238,8 +268,15 @@
     }
 
     @keyframes fadeIn {
-        from {opacity: 0; transform: scale(0.9);}
-        to {opacity: 1; transform: scale(1);}
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     @media (max-width: 992px) {
@@ -247,6 +284,7 @@
             grid-template-columns: repeat(2, 1fr);
         }
     }
+
     @media (max-width: 576px) {
         .plans-grid {
             grid-template-columns: 1fr;
@@ -254,141 +292,97 @@
     }
 </style>
 <script>
-<!-- JavaScript -->
-const subscriberId = {{ session['subscriber_id'] | tojson }};
-const subscriberType = {{ session['subscriber_type'] | tojson }};
-let currentPlanId = null;
+    <!-- JavaScript -->
+    const subscriberId = {{ session['subscriber_id']  }};
+    const subscriberType = {{ session['subscriber_type'] }};
+    let currentPlanId = null;
 
-function openModal(packageName, packagePrice, planId) {
-    document.getElementById('packageName').textContent = packageName;
-    document.getElementById('packagePrice').textContent = packagePrice;
-    currentPlanId = planId;
-    document.getElementById('registerModal').classList.remove('hidden');
-    document.getElementById('methodError').style.display = 'none';
-}
+    function openModal(packageName, packagePrice, planId) {
+        document.getElementById('packageName').textContent = packageName;
+        document.getElementById('packagePrice').textContent = packagePrice;
+        currentPlanId = planId;
+        document.getElementById('registerModal').classList.remove('hidden');
+        document.getElementById('methodError').style.display = 'none';
+    }
 
-function closeModal() {
-    document.getElementById('registerModal').classList.add('hidden');
-}
+    function closeModal() {
+        document.getElementById('registerModal').classList.add('hidden');
+    }
 
-async function confirmRegister() {
+    async function confirmRegister() {
 
-    let method = 'account';
+        let method = 'account';
 
-    // Nếu là TRẢ TRƯỚC thì cần chọn phương thức và kiểm tra số dư
-    if (subscriberType === 'TRATRUOC') {
-        const selectedMethod = document.querySelector('input[name="method"]:checked');
-        if (!selectedMethod) {
-            document.getElementById('methodError').style.display = 'block';
-            return;
-        }
-        method = selectedMethod.value;
+        // Nếu là TRẢ TRƯỚC thì cần chọn phương thức và kiểm tra số dư
+        if (subscriberType === 'TRATRUOC') {
+            const selectedMethod = document.querySelector('input[name="method"]:checked');
+            if (!selectedMethod) {
+                document.getElementById('methodError').style.display = 'block';
+                return;
+            }
+            method = selectedMethod.value;
 
-        // Nếu chọn thanh toán bằng tài khoản thì mới cần kiểm tra số dư
-        if (method === 'account') {
-            try {
-                const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
-                const balanceData = await balanceResponse.json();
-                if (!balanceResponse.ok) {
-                    alert("Không thể lấy số dư tài khoản.");
+            // Nếu chọn thanh toán bằng tài khoản thì mới cần kiểm tra số dư
+            if (method === 'account') {
+                try {
+                    const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
+                    const balanceData = await balanceResponse.json();
+                    if (!balanceResponse.ok) {
+                        alert("Không thể lấy số dư tài khoản.");
+                        return;
+                    }
+
+                    const packagePriceRaw = document.getElementById("packagePrice").textContent;
+                    const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
+
+                    const balance = parseFloat(balanceData.main_balance);
+
+
+                    if (balance < packagePrice) { alert("Số dư tài khoản không đủ để đăng ký gói này."); return; }
+                } catch (err) {
+                    alert("Lỗi kiểm tra số dư: " + err.message);
                     return;
                 }
 
+            }
+            if (method === " qr") {
                 const packagePriceRaw = document.getElementById("packagePrice").textContent;
-                const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
-                
-                const balance = parseFloat(balanceData.main_balance);
-
-
-                if (balance < packagePrice) {
-                    alert("Số dư tài khoản không đủ để đăng ký gói này.");
-                    return;
-                }
-            } catch (err) {
-                alert("Lỗi kiểm tra số dư: " + err.message);
-                return;
+                console.log(packagePriceRaw) const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, '')); const
+                    packageName = document.getElementById("packageName").textContent; const url = new URL("/pay-process",
+                        window.location.origin); url.searchParams.append("subscriber_id", subscriberId); url.searchParams.append("plan_id",
+                            currentPlanId); url.searchParams.append("price", packagePrice); url.searchParams.append("plan_code", packageName);
+                window.location.href = url.toString(); return;
             }
-
-        }
-        if (method === "qr") {
-            const packagePriceRaw = document.getElementById("packagePrice").textContent;
-            console.log(packagePriceRaw)
-            const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
-            const packageName = document.getElementById("packageName").textContent;
-
-            const url = new URL("/pay-process", window.location.origin);
-            url.searchParams.append("subscriber_id", subscriberId);
-            url.searchParams.append("plan_id", currentPlanId);
-            url.searchParams.append("price",  packagePrice);
-            url.searchParams.append("plan_code", packageName);
-
-            window.location.href = url.toString();
-            return;
-        }
+        } // Đăng ký gói try { const subscriptionResponse=await
+        fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, { method: "POST" }); const subscriptionResult = await
+            subscriptionResponse.json(); if (!subscriptionResponse.ok) {
+                alert("Không thể đăng ký gói
+    cước: " + (subscriptionResult.error || " Lỗi không xác định.")); return; } alert("Đăng ký gói cước thành công!");
+    closeModal(); // TRẢ TRƯỚC: thực hiện trừ tiền if (subscriberType==='TRATRUOC' && method==='account' ) { const
+                deductResponse = await fetch(`/subscriptions/deduct/${subscriberId}/${currentPlanId}`, { method: "POST" }); const
+                    deductResult = await deductResponse.json(); if (!deductResponse.ok || !deductResult.success) {
+                        alert("Lỗi khi trừ tiền
+    tài khoản: " + (deductResult.error || " Lỗi không xác định.")); return; } } // Tạo bản ghi thanh toán (cả trả trước
+    và trả sau) const dueDate = new Date(); const paymentResponse = await
+                            fetch(`/payments/${subscriberId}/${currentPlanId}`, {
+                                method: "POST", headers: {
+                                    'Content-Type'
+                                        : 'application/json'
+                                }, body: JSON.stringify({
+                                    payment_method: subscriberType === 'TRATRUOC' ? method : 'postpaid',
+                                    is_paid: subscriberType === 'TRATRUOC', due_date: dueDate.toISOString()
+                                })
+                            }); if (paymentResponse.ok) {
+                                const
+                                paymentData = await paymentResponse.json(); const idPayment = paymentData.id_payment; const paymentDetailResponse = await
+                                    fetch(`/payment-details/${idPayment}/${currentPlanId}`, { method: "POST" }); if (paymentDetailResponse.ok) {
+                                        alert("Thanh toán thành công và chi tiết đã được lưu!");
+                                    } else {
+                                        const paymentDetailResult = await
+                                            paymentDetailResponse.json(); alert("Lỗi khi thêm chi tiết thanh toán: " + (paymentDetailResult.error || " Lỗi không
+    xác định.")); } } else { alert("Lỗi khi tạo bản ghi thanh toán."); } } catch (error) { alert("Lỗi xảy ra: " + error.message);
     }
-
-    // Đăng ký gói
-    try {
-        const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
-            method: "POST"
-        });
-        const subscriptionResult = await subscriptionResponse.json();
-
-        if (!subscriptionResponse.ok) {
-            alert("Không thể đăng ký gói cước: " + (subscriptionResult.error || "Lỗi không xác định."));
-            return;
-        }
-
-        alert("Đăng ký gói cước thành công!");
-        closeModal();
-
-        // TRẢ TRƯỚC: thực hiện trừ tiền
-        if (subscriberType === 'TRATRUOC' && method === 'account') {
-            const deductResponse = await fetch(`/subscriptions/deduct/${subscriberId}/${currentPlanId}`, {
-                method: "POST"
-            });
-            const deductResult = await deductResponse.json();
-
-            if (!deductResponse.ok || !deductResult.success) {
-                alert("Lỗi khi trừ tiền tài khoản: " + (deductResult.error || "Lỗi không xác định."));
-                return;
-            }
-        }
-
-        // Tạo bản ghi thanh toán (cả trả trước và trả sau)
-        const dueDate = new Date();
-        const paymentResponse = await fetch(`/payments/${subscriberId}/${currentPlanId}`, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                payment_method: subscriberType === 'TRATRUOC' ? method : 'postpaid',
-                is_paid: subscriberType === 'TRATRUOC',
-                due_date: dueDate.toISOString()
-            })
-        });
-
-        if (paymentResponse.ok) {
-            const paymentData = await paymentResponse.json();
-            const idPayment = paymentData.id_payment;
-
-            const paymentDetailResponse = await fetch(`/payment-details/${idPayment}/${currentPlanId}`, {
-
-                method: "POST"
-            });
-
-            if (paymentDetailResponse.ok) {
-                alert("Thanh toán thành công và chi tiết đã được lưu!");
-            } else {
-                const paymentDetailResult = await paymentDetailResponse.json();
-                alert("Lỗi khi thêm chi tiết thanh toán: " + (paymentDetailResult.error || "Lỗi không xác định."));
-            }
-        } else {
-            alert("Lỗi khi tạo bản ghi thanh toán.");
-        }
-    } catch (error) {
-        alert("Lỗi xảy ra: " + error.message);
-    }
-}
+                            }
 
 </script>
 {% endblock %}

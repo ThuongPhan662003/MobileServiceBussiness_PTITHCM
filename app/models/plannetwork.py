@@ -1,6 +1,7 @@
 from typing import Optional
 
-from . import *
+
+
 
 class PlanNetwork:
     __id: Optional[int]
@@ -45,6 +46,6 @@ class PlanNetwork:
     def to_dict(self):
         return {
             "id": self.id,
-            "network_id": self.network_id.to_dict(),
-            "plan_id": self.plan_id.to_dict(),
+            "network_id": self.network_id.to_dict() if self.network_id else None,
+            "plan_id": self.plan_id.to_dict() if self.plan_id else None,
         }

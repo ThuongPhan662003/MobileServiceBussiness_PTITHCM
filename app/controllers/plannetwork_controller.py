@@ -7,6 +7,9 @@ plan_network_bp = Blueprint("plan_network", __name__, url_prefix="/plan_networks
 @plan_network_bp.route("/", methods=["GET"])
 def get_all_plan_networks():
     plan_networks = PlanNetworkService.get_all_plan_networks()
+    print("plan_networks", plan_networks)
+    if not plan_networks:
+        return jsonify({"error": "No plan networks found"}), 404
     return jsonify(plan_networks), 200
 
 
