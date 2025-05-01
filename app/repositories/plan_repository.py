@@ -247,9 +247,10 @@ class PlanRepository:
                 plan.code = row.get("code")
                 plan.price = row.get("price")
                 plan.description = row.get("description")
-                print("ind",type(row.get("service_id")))
-                plan.service_id = ServiceRepository.get_by_id(int(row.get("service_id")))
-
+                print("ind", type(row.get("service_id")))
+                plan.service_id = ServiceRepository.get_by_id(
+                    int(row.get("service_id"))
+                )
 
                 plan.is_active = True if row.get("is_active") else False
                 plan.renewal_syntax = row.get("renewal_syntax")
@@ -263,7 +264,7 @@ class PlanRepository:
                 plan.free_off_network_call = row.get("free_off_network_call")
                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
                 plan.auto_renew = True if row.get("auto_renew") else False
-                plan.staff_id =StaffRepository.get_by_id(row.get("staff_id"))
+                plan.staff_id = StaffRepository.get_by_id(row.get("staff_id"))
                 plan.created_at = row.get("created_at")
                 plan.updated_at = row.get("updated_at")
                 plan.maximum_on_network_call = row.get("maximum_on_network_call")
@@ -304,4 +305,36 @@ class PlanRepository:
             }
         except Exception as e:
             print(f"[Repository] Lỗi khi gọi SP get_plan_by_subscription_id: {e}")
+            return None
+
+    @staticmethod
+    def get_by_plan_id(plan_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetPlanById(%s)", (plan_id,), fetchone=True
+            )
+            if result:
+                plan = Plan()
+                for key in result:
+                    if key in ("is_active", "auto_renew"):
+                        value = result[key]
+                        setattr(
+                            plan, key, bool(int(value)) if value is not None else False
+                        )
+
+                    elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+                        value = result[key]
+                        setattr(plan, key, float(value) if value is not None else None)
+                    elif key in ("service_id"):
+                        value = ServiceRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value else None)
+                    elif key in ("staff_id"):
+                        value = StaffRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value is not None else None)
+                    else:
+                        setattr(plan, key, result[key])
+                return plan
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy plan theo ID: {e}")
             return None

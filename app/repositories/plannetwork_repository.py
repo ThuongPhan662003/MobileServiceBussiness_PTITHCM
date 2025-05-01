@@ -1,5 +1,7 @@
 from app.database import db_instance
 from app.models.plannetwork import PlanNetwork
+from app.repositories.network_repository import NetworkRepository
+from app.repositories.plan_repository import PlanRepository
 
 
 class PlanNetworkRepository:
@@ -7,13 +9,23 @@ class PlanNetworkRepository:
     def get_all():
         try:
             result = db_instance.execute("SELECT * FROM v_plan_networks", fetchall=True)
+            print("repo-plan-network", result[0])
             plan_networks = []
-
-            for row in result:
+            for row in result[0]:
                 pn = PlanNetwork()
                 pn.id = row.get("id")
-                pn.network_id = row.get("network_id")
-                pn.plan_id = row.get("plan_id")
+                network_id = row.get("network_id")
+                if network_id:
+                    pn.network_id = NetworkRepository.get_by_id(network_id)
+                else:
+                    pn.network_id = None
+
+                plan_id = row.get("plan_id")
+                if plan_id:
+                    pn.plan_id = PlanRepository.get_by_plan_id(plan_id)
+                else:
+                    pn.plan_id = None
+                print("pn.to_dict", pn.network_id, pn.plan_id.to_dict(), pn.id)
                 plan_networks.append(pn.to_dict())
 
             return plan_networks
