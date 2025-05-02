@@ -21,7 +21,7 @@ class Plan:
     __free_off_network_call: Optional[int]
     __free_off_network_SMS: Optional[int]
     __auto_renew: Optional[bool]
-    __staff_id: Optional[int]
+    __staff_id: Optional["Staff"]
     __created_at: Optional[datetime]
     __updated_at: Optional[datetime]
     __maximum_on_network_call: Optional[int]

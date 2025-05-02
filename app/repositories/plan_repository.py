@@ -51,6 +51,12 @@ class PlanRepository:
                     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
                         value = result[key]
                         setattr(plan, key, float(value) if value is not None else None)
+                    elif key in ("service_id"):
+                        value = ServiceRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value else None)
+                    elif key in ("staff_id"):
+                        value = StaffRepository.get_by_id(result[key])
+                        setattr(plan, key, value if value else None)
                     else:
                         setattr(plan, key, result[key])
                 return plan
@@ -244,14 +250,21 @@ class PlanRepository:
                 (service_id,),
                 fetchall=True,
             )
+            print("l", result[0])
             plans = []
             for row in result[0]:
                 plan = Plan()
                 plan.id = row.get("id")
+                print("plan_id", plan.id)
                 plan.code = row.get("code")
                 plan.price = row.get("price")
                 plan.description = row.get("description")
-                plan.service_id = row.get("service_id")
+                service_id = row.get("service_id")
+                if service_id:
+                    service = ServiceRepository.get_by_id(service_id)
+                    plan.service_id = service if service else None
+                else:
+                    plan.service_id = None
                 plan.is_active = True if row.get("is_active") else False
                 plan.renewal_syntax = row.get("renewal_syntax")
                 plan.registration_syntax = row.get("registration_syntax")
@@ -264,16 +277,24 @@ class PlanRepository:
                 plan.free_off_network_call = row.get("free_off_network_call")
                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
                 plan.auto_renew = True if row.get("auto_renew") else False
-                plan.staff_id = row.get("staff_id")
+
+                staff_id = row.get("staff_id")
+                if staff_id:
+                    staff = StaffRepository.get_by_id(staff_id)
+                    plan.staff_id = staff if staff else None
+                else:
+                    plan.staff_id = None
                 plan.created_at = row.get("created_at")
                 plan.updated_at = row.get("updated_at")
                 plan.maximum_on_network_call = row.get("maximum_on_network_call")
                 plan.ON_SMS_cost = row.get("ON_SMS_cost")
                 plan.ON_a_call_cost = row.get("ON_a_call_cost")
                 plans.append(plan.to_dict())
+                print("repo", plan.to_dict())
             return plans
         except Exception as e:
             # logging.error(f"Lỗi khi lấy danh sách gói cước theo service_id: {e}")
+            print(e)
             return []
 
     @staticmethod
