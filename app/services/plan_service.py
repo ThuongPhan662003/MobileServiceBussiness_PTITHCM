@@ -102,6 +102,7 @@ class PlanService:
     @staticmethod
     def get_plans_by_service_id(service_id):
         plans = PlanRepository.get_plans_by_service_id(service_id)
+        print("service", plans)
         return [
             {
                 "id": plan["id"],
