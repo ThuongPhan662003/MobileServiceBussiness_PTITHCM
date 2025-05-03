@@ -417,7 +417,7 @@
                 <td>{{ voucher.packages or "Tất cả" }}</td>
                 <td>{{ voucher.start_date }}</td>
                 <td>{{ voucher.end_date }}</td>
-                <td>{{ voucher.remaining_count }}/{{ voucher.usage_limit }}</td>
+                <td>{{ voucher.remaining_count}}</td>
                 <td class="text-center">
                     {% if voucher.is_active %}
                     <span class="badge badge-success">✔️</span>
@@ -621,7 +621,7 @@
             document.getElementById('addVoucherModal').style.display = 'none';
             document.getElementById('editVoucherModal').style.display = 'none';
         });
-
+        let originalVoucherData = null;
         function openModal(id) {
             const modal = document.getElementById(id);
             modal.classList.add('active');
@@ -670,20 +670,41 @@
                 return;
             }
 
+            // Lấy dữ liệu từ các input
+            const code = document.getElementById('addCode').value.trim();
+            const description = document.getElementById('addDescription').value.trim();
+            const packages = document.getElementById('addPackages').value.trim();
+            const startDate = document.getElementById('addStartDate').value;
+            const endDate = document.getElementById('addEndDate').value;
+            const usageLimit = document.getElementById('addUsageLimit').value.trim();
+            const isActive = document.getElementById('addIsActive').checked;
 
+            // Kiểm tra dữ liệu bắt buộc
+            if (!code || !packages || !startDate || !endDate || !usageLimit || !rawJsonStr) {
+                alert("❗Vui lòng nhập đầy đủ tất cả các trường thông tin!");
+                return;
+            }
+            // Kiểm tra ngày hợp lệ
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (start > end) {
+                alert("❌ Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+                return;
+            }
+            // Tạo object dữ liệu
             const data = {
-                code: document.getElementById('addCode').value,
-                description: document.getElementById('addDescription').value,
-                packages: document.getElementById('addPackages').value,
-                start_date: document.getElementById('addStartDate').value,
-                end_date: document.getElementById('addEndDate').value,
-                usage_limit: parseInt(document.getElementById('addUsageLimit').value),
-                remaining_count: parseInt(document.getElementById('addUsageLimit').value),
-                is_active: document.getElementById('addIsActive').checked,
-                conandpromo: rawJsonStr
-
+                code: code,
+                description: description,
+                packages: packages,
+                start_date: startDate,
+                end_date: endDate,
+                usage_limit: parseInt(usageLimit),
+                remaining_count: parseInt(usageLimit),
+                is_active: isActive,
+                conandpromo: rawJson
             };
 
+            // Gửi request
             fetch("/vouchers", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -701,9 +722,9 @@
                     document.getElementById('editPackages').value = data.packages;
                     document.getElementById('editStartDate').value = data.start_date;
                     document.getElementById('editEndDate').value = data.end_date;
-                    document.getElementById('editUsageLimit').value = data.usage_limit;
-                    document.getElementById('editIsActive').checked = data.is_active;
 
+                    document.getElementById('editIsActive').checked = data.is_active;
+                    document.getElementById('editUsageLimit').value = data.usage_limit || 0;
                     let conpro = {};
                     try {
                         conpro = typeof data.conandpromo === 'string'
@@ -749,7 +770,16 @@
                         document.getElementById("promo_data_operator").value = details.free_data.operator || "";
                         document.getElementById("promo_free_data").value = details.free_data.value || "";
                     }
-
+                    // Lưu dữ liệu gốc để so sánh sau
+                    originalVoucherData = {
+                        code: data.code,
+                        description: data.description,
+                        packages: data.packages,
+                        start_date: data.start_date,
+                        end_date: data.end_date,
+                        is_active: data.is_active,
+                        conandpromo: JSON.stringify(JSON.parse(data.conandpromo))
+                    };
                     openModal('editVoucherModal');
                 })
                 .catch(error => {
@@ -781,30 +811,70 @@
 
         function updateVoucher() {
             const id = document.getElementById('editVoucherId').value;
+
             let rawJson;
             try {
                 rawJson = JSON.parse(document.getElementById('editConAndPro').value);
             } catch (e) {
-                alert("❌ JSON không hợp lệ!");
+                alert("❌ JSON không hợp lệ! Vui lòng kiểm tra lại dữ liệu JSON.");
                 return;
             }
 
-            const data = {
-                code: document.getElementById('editCode').value,
-                description: document.getElementById('editDescription').value,
-                packages: document.getElementById('editPackages').value,
-                start_date: document.getElementById('editStartDate').value,
-                end_date: document.getElementById('editEndDate').value,
-                usage_limit: parseInt(document.getElementById('editUsageLimit').value),
-                is_active: document.getElementById('editIsActive').checked,
+            const code = document.getElementById('editCode').value.trim();
+            const description = document.getElementById('editDescription').value.trim();
+            const packages = document.getElementById('editPackages').value.trim();
+            const startDate = document.getElementById('editStartDate').value;
+            const endDate = document.getElementById('editEndDate').value;
+            const isActive = document.getElementById('editIsActive').checked;
+
+            // Kiểm tra dữ liệu bắt buộc
+            if (!packages || !startDate || !endDate || !rawJson) {
+                alert("❗Vui lòng nhập đầy đủ tất cả các trường thông tin!");
+                return;
+            }
+
+            // Kiểm tra ngày hợp lệ
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (start > end) {
+                alert("❌ Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+                return;
+            }
+
+            const currentData = {
+                code: code,
+                description: description,
+                packages: packages,
+                start_date: startDate,
+                end_date: endDate,
+                is_active: isActive,
                 conandpromo: JSON.stringify(rawJson)
             };
+
+            // So sánh dữ liệu hiện tại với dữ liệu gốc
+            if (JSON.stringify(currentData) === JSON.stringify(originalVoucherData)) {
+                alert("⚠️ Không có thay đổi nào để cập nhật.");
+                return;
+            }
 
             fetch(`/vouchers/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            }).then(res => res.ok ? location.reload() : res.json().then(j => alert(j.error)));
+                body: JSON.stringify(currentData)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("✅ Cập nhật voucher thành công!");
+                        location.reload();
+                    } else {
+                        res.json().then(j => {
+                            alert(`❌ Lỗi: ${j.message || j.error || "Có lỗi xảy ra!"}`);
+                        });
+                    }
+                })
+                .catch(error => {
+                    alert(`❌ Lỗi khi gửi yêu cầu: ${error.message}`);
+                });
         }
 
         function deleteVoucher(id) {

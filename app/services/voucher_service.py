@@ -48,41 +48,31 @@ class VoucherService:
     @staticmethod
     def update_voucher(voucher_id, data: dict):
         try:
-            # Ép kiểu từ chuỗi → datetime
-            start_date_str = data.get("start_date")
-            end_date_str = data.get("end_date")
+            # Gọi tới repository xử lý update
+            result = VoucherRepository.update(voucher_id, data)
+            print("resultdddd:", result)
 
-            start_date = (
-                datetime.strptime(start_date_str, "%Y-%m-%d")
-                if start_date_str
-                else None
-            )
-            end_date = (
-                datetime.strptime(end_date_str, "%Y-%m-%d") if end_date_str else None
-            )
-            voucher = Voucher(
-                id=data.get("id"),
-                code=data.get("code"),
-                description=data.get("description"),
-                conandpromo=data.get("conandpromo"),
-                start_date=start_date,
-                end_date=end_date,
-                usage_limit=data.get("usage_limit"),
-                remaining_count=data.get("remaining_count", 0),
-                is_active=True if data.get("is_active") else False,
-                staff_id=session["staff_id"],
-                packages=data.get("packages"),
-            )
-            result = VoucherRepository.update(voucher_id, voucher)
-            print("result", result)
-            if result and result["success"]:
-                return result
+            if result.get("success"):
+                return {
+                    "success": True,
+                    "message": result.get("message", "Cập nhật thành công."),
+                    "data": result.get("data", {}),
+                }
             else:
-                print("lỗi")
-                return result
+                print("Cập nhật voucher thất bại:", result)
+                return {
+                    "success": False,
+                    "message": result.get("message", "Cập nhật thất bại."),
+                    "data": result.get("data", {}),
+                }
+
         except Exception as e:
-            print("exception")
-            return {"error": str(e)}
+            print("Exception khi cập nhật voucher:", str(e))
+            return {
+                "success": False,
+                "message": f"Lỗi hệ thống: {str(e)}",
+                "data": None,
+            }
 
     @staticmethod
     def delete_voucher(voucher_id):
