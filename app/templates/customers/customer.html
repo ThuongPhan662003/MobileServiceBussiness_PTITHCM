@@ -132,11 +132,6 @@
             <tr>
                 <td>{{ customer.id }}</td>
                 <td>{{ customer.full_name }}</td>
-
-                <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
-                    {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}
-                </td>
-
                 <td>{{ customer.card_id }}</td>
                 <td style="color: {{ 'red' if not customer.is_active else 'inherit' }};">
                     {{ 'Kích hoạt' if customer.is_active else 'Không kích hoạt' }}

@@ -186,23 +186,30 @@ class AccountRepository:
     @staticmethod
     def create_account_from_phone(phone_number: str):
         try:
-            # Gọi stored procedure
             result = db_instance.execute(
-                "CALL create_account_from_phone(%s)",  # Gọi stored procedure
-                (phone_number,),  # Tham số truyền vào là số điện thoại
-                fetchone=True,  # Lấy một dòng duy nhất
-                commit=True,  # Commit sau khi thực thi
+                "CALL create_account_from_phone(%s)",
+                (phone_number,),  # ✅ phải là tuple
+                fetchone=True,
+                commit=True,
             )
 
             # In ra kết quả trả về để kiểm tra
             print("Kết quả trả về từ stored procedure:", result)
 
             # Kiểm tra kết quả trả về và lấy account_id
-            if result and "id" in result:
-                return result["id"]  # Trả về account_id
+            if result:
+                # In chi tiết kết quả để kiểm tra cấu trúc dữ liệu trả về
+                print("Chi tiết kết quả:", result)
+                account_id = result.get("id")
+
+                if account_id is not None:
+                    return account_id
+                else:
+                    return {"error": "Không thể lấy account_id từ stored procedure"}
             else:
-                return {"error": "Không thể lấy account_id từ stored procedure"}
+                return {"error": "Không có kết quả từ stored procedure"}
 
         except Exception as e:
-            print(f"Lỗi khi tạo account từ số điện thoại: {e}")
+            print(f"❌ Lỗi khi tạo account từ số điện thoại: {e}")
             return {"error": str(e)}
+

@@ -59,7 +59,9 @@ class PaymentDetailRepository:
     @staticmethod
     def insert(payment_detail_data: dict):
         try:
-            # Thực thi câu lệnh SQL để chèn thông tin vào paymentdetail
+            print("Fdsfs",payment_detail_data["payment_id"])
+
+            # Thực thi câu lệnh SQL để chèn thông tin vào payment_detail
             result = db_instance.execute(
                 "INSERT INTO payment_detail (payment_id, free_data, free_ON_a_call, free_OffN_a_call, free_ON_call, free_OffN_call, free_ON_SMS, free_OffN_SMS, ON_a_call_cost, ON_SMS_cost) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -81,6 +83,8 @@ class PaymentDetailRepository:
             return {"success": True}
 
         except Exception as e:
+            # Ghi log lỗi
+            print(f"Error inserting payment detail: {str(e)}")
             return {"error": str(e)}
 
     @staticmethod
