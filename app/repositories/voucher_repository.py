@@ -90,13 +90,13 @@ class VoucherRepository:
                 (
                     voucher.get("code"),
                     voucher.get("description"),
-                    voucher.get("conandpromo"),
+                    json.dumps(voucher.get("conandpromo"), ensure_ascii=False),
                     voucher.get("start_date"),
                     voucher.get("end_date"),
                     voucher.get("usage_limit"),
                     voucher.get("remaining_count"),
                     voucher.get("is_active"),
-                    voucher.get("staff_id"),
+                    voucher.get("staff_id").get("id"),
                     voucher.get("packages"),
                 ),
                 fetchone=True,
@@ -104,7 +104,7 @@ class VoucherRepository:
             )
 
             # Xử lý kết quả trả về từ stored procedure
-            if result.get("success") or result.get("SUCCESS"):
+            if result.get("success"):
                 return {
                     "success": True,
                     "error": False,
@@ -125,39 +125,50 @@ class VoucherRepository:
             }
 
     @staticmethod
-    def update(voucher_id, voucher: Voucher):
+    def update(voucher_id, voucher: dict):
         try:
-            print("con", type(voucher.conandpromo))
             result = db_instance.execute(
-                "CALL UpdateVoucher(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL UpdateVoucher(%s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     voucher_id,
-                    voucher.code,
-                    voucher.description,
-                    voucher.conandpromo,
-                    voucher.start_date,
-                    voucher.end_date,
-                    voucher.usage_limit,
-                    voucher.remaining_count,
-                    voucher.is_active,
-                    voucher.staff_id,
-                    voucher.packages,
+                    voucher.get("code"),
+                    voucher.get("description"),
+                    voucher.get("conandpromo"),
+                    voucher.get("start_date"),
+                    voucher.get("end_date"),
+                    voucher.get("is_active"),
+                    voucher.get("packages"),
                 ),
                 fetchone=True,
                 commit=True,
             )
-            print("kees qua", result)
-            if not result.get("error"):
-                return result
-            return result
+            print("resultd", result)
+            if result is None:
+                return {
+                    "success": False,
+                    "message": "Không nhận được phản hồi từ stored procedure.",
+                    "data": None,
+                }
+
+            message = result.get("message", "Không có thông báo.")
+            # Xử lý kết quả có 'success' hoặc 'error'
+            if result.get("success"):
+                return {"success": True, "message": message, "data": result}
+            else:
+                return {"success": False, "message": message, "data": result}
+
         except Exception as e:
-            return {"error": f"Lỗi khi cập nhật voucher: {e}"}
+            return {
+                "success": False,
+                "message": f"Lỗi khi cập nhật voucher: {str(e)}",
+                "data": None,
+            }
 
     @staticmethod
     def delete(voucher_id):
         try:
             result = db_instance.execute(
-                "CALL DeleteVoucher(%s)", (voucher_id,), fetchone=True
+                "CALL DeleteVoucher(%s)", (voucher_id,), fetchone=True, commit=True
             )
             if result.get("error"):
                 return result.get("error")
