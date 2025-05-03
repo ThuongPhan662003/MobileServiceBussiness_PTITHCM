@@ -52,9 +52,12 @@ class StaffRepository:
             )
             if result:
                 staff = Staff()
-                for key in result:
-                    setattr(staff, key, result[key])
-                staff["is_active"] = True if result["is_active"] else False
+                for key, value in result.items():
+                    if key == 'is_active':
+                        # Chuyển đổi 0/1 thành False/True
+                        staff.is_active = True if value else False
+                    else:
+                        setattr(staff, key, value)
                 return staff
             return None
         except Exception as e:

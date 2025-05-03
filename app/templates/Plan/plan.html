@@ -98,6 +98,9 @@
                     {{ 'Đang hoạt động' if plan.is_active else 'Đã khóa' }}
                 </td>
                 <td>
+                    <a href="{{ url_for('plan.update_plan', plan_id=33) }}" class="btn btn-edit">{{ plan.id }} </a>
+
+
                     <button class="btn btn-update" onclick="location.href='/plans/update/{{ plan.id }}'" {% if not plan.is_active %}disabled{% endif %}>🛠 Cập nhật</button>
                     {% if plan.is_active %}
                     <button class="btn btn-lock" data-plan-id="{{ plan.id }}" onclick="lockPlan(this)">🔒 Khóa</button>
