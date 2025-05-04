@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, session
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 
 admin_main_bp = Blueprint("admin_main_bp", __name__, url_prefix="/admin")
 
 
 @admin_main_bp.route("/")
+@login_required
 def index():
     print("Hello")
     # send_email(

@@ -11,31 +11,7 @@ from ..services.subscriber_service import SubscriberService
 from ..services.subscription_service import SubscriptionService
 
 
-# auth = Blueprint("auth", __name__)
 
-
-# @auth.route("/login", methods=["GET", "POST"])
-# def login():
-#     print("current_usre", current_user)
-#     if current_user.get_id():
-#         return redirect(url_for("main_bp.index"))
-
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         result = AccountService.check_login(form.email.data, form.password.data)
-#         print("🧾 Kết quả đăng nhập:", result.get("data"))
-
-#         if result.get("success"):
-#             user = result["data"]
-#             print("user", user)
-#             login_user(user)
-#             flash(result.get("message"), "success")
-#             return redirect(url_for("main_bp.index"))
-#         else:
-#             flash(result.get("message"), "danger")
-
-
-#     return render_template("auth/login.html", form=form)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     print("current_user", current_user)
@@ -45,7 +21,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         result = AccountService.check_login(form.email.data, form.password.data)
-        print("🧾 Kết quả đăng nhập:", result["data"])
 
         if result.get("success"):
             user = result["data"]["account_id"]
@@ -77,7 +52,6 @@ def login():
                 session["subscriber_type"] = user_data.get("subscriber_type")
                 flash(result.get("message"), "success")
 
-
             # ➤ Điều hướng theo role
             if result["data"]["role_type"] == "staff":
                 print("staff")
@@ -86,6 +60,7 @@ def login():
                 return redirect(url_for("main_bp.index"))
         else:
             flash(result.get("message"), "danger")
+            return render_template("auth/login.html", form=form)
 
     return render_template("auth/login.html", form=form)
 
@@ -116,6 +91,7 @@ def register():
             return redirect(url_for("auth.register"))
     return render_template("auth/register.html", form=form)
 
+
 @auth.route("/subscribers/<int:subscriber_id>", methods=["GET"])
 def view_subscriber(subscriber_id):
     # Lấy thông tin của subscriber, customer và subscription
@@ -129,4 +105,9 @@ def view_subscriber(subscriber_id):
     print("Subscription: ", subscriptions)
 
     # Truyền các dữ liệu vào HTML template
-    return render_template("home/cuoc.html", subscriber=subscriber, customer=customer, subscriptions=subscriptions)
+    return render_template(
+        "home/cuoc.html",
+        subscriber=subscriber,
+        customer=customer,
+        subscriptions=subscriptions,
+    )

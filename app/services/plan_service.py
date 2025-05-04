@@ -42,6 +42,10 @@ class PlanService:
         return result
 
     @staticmethod
+    def get_plan_by_id(plan_id):
+        return PlanRepository.get_by_id(plan_id)
+
+    @staticmethod
     def get_plan_by_code(code):
         result = PlanRepository.get_by_code(code)
         if isinstance(result, dict) and "error" in result:

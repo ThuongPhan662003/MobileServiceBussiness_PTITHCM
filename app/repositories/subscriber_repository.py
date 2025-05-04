@@ -37,14 +37,9 @@ class SubscriberRepository:
                     else None
                 )
                 s.warning_date = row.get("warning_date")
-                s.subscriber_type = row.get("subscriber_type")
-
-                # Xử lý kiểu bytes (bit) cho is_messaged
-                is_messaged_raw = row.get("is_messaged")
-                if isinstance(is_messaged_raw, bytes):
-                    s.is_messaged = bool(int.from_bytes(is_messaged_raw, "little"))
-                else:
-                    s.is_messaged = bool(is_messaged_raw)
+                s.subscriber = row.get("subscriber")
+                s.ON_a_call_cost=row.get("ON_a_call_cost")
+                s.ON_SMS_cost=row.get("ON_SMS_cost")
 
                 subscribers.append(s.to_dict())
 
@@ -85,6 +80,29 @@ class SubscriberRepository:
             return None
 
     @staticmethod
+    def get_active_service_ids(subscriber_id: int):
+        try:
+            # Thực thi stored procedure để lấy các service_id mà thuê bao đã đăng ký
+            result = db_instance.execute(
+                """
+                CALL GetActiveServiceIdBySubscriber(%s);
+                """, (subscriber_id,),
+                fetchall=True
+            )
+
+            # Kiểm tra kết quả trả về có dữ liệu hay không
+            if result:
+                # Trả về kết quả gốc từ database, không cần xử lý thêm
+                print(f"Kết quả trả về từ database: {result}")  # In ra kết quả trả về
+                return result
+            else:
+                return []  # Trả về danh sách rỗng nếu không có gói cước nào được đăng ký
+
+        except Exception as e:
+            print(f"Lỗi khi lấy service_id của thuê bao {subscriber_id}: {e}")
+            return []  # Trả về danh sách rỗng khi có lỗi xảy ra
+
+    @staticmethod
     def get_by_account_id(account_id: int):
         try:
             result = db_instance.execute(
@@ -99,49 +117,58 @@ class SubscriberRepository:
     @staticmethod
     def create(data: Subscriber):
         try:
-            print(data.to_dict())
+            # Chuyển đổi bool subscriber thành chuỗi "TRASAU" hoặc "TRATRUOC"
+            subscriber_type = "TRASAU" if data.subscriber else "TRATRUOC"
+
             result = db_instance.execute(
-                "CALL AddSubscriber(%s, %s, %s, %s, %s, %s)",  # SP: AddSubscriber
+                "CALL AddSubscriber(%s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     data.phone_number,
                     float(data.main_balance or 0),
                     data.expiration_date,
-                    data.subscriber_type,  # Kiểu BOOLEAN: Trả sau = True, Trả trước = False
                     data.customer_id,
                     data.account_id,
+                    float(data.ON_a_call_cost or 0),
+                    float(data.ON_SMS_cost or 0),
+                    subscriber_type,
                 ),
                 fetchone=True,
                 commit=True,
             )
 
-            if result.get("error"):
+            if result and result.get("error"):
                 return result["error"]
             return True
+
         except Exception as e:
-            print(f"Lỗi khi tạo subscriber: {e}")
+            print(f"❌ Lỗi khi tạo subscriber: {e}")
             return str(e)
 
     @staticmethod
     def update(subscriber_id, data: Subscriber):
         try:
             result = db_instance.execute(
-                "CALL UpdateSubscriber(%s, %s, %s, %s, %s, %s, %s, %s, %s)",  # Thêm parameter subscriber_type
+                """
+                CALL UpdateSubscriber(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
                 (
                     subscriber_id,
                     data.phone_number,
                     float(data.main_balance or 0),
                     data.expiration_date,
                     data.is_active,
-                    data.customer_id,
                     data.warning_date,
-                    data.subscriber_type,  # Thêm subscriber_type
+                    data.subscriber,  # Tên hiển thị hoặc mã thuê bao
+                    data.customer_id,
                     data.account_id,
+                    float(data.ON_a_call_cost or 0),
+                    float(data.ON_SMS_cost or 0),
                 ),
                 fetchone=True,
                 commit=True,
             )
-            if result.get("error"):
-                return result["error"]
+            if result and not result.get("success"):
+                return result.get("message", "Cập nhật thất bại")
             return True
         except Exception as e:
             print(f"Lỗi khi cập nhật subscriber: {e}")

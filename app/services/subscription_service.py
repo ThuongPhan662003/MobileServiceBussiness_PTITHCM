@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 
+
 from app.repositories.plan_repository import PlanRepository
 from app.repositories.plandetail_repository import PlanDetailRepository
 from app.repositories.subscriber_repository import SubscriberRepository
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.models.subscription import Subscription
+from app.services.plan_service import PlanService
 
 
 class SubscriptionService:
@@ -21,11 +23,33 @@ class SubscriptionService:
         try:
             subscriber = SubscriberRepository.get_by_id(subscriber_id)
 
+            plans = PlanRepository.get_by_plan_id(plan_id)
+            print(f"Plans object: {plans.to_dict()}")  # In ra toàn bộ đối tượng plans
             created_at = datetime.now()
             plan = PlanDetailRepository.get_by_id(plan_id)
+
             if not plan:
                 return {"error": "Không tìm thấy gói cước."}
-            activation_date=datetime.now()
+
+            active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
+
+            active_service_ids_flat = {service['service_id'] for sublist in active_service_ids_set for service in
+                                       sublist}
+
+            print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")  # In service_id của gói cước
+            print(f"Active Service IDs đã được xử lý: {active_service_ids_flat}")
+
+            # Kiểm tra gói cước muốn đăng ký
+            if plans.service_id.id == 2:
+                if 2 in active_service_ids_flat:
+                    return {"error": "Bạn đã đăng kí gói cước chính."}
+
+            elif plans.service_id.id in {3, 4, 5, 6}:
+                if any(service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat):
+                    return {
+                        "error": "Bạn đã đăng kí gói cước di động."
+                    }
+            activation_date = datetime.now()
             if subscriber.subscriber_type == "TRATRUOC":
                 if plan.duration < 1:
                     expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
@@ -34,26 +58,18 @@ class SubscriptionService:
                     expiration_date = today + timedelta(days=int(plan.duration))
             else:
                 if plan.duration < 1:
-                    # Trường hợp nhỏ hơn 1: cộng số giờ (duration * 24)
                     expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
-
                 elif 1 <= plan.duration <= 30:
-                    # Trường hợp từ 1 đến 30: cộng số ngày, reset về 0h
                     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
                     expiration_date = today + timedelta(days=int(plan.duration))
-
                 else:
-                    # Trường hợp lớn hơn 30: quy đổi thành số tháng
                     now = datetime.now()
                     months_to_add = int(plan.duration // 30)
-
-                    # Tính tổng tháng mới
                     new_month = now.month + months_to_add
                     new_year = now.year + (new_month - 1) // 12
                     new_month = (new_month - 1) % 12 + 1
-
-                    # Tạo ngày hết hạn: ngày 1, giờ 0:00
                     expiration_date = datetime(new_year, new_month, 1, 0, 0, 0)
+
             subscription = Subscription(
                 plan_id=plan_id,
                 subscriber_id=subscriber_id,
@@ -71,8 +87,10 @@ class SubscriptionService:
                 return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
             else:
                 return {"error": "Lỗi khi tạo subscription."}
+
         except Exception as e:
             return {"error": str(e)}
+
     @staticmethod
     def update_subscription(subscription_id, data: dict):
         try:

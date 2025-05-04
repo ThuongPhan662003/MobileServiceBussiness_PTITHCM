@@ -1,16 +1,19 @@
 from flask import Blueprint, request, jsonify, render_template
+from flask_login import login_required
 from app.services.customer_service import CustomerService
 
 customer_bp = Blueprint("customer", __name__, url_prefix="/customers")
 
 
 @customer_bp.route("/", methods=["GET"])
+@login_required
 def get_all_customers():
     customers = CustomerService.get_all_customers()
     return render_template("customers/customer.html", customers=customers)
 
 
 @customer_bp.route("/<int:id>", methods=["GET"])
+@login_required
 def get_customer_by_id(id):
 
     customer = CustomerService.get_customer_by_id(id)
@@ -20,6 +23,7 @@ def get_customer_by_id(id):
 
 
 @customer_bp.route("/", methods=["POST"])
+@login_required
 def create_customer():
     data = request.get_json()
     result = CustomerService.create_customer(data)
@@ -29,6 +33,7 @@ def create_customer():
 
 
 @customer_bp.route("/<int:customer_id>", methods=["PUT"])
+@login_required
 def update_customer(customer_id):
     data = request.get_json()
     result = CustomerService.update_customer(customer_id, data)
@@ -38,6 +43,7 @@ def update_customer(customer_id):
 
 
 @customer_bp.route("/<int:customer_id>", methods=["DELETE"])
+@login_required
 def delete_customer(customer_id):
     result = CustomerService.delete_customer(customer_id)
     if result.get("success"):

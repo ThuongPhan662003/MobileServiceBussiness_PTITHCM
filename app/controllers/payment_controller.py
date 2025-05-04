@@ -1,4 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, jsonify, url_for
+from flask_login import login_required
 import paypalrestsdk
 
 from app.repositories.plan_repository import PlanRepository
@@ -9,15 +10,15 @@ from app.services.payment_service import PaymentService
 payment_bp = Blueprint("payment_bp", __name__, url_prefix="/payments")
 
 
-
-
 @payment_bp.route("/getallpays", methods=["GET"])
+@login_required
 def get_all_payments():
     payments = PaymentService.get_all_payments()
     return jsonify(payments), 200
 
 
 @payment_bp.route("/<int:payment_id>", methods=["GET"])
+@login_required
 def get_payment_by_id(payment_id):
     payment = PaymentService.get_payment_by_id(payment_id)
     if payment:
@@ -29,7 +30,9 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 
+
 @payment_bp.route("/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
+@login_required
 def create_payment(subscriber_id, plan_id):
     try:
         subscription_id = SubscriptionRepository.get_subscription_by_subscriber_and_plan(subscriber_id, plan_id)
@@ -86,9 +89,8 @@ def create_payment(subscriber_id, plan_id):
         return jsonify({"error": str(e)}), 500
 
 
-
-
 @payment_bp.route("/<int:payment_id>", methods=["PUT"])
+@login_required
 def update_payment(payment_id):
     data = request.get_json()
     result = PaymentService.update_payment(payment_id, data)
@@ -103,5 +105,3 @@ def delete_payment(payment_id):
     if result.get("success"):
         return jsonify({"message": "Payment deleted successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
-
-
