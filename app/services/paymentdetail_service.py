@@ -16,12 +16,10 @@ class PaymentDetailService:
     @staticmethod
     def create_payment_detail(payment_id: int, plan_id: int):
         try:
-
             # Lấy thông tin từ bảng plan
             plan = PlanRepository.get_by_id(plan_id)  # Giả sử bạn có phương thức này
             if not plan:
                 return {"error": "Không tìm thấy thông tin gói cước"}
-
             # Chuẩn bị dữ liệu để chèn vào paymentdetail
             payment_detail_data = {
                 "payment_id": payment_id,
@@ -36,11 +34,8 @@ class PaymentDetailService:
                 "ON_SMS_cost": plan.ON_SMS_cost,
             }
 
-            # Nếu một trường không có giá trị, thay thế bằng NULL
             payment_detail_data = {key: value if value is not None else None for key, value in
                                    payment_detail_data.items()}
-
-            # Chèn vào bảng paymentdetail
             result = PaymentDetailRepository.insert(payment_detail_data)
 
             if result.get("success"):

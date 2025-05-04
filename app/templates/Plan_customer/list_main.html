@@ -285,10 +285,10 @@
 
 <!-- JavaScript -->
 <script>
-    const subscriberId = {{ session['subscriber_id']  }};
+    const subscriberId = {{ session['subscriber_id'] }};
+    const subscriberType = "{{ session['subscriber_type'] }}"; // Đảm bảo là string
     let currentPlanId = null;
 
-    // Mở modal và cập nhật thông tin gói cước
     function openModal(packageName, packagePrice, planId) {
         document.getElementById('packageName').textContent = packageName;
         document.getElementById('packagePrice').textContent = packagePrice;
@@ -297,111 +297,122 @@
         document.getElementById('methodError').style.display = 'none';
     }
 
-    // Đóng modal
     function closeModal() {
         document.getElementById('registerModal').classList.add('hidden');
     }
 
-    // Xác nhận đăng ký gói cước
     async function confirmRegister() {
-        const selectedMethod = document.querySelector('input[name="method"]:checked');
+        let method = 'account';
 
-        // Kiểm tra nếu cần chọn phương thức (dành cho TRATRUOC)
-        {% if session['subscriber_type'] == 'TRATRUOC' %}
-        if (!selectedMethod) {
-            document.getElementById('methodError').style.display = 'block';
-            return;
+        if (subscriberType === 'TRATRUOC') {
+            const selectedMethod = document.querySelector('input[name="method"]:checked');
+            if (!selectedMethod) {
+                document.getElementById('methodError').style.display = 'block';
+                return;
+            }
+            method = selectedMethod.value;
+
+            if (method === 'account') {
+                try {
+                    const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
+                    const balanceData = await balanceResponse.json();
+
+                    if (!balanceResponse.ok) {
+                        alert("Không thể lấy số dư tài khoản.");
+                        return;
+                    }
+
+                    const packagePriceRaw = document.getElementById("packagePrice").textContent;
+                    const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
+                    const balance = parseFloat(balanceData.main_balance);
+
+                    if (balance < packagePrice) {
+                        alert("Số dư tài khoản không đủ để đăng ký gói này.");
+                        return;
+                    }
+                } catch (err) {
+                    alert("Lỗi kiểm tra số dư: " + err.message);
+                    return;
+                }
+            }
+
+            if (method === 'qr') {
+                const packagePriceRaw = document.getElementById("packagePrice").textContent;
+                const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
+                const packageName = document.getElementById("packageName").textContent;
+
+                const url = new URL("/pay-process", window.location.origin);
+                url.searchParams.append("subscriber_id", subscriberId);
+                url.searchParams.append("plan_id", currentPlanId);
+                url.searchParams.append("price", packagePrice);
+                url.searchParams.append("plan_code", packageName);
+
+                window.location.href = url.toString();
+                return;
+            }
         }
-        const method = selectedMethod.value;
-        {% else %}
-        const method = 'account';
-        {% endif %}
 
-        if (method === 'account') {
-            try {
-                const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
-                const balanceData = await balanceResponse.json();
+        // Đăng ký gói
+        try {
+            const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
+                method: "POST"
+            });
+            const subscriptionResult = await subscriptionResponse.json();
 
-                if (!balanceResponse.ok) {
-                    alert("Không thể lấy số dư tài khoản: " + (balanceData.error || 'Lỗi không xác định.'));
-                    return;
-                }
+            if (!subscriptionResponse.ok) {
+                alert("Không thể đăng ký gói cước: " + (subscriptionResult.error || "Lỗi không xác định."));
+                return;
+            }
 
-                const packagePrice = parseInt(document.getElementById("packagePrice").textContent);
-                if (balanceData.main_balance < packagePrice) {
-                    alert("Số dư tài khoản không đủ để đăng ký gói này.");
-                    return;
-                }
+            alert("Đăng ký gói cước thành công!");
+            closeModal();
 
-                const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
+            // TRẢ TRƯỚC: thực hiện trừ tiền
+            if (subscriberType === 'TRATRUOC' && method === 'account') {
+                const deductResponse = await fetch(`/subscriptions/deduct/${subscriberId}/${currentPlanId}`, {
                     method: "POST"
                 });
-                const subscriptionResult = await subscriptionResponse.json();
+                const deductResult = await deductResponse.json();
 
-                if (subscriptionResponse.ok) {
-                    alert("Đăng ký gói cước thành công!");
-                    closeModal();
-
-                    const deductResponse = await fetch(`/subscriptions/deduct/${subscriberId}/${currentPlanId}`, {
-                        method: "POST"
-                    });
-                    const deductResult = await deductResponse.json();
-
-                    if (deductResponse.ok && deductResult.success) {
-                        const dueDate = new Date();
-                        dueDate.setDate(dueDate.getDate());
-
-                        const paymentResponse = await fetch(`/payments/${subscriberId}/${currentPlanId}`, {
-                            method: "POST",
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                payment_method: 'main_balance',
-                                is_paid: true,
-                                due_date: dueDate.toISOString()
-                            })
-                        });
-
-                        if (paymentResponse.ok) {
-                            const paymentData = await paymentResponse.json();
-                            const idPayment = paymentData.id_payment;
-
-                            const paymentDetailResponse = await fetch(`/payment-details/${idPayment}/${currentPlanId}`, {
-                                method: "POST"
-                            });
-
-                            if (paymentDetailResponse.ok) {
-                                alert("Thanh toán thành công và chi tiết đã được lưu!");
-                            } else {
-                                const paymentDetailResult = await paymentDetailResponse.json();
-                                alert("Lỗi khi thêm chi tiết thanh toán: " + (paymentDetailResult.error || "Lỗi không xác định."));
-                            }
-                        } else {
-                            alert("Lỗi khi tạo bản ghi thanh toán.");
-                        }
-                    } else {
-                        alert("Lỗi khi trừ tiền tài khoản: " + (deductResult.error || "Lỗi không xác định."));
-                    }
-                } else {
-                    alert("Không thể đăng ký gói cước: " + (subscriptionResult.error || "Lỗi không xác định."));
+                if (!deductResponse.ok || !deductResult.success) {
+                    alert("Lỗi khi trừ tiền tài khoản: " + (deductResult.error || "Lỗi không xác định."));
+                    return;
                 }
-            } catch (error) {
-                alert("Lỗi xảy ra: " + error.message);
             }
-        } else if (method === 'qr') {
-            const packagePriceRaw = document.getElementById("packagePrice").textContent;
-            console.log(packagePriceRaw)
-            const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
-            const packageName = document.getElementById("packageName").textContent;
 
-            const url = new URL("/pay-process", window.location.origin);
-            url.searchParams.append("subscriber_id", subscriberId);
-            url.searchParams.append("plan_id", currentPlanId);
-            url.searchParams.append("price", packagePrice);
-            url.searchParams.append("plan_code", packageName);
+            // Tạo bản ghi thanh toán
+            const dueDate = new Date();
+            const paymentResponse = await fetch(`/payments/${subscriberId}/${currentPlanId}`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    payment_method: subscriberType === 'TRATRUOC' ? method : 'postpaid',
+                    is_paid: subscriberType === 'TRATRUOC',
+                    due_date: dueDate.toISOString()
+                })
+            });
 
-            window.location.href = url.toString();
-            return;
+            if (paymentResponse.ok) {
+                const paymentData = await paymentResponse.json();
+                const idPayment = paymentData.id_payment;
+
+                const paymentDetailResponse = await fetch(`/payment-details/${idPayment}/${currentPlanId}`, {
+                    method: "POST"
+                });
+
+                if (paymentDetailResponse.ok) {
+                    alert("Thanh toán thành công và chi tiết đã được lưu!");
+                } else {
+                    const paymentDetailResult = await paymentDetailResponse.json();
+                    alert("Lỗi khi thêm chi tiết thanh toán: " + (paymentDetailResult.error || "Lỗi không xác định."));
+                }
+            } else {
+                alert("Lỗi khi tạo bản ghi thanh toán.");
+            }
+        } catch (error) {
+            alert("Lỗi xảy ra: " + error.message);
         }
     }
 </script>
+
 {% endblock %}

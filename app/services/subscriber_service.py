@@ -24,64 +24,63 @@ class SubscriberService:
     @staticmethod
     def create_subscriber(data: dict):
         try:
-            # In ra dữ liệu nhận được từ client
             print("Dữ liệu nhận được:", data)
 
+            # Kiểm tra số điện thoại
             phone_number = data.get("phone_number")
+            print(phone_number)
             if not phone_number:
-                return {"error": "Số điện thoại không được để trống"}
-
-            # Gọi stored procedure tạo tài khoản từ số điện thoại
+                return {"success": False, "message": "Số điện thoại không được để trống"}
             account_result = AccountRepository.create_account_from_phone(phone_number)
-            print("Kết quả trả về từ stored procedure:", account_result)
-            if isinstance(account_result, dict) and "error" in account_result:
-                return {"error": account_result["error"]}
-            account_id = account_result  # Lấy account_id từ kết quả stored procedure
-
-            # Cập nhật lại account_id vào dữ liệu
+            account_id = account_result
+            print("Kết quả từ AccountRepository:", account_result)
             data["account_id"] = account_id
-
-            # Chuyển đổi các dữ liệu khác
+            # Lấy và chuyển đổi các thông tin khác
             main_balance = Decimal(data.get("main_balance", 0))
             expiration_date_str = data.get("expiration_date")
             expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d") if expiration_date_str else None
 
-            # Kiểm tra và ép kiểu subscriber_type thành chuỗi
-            subscriber_type_str = str(data.get("subscriber_type", "Trả trước")).strip()
+            # Chuyển đổi subscriber thành chuỗi hợp lệ ("Trả sau" hoặc "Trả trước")
+            subscriber_type_str = str(data.get("subscriber", "Trả trước")).strip()
+            if subscriber_type_str == "Trả sau":
+                subscriber = "Trả sau"  # Để kiểu chuỗi "Trả sau"
+            elif subscriber_type_str == "Trả trước":
+                subscriber = "Trả trước"  # Để kiểu chuỗi "Trả trước"
+            else:
+                return {"success": False, "message": "Loại thuê bao không hợp lệ"}
 
-            # Kiểm tra nếu subscriber_type là "Trả sau" hoặc "Trả trước"
-            subscriber = True if subscriber_type_str == "Trả sau" else False
+            # Chuyển customer_id về kiểu int
+            try:
+                customer_id = int(data.get("customer_id"))
+            except ValueError:
+                return {"success": False, "message": "Customer ID không hợp lệ"}
 
-            customer_id = int(data.get("customer_id"))
+            # Lấy thêm chi phí gọi và tin nhắn
+            call_cost = float(data.get("ON_a_call_cost", 0))
+            sms_cost = float(data.get("ON_SMS_cost", 0))
 
             # Tạo đối tượng Subscriber
             new_subscriber = Subscriber(
                 phone_number=phone_number,
                 main_balance=main_balance,
                 expiration_date=expiration_date,
-                subscriber_type=subscriber_type_str,  # Gán chuỗi subscriber_type vào đây
+                subscriber=subscriber,  # Truyền vào chuỗi "Trả sau" hoặc "Trả trước"
                 customer_id=customer_id,
-                account_id=account_id  # Gán account_id vào đối tượng subscriber
+                account_id=account_id,
+                ON_a_call_cost=call_cost,
+                ON_SMS_cost=sms_cost
             )
 
-            # ✅ In ra thông tin trước khi gọi stored procedure
-            print("Chuẩn bị thêm subscriber với dữ liệu:")
-            print(new_subscriber.to_dict())
-
-            # Gọi phương thức create từ repository
+            # Gọi repository để lưu subscriber vào CSDL
             result = SubscriberRepository.create(new_subscriber)
-
-            # In kết quả trả về từ repository
-            print("Kết quả trả về từ repository:", result)
-
-            # Kiểm tra kết quả trả về từ repository
             if result is True:
-                return jsonify({"success": True, "message": "Thêm subscriber thành công"})
+                return {"success": True, "message": "Tạo thuê bao thành công"}
             else:
-                return jsonify({"error": result})  # Trả về lỗi nếu có
+                return {"success": False, "message": str(result)}
 
         except Exception as e:
-         return jsonify({"error": str(e)})
+            print(f"❌ Lỗi khi tạo subscriber: {e}")
+            return {"success": False, "message": str(e)}
 
     @staticmethod
     def update_subscriber(subscriber_id, data: dict):
