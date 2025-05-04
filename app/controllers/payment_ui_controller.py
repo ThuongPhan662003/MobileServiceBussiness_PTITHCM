@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask_login import login_required
 from app.services.payment_service import PaymentService
 from app.services.paymentdetail_service import PaymentDetailService
 import paypalrestsdk
@@ -20,6 +21,7 @@ paypalrestsdk.configure(
 
 
 @payment_ui_bp.route("/history", methods=["GET"])
+@login_required
 def payment_history():
     payment_method = request.args.get("payment_method", "Tất cả")
     payments = PaymentService.get_all_payments()
@@ -41,6 +43,7 @@ def payment_history():
 
 
 @payment_ui_bp.route("/history/search", methods=["POST"])
+@login_required
 def search_payments():
     data = request.form
     subscription_id = data.get("subscription_id")
@@ -76,11 +79,13 @@ def search_payments():
 
 
 @payment_ui_bp.route("/history/reset", methods=["GET"])
+@login_required
 def reset_search():
     return redirect(url_for("payment_ui_bp.payment_history"))
 
 
 @payment_ui_bp.route("/details/<int:payment_id>", methods=["GET"])
+@login_required
 def payment_details(payment_id):
     payment = PaymentService.get_payment_by_id(payment_id)
     details = PaymentDetailService.get_by_payment_id(payment_id)
@@ -95,6 +100,7 @@ def payment_details(payment_id):
 
 
 @payment_ui_bp.route("/pay/<int:payment_id>", methods=["POST"])
+@login_required
 def initiate_payment(payment_id):
     payment = PaymentService.get_payment_by_id(payment_id)
     if not payment or payment.is_paid:
@@ -149,10 +155,12 @@ def initiate_payment(payment_id):
 
 
 @payment_ui_bp.route("/payment/success/<int:payment_id>", methods=["GET"])
+@login_required
 def payment_success(payment_id):
     return redirect(url_for("payment_ui_bp.payment_history"))
 
 
 @payment_ui_bp.route("/payment/cancel", methods=["GET"])
+@login_required
 def payment_cancel():
     return redirect(url_for("payment_ui_bp.payment_history"))

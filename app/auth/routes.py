@@ -11,31 +11,7 @@ from ..services.subscriber_service import SubscriberService
 from ..services.subscription_service import SubscriptionService
 
 
-# auth = Blueprint("auth", __name__)
 
-
-# @auth.route("/login", methods=["GET", "POST"])
-# def login():
-#     print("current_usre", current_user)
-#     if current_user.get_id():
-#         return redirect(url_for("main_bp.index"))
-
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         result = AccountService.check_login(form.email.data, form.password.data)
-#         print("🧾 Kết quả đăng nhập:", result.get("data"))
-
-#         if result.get("success"):
-#             user = result["data"]
-#             print("user", user)
-#             login_user(user)
-#             flash(result.get("message"), "success")
-#             return redirect(url_for("main_bp.index"))
-#         else:
-#             flash(result.get("message"), "danger")
-
-
-#     return render_template("auth/login.html", form=form)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     print("current_user", current_user)

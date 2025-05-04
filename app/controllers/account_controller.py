@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_required
 from app.services.account_service import AccountService
 
 account_bp = Blueprint("account", __name__, url_prefix="/accounts")
 
 
 @account_bp.route("/", methods=["GET"])
+@login_required
 def get_all_accounts():
     accounts = AccountService.get_all_accounts()
     print(accounts)
@@ -12,6 +14,7 @@ def get_all_accounts():
 
 
 @account_bp.route("/<int:account_id>", methods=["GET"])
+@login_required
 def get_account_by_id(account_id):
     account = AccountService.get_account_by_id(account_id)
     if account:
@@ -20,6 +23,7 @@ def get_account_by_id(account_id):
 
 
 @account_bp.route("/", methods=["POST"])
+@login_required
 def create_account():
     data = request.get_json()
     result = AccountService.create_account(data)
@@ -29,6 +33,7 @@ def create_account():
 
 
 @account_bp.route("/<int:account_id>", methods=["PUT"])
+@login_required
 def update_account(account_id):
     data = request.get_json()
     result = AccountService.update_account(account_id, data)
@@ -38,6 +43,7 @@ def update_account(account_id):
 
 
 @account_bp.route("/<int:account_id>", methods=["DELETE"])
+@login_required
 def delete_account(account_id):
     result = AccountService.delete_account(account_id)
     if result.get("success"):
