@@ -36,7 +36,10 @@ class PlanService:
 
     @staticmethod
     def get_all_plans():
-        return PlanRepository.get_all()
+        result = PlanRepository.get_all()
+        if isinstance(result, dict) and "error" in result:
+            return []
+        return result
 
     @staticmethod
     def get_plan_by_id(plan_id):
@@ -44,11 +47,19 @@ class PlanService:
 
     @staticmethod
     def get_plan_by_code(code):
-        return PlanRepository.get_by_code(code)
+        result = PlanRepository.get_by_code(code)
+        if isinstance(result, dict) and "error" in result:
+            return None
+        return result
 
     @staticmethod
     def check_syntax_exists(field, value, plan_id=None):
-        return PlanRepository.check_syntax_exists(field, value, plan_id)
+        if not value:
+            return False
+        result = PlanRepository.check_syntax_exists(field, value, plan_id)
+        if isinstance(result, dict) and "error" in result:
+            return False
+        return result
 
     @staticmethod
     def create_plan(data):
@@ -62,7 +73,7 @@ class PlanService:
                 return {"success": True}
             return {"success": False, "error": result}
         except Exception as e:
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": f"Không thể tạo gói cước: {str(e)}"}
 
     @staticmethod
     def update_plan(plan_id, data):
@@ -76,7 +87,7 @@ class PlanService:
                 return {"success": True}
             return {"success": False, "error": result}
         except Exception as e:
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": f"Không thể cập nhật gói cước: {str(e)}"}
 
     @staticmethod
     def lock_plan(plan_id):
@@ -86,23 +97,27 @@ class PlanService:
                 return {"success": True}
             return {"success": False, "error": result}
         except Exception as e:
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": f"Không thể khóa gói cước: {str(e)}"}
 
     @staticmethod
     def search_plans(code, price, is_active, object_type):
-        try:
-            return PlanRepository.search(code, price, is_active, object_type)
-        except Exception as e:
+        result = PlanRepository.search(code, price, is_active, object_type)
+        if isinstance(result, dict) and "error" in result:
             return []
+        return result
 
     @staticmethod
     def get_sub_services(parent_service_id):
-        return PlanRepository.get_sub_services(parent_service_id)
+        result = PlanRepository.get_sub_services(parent_service_id)
+        if isinstance(result, dict) and "error" in result:
+            return []
+        return result
 
     @staticmethod
     def get_plans_by_service_id(service_id):
         plans = PlanRepository.get_plans_by_service_id(service_id)
-        print("service", plans)
+        if isinstance(plans, dict) and "error" in plans:
+            return []
         return [
             {
                 "id": plan["id"],
@@ -118,6 +133,8 @@ class PlanService:
     @staticmethod
     def get_plan_details(plan_id):
         plan = PlanRepository.get_by_id(plan_id)
+        if isinstance(plan, dict) and "error" in plan:
+            return None
         if plan:
             plan_dict = plan.to_dict()
             return {
@@ -144,4 +161,7 @@ class PlanService:
 
     @staticmethod
     def get_all_codes():
-        return PlanRepository.get_all_codes()
+        result = PlanRepository.get_all_codes()
+        if isinstance(result, dict) and "error" in result:
+            return []
+        return result
