@@ -15,8 +15,6 @@ class VoucherRepository:
             vouchers = []
 
             for row in result[0]:
-                print("row", row)
-                breakpoint()
                 voucher = Voucher()
                 voucher.id = row.get("id")
                 voucher.code = row.get("code")
