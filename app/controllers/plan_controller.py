@@ -124,11 +124,8 @@ def get_all_plans():
         plans = PlanService.get_all_plans()
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             plan_list = [plan.to_dict() for plan in plans]
-            
             return jsonify(plan_list), 200
-        print(len(plans))
         return render_template("Plan/plan.html", plans=plans)
-
     except Exception as e:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({"error": f"Lỗi khi lấy danh sách gói cước: {str(e)}"}), 500
@@ -185,17 +182,15 @@ def create_plan():
         return render_template("Plan/create_plan.html", data=data), 400
 
 
-@plan_bp.route("/update/<int:plan_id>", methods=["GET","POST"])
+@plan_bp.route("/update/<int:plan_id>", methods=["GET", "POST"])
 def update_plan(plan_id):
-    print("run")
-    print(f"Update plan with ID: {plan_id}")
     plan = PlanService.get_plan_by_id(plan_id)
     if not plan:
         flash("Gói cước không tồn tại!", "error")
         return redirect(url_for("plan.get_all_plans")), 404
 
     if request.method == "GET":
-        return render_template("Plan/update_plan.html", plan=plan.to_dict(), plan_id=plan_id)
+        return render_template("Plan/update_plan.html", plan=plan.to_dict_plan(), plan_id=plan_id)
 
     if request.method == "POST":
         data = request.form.to_dict()
@@ -242,7 +237,7 @@ def update_plan(plan_id):
 
 
 @plan_bp.route("/lock/<int:plan_id>", methods=["POST"])
-def lock_plan():
+def lock_plan(plan_id):
     result = PlanService.lock_plan(plan_id)
     if result.get("success"):
         flash("Khóa gói cước thành công!", "success")
@@ -255,24 +250,34 @@ def lock_plan():
 def search_plans():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"error": "Dữ liệu JSON không hợp lệ"}), 400
+
         code = data.get("code") or None
         price = data.get("price") or None
         is_active = data.get("is_active")
         object_type = data.get("object_type")
+
+        print("Received data:", data)  # Debug log
 
         if not object_type or object_type.strip() == "":
             object_type = None
         if is_active == "" or is_active is None:
             is_active = None
         else:
-            is_active = int(is_active)
+            try:
+                is_active = int(is_active)
+            except (ValueError, TypeError):
+                return jsonify({"error": "Trạng thái phải là số (0 hoặc 1)"}), 400
         if price:
             try:
                 price = float(price)
-            except ValueError:
+            except (ValueError, TypeError):
                 return jsonify({"error": "Giá phải là số"}), 400
 
+        print("Processed params:", code, price, is_active, object_type)  # Debug log
         plans = PlanService.search_plans(code, price, is_active, object_type)
         return jsonify(plans)
     except Exception as e:
+        print("Error in search_plans:", str(e))  # Debug log
         return jsonify({"error": f"Lỗi khi tìm kiếm: {str(e)}"}), 500
