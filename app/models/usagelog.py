@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime
 from datetime import datetime, date
 
+
 class UsageLog:
     __id: Optional[int]
     __type: Optional[str]
@@ -131,7 +132,6 @@ class UsageLog:
             raise ValueError("contents must be a string")
         self.__contents = value
 
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -144,4 +144,3 @@ class UsageLog:
             "to": self.to,
             "contents": self.contents,
         }
-

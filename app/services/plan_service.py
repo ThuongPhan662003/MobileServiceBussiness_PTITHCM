@@ -161,3 +161,7 @@ class PlanService:
         if isinstance(result, dict) and "error" in result:
             return []
         return result
+
+    @staticmethod
+    def get_plan_detail_from_subscription(subscription_id):
+        return PlanRepository.get_plan_by_subscription_id(subscription_id)
