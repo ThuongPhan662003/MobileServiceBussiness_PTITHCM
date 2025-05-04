@@ -107,7 +107,9 @@ class PlanRepository:
                     else None
                 )
                 plan.object_type = (
-                    row.get("object_type") if row.get("object_type") is not None else None
+                    row.get("object_type")
+                    if row.get("object_type") is not None
+                    else None
                 )
                 plan.duration = (
                     row.get("duration") if row.get("duration") is not None else None
@@ -302,7 +304,7 @@ class PlanRepository:
     @staticmethod
     def lock(plan_id):
         try:
-            print("plan_id: ",plan_id)
+            print("plan_id: ", plan_id)
             result = db_instance.execute(
                 "CALL LockPlan(%s)", (plan_id,), fetchone=True, commit=True
             )
@@ -443,31 +445,31 @@ class PlanRepository:
     @staticmethod
     def _row_to_plan(row):
         plan = Plan()
-#         plan.id = row.get("id")
-#         for key in row:
-#             print("key", key)
-#             if key in ("is_active", "auto_renew"):
-#                 value = row[key]
-#                 setattr(plan, key, bool(value) if value is not None else False)
-#             elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
-#                 value = row[key]
-#                 setattr(plan, key, float(value) if value is not None else None)
-#             elif key in ("service_id"):
-#                 value = ServiceRepository.get_by_id(row[key])
-#                 setattr(plan, key, value if value else None)
-#             elif key in ("staff_id"):
-#                 value = StaffRepository.get_by_id(row[key])
-#                 if isinstance(value, dict) and "error" in value:
-#                     setattr(plan, key, None)
-#                 else:
-#                     setattr(plan, key, value)
-#             else:
-#                 print("key", key)
-#                 setattr(plan, key, row[key])
+        #         plan.id = row.get("id")
+        #         for key in row:
+        #             print("key", key)
+        #             if key in ("is_active", "auto_renew"):
+        #                 value = row[key]
+        #                 setattr(plan, key, bool(value) if value is not None else False)
+        #             elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+        #                 value = row[key]
+        #                 setattr(plan, key, float(value) if value is not None else None)
+        #             elif key in ("service_id"):
+        #                 value = ServiceRepository.get_by_id(row[key])
+        #                 setattr(plan, key, value if value else None)
+        #             elif key in ("staff_id"):
+        #                 value = StaffRepository.get_by_id(row[key])
+        #                 if isinstance(value, dict) and "error" in value:
+        #                     setattr(plan, key, None)
+        #                 else:
+        #                     setattr(plan, key, value)
+        #             else:
+        #                 print("key", key)
+        #                 setattr(plan, key, row[key])
 
-#             print("data", key, row[key])
-#         print("plan", plan.to_dict_plan())
-#         return plan
+        #             print("data", key, row[key])
+        #         print("plan", plan.to_dict_plan())
+        #         return plan
         # Gán giá trị từng thuộc tính một cách tường minh
         plan.id = int(row["id"]) if row.get("id") is not None else 0
         plan.code = row.get("code")
@@ -477,39 +479,85 @@ class PlanRepository:
         # Xử lý service_id là object
         try:
             service_id = row.get("service_id")
-            plan.service_id = ServiceRepository.get_by_id(service_id).to_dict() if service_id else None
+            plan.service_id = (
+                ServiceRepository.get_by_id(service_id).to_dict()
+                if service_id
+                else None
+            )
         except Exception:
             plan.service_id = None
-        
-    
-        plan.is_active = bool(row.get("is_active")) if row.get("is_active") is not None else False
+
+        plan.is_active = (
+            bool(row.get("is_active")) if row.get("is_active") is not None else False
+        )
         plan.renewal_syntax = row.get("renewal_syntax")
         plan.registration_syntax = row.get("registration_syntax")
         plan.cancel_syntax = row.get("cancel_syntax")
-        plan.free_data = int(row["free_data"]) if row.get("free_data") is not None else 0
-        plan.free_on_network_a_call = int(row["free_on_network_a_call"]) if row.get("free_on_network_a_call") is not None else 0
-        plan.free_on_network_call = int(row["free_on_network_call"]) if row.get("free_on_network_call") is not None else 0
-        plan.free_on_network_SMS = int(row["free_on_network_SMS"]) if row.get("free_on_network_SMS") is not None else 0
-        plan.free_off_network_a_call = int(row["free_off_network_a_call"]) if row.get("free_off_network_a_call") is not None else 0
-        plan.free_off_network_call = int(row["free_off_network_call"]) if row.get("free_off_network_call") is not None else 0
-        plan.free_off_network_SMS = int(row["free_off_network_SMS"]) if row.get("free_off_network_SMS") is not None else 0
-        plan.auto_renew = bool(row.get("auto_renew")) if row.get("auto_renew") is not None else False
+        plan.free_data = (
+            int(row["free_data"]) if row.get("free_data") is not None else 0
+        )
+        plan.free_on_network_a_call = (
+            int(row["free_on_network_a_call"])
+            if row.get("free_on_network_a_call") is not None
+            else 0
+        )
+        plan.free_on_network_call = (
+            int(row["free_on_network_call"])
+            if row.get("free_on_network_call") is not None
+            else 0
+        )
+        plan.free_on_network_SMS = (
+            int(row["free_on_network_SMS"])
+            if row.get("free_on_network_SMS") is not None
+            else 0
+        )
+        plan.free_off_network_a_call = (
+            int(row["free_off_network_a_call"])
+            if row.get("free_off_network_a_call") is not None
+            else 0
+        )
+        plan.free_off_network_call = (
+            int(row["free_off_network_call"])
+            if row.get("free_off_network_call") is not None
+            else 0
+        )
+        plan.free_off_network_SMS = (
+            int(row["free_off_network_SMS"])
+            if row.get("free_off_network_SMS") is not None
+            else 0
+        )
+        plan.auto_renew = (
+            bool(row.get("auto_renew")) if row.get("auto_renew") is not None else False
+        )
 
         # Xử lý staff_id là object
         try:
             staff_id = row.get("staff_id")
             staff = StaffRepository.get_by_id(staff_id).to_dict() if staff_id else None
-            plan.staff_id = None if isinstance(staff, dict) and "error" in staff else staff
+            plan.staff_id = (
+                None if isinstance(staff, dict) and "error" in staff else staff
+            )
         except Exception:
             plan.staff_id = None
 
         plan.created_at = row.get("created_at")
         plan.updated_at = row.get("updated_at")
-        plan.maximum_on_network_call = int(row["maximum_on_network_call"]) if row.get("maximum_on_network_call") is not None else 0
-        plan.ON_SMS_cost = float(row["ON_SMS_cost"]) if row.get("ON_SMS_cost") is not None else None
-        plan.ON_a_call_cost = float(row["ON_a_call_cost"]) if row.get("ON_a_call_cost") is not None else None
+        plan.maximum_on_network_call = (
+            int(row["maximum_on_network_call"])
+            if row.get("maximum_on_network_call") is not None
+            else 0
+        )
+        plan.ON_SMS_cost = (
+            float(row["ON_SMS_cost"]) if row.get("ON_SMS_cost") is not None else None
+        )
+        plan.ON_a_call_cost = (
+            float(row["ON_a_call_cost"])
+            if row.get("ON_a_call_cost") is not None
+            else None
+        )
 
         return plan
+
     @staticmethod
     def get_plan_by_subscription_id(subscription_id):
         try:

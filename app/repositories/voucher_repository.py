@@ -15,6 +15,8 @@ class VoucherRepository:
             vouchers = []
 
             for row in result[0]:
+                print("row", row)
+                breakpoint()
                 voucher = Voucher()
                 voucher.id = row.get("id")
                 voucher.code = row.get("code")
@@ -36,7 +38,6 @@ class VoucherRepository:
                     voucher.staff_id = None
 
                 voucher.packages = row.get("packages")
-                print("voucher------------------", voucher.to_dict)
                 vouchers.append(voucher.to_dict())
                 print(voucher)
 
