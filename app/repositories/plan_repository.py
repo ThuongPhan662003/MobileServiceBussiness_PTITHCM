@@ -154,7 +154,9 @@ class PlanRepository:
             result = db_instance.execute(query, params, fetchone=True)
             return bool(result)
         except Exception as e:
-            return {"error": f"Không thể kiểm tra cú pháp {field} với giá trị {value}: {str(e)}"}
+            return {
+                "error": f"Không thể kiểm tra cú pháp {field} với giá trị {value}: {str(e)}"
+            }
 
     @staticmethod
     def insert(data: Plan, object_type: str, duration: int):
@@ -375,7 +377,11 @@ class PlanRepository:
                     plan.service_id = service if service else None
                 else:
                     plan.service_id = None
-                plan.is_active = bool(row.get("is_active")) if row.get("is_active") is not None else False
+                plan.is_active = (
+                    bool(row.get("is_active"))
+                    if row.get("is_active") is not None
+                    else False
+                )
                 plan.renewal_syntax = row.get("renewal_syntax")
                 plan.registration_syntax = row.get("registration_syntax")
                 plan.cancel_syntax = row.get("cancel_syntax")
@@ -386,7 +392,11 @@ class PlanRepository:
                 plan.free_off_network_a_call = row.get("free_off_network_a_call")
                 plan.free_off_network_call = row.get("free_off_network_call")
                 plan.free_off_network_SMS = row.get("free_off_network_SMS")
-                plan.auto_renew = bool(row.get("auto_renew")) if row.get("auto_renew") is not None else False
+                plan.auto_renew = (
+                    bool(row.get("auto_renew"))
+                    if row.get("auto_renew") is not None
+                    else False
+                )
                 staff_id = row.get("staff_id")
                 if staff_id:
                     staff = StaffRepository.get_by_id(staff_id)
@@ -404,7 +414,9 @@ class PlanRepository:
                 plans.append(plan.to_dict())
             return plans
         except Exception as e:
-            return {"error": f"Không thể lấy danh sách gói cước theo service_id {service_id}: {str(e)}"}
+            return {
+                "error": f"Không thể lấy danh sách gói cước theo service_id {service_id}: {str(e)}"
+            }
 
     @staticmethod
     def get_by_plan_id(plan_id):
@@ -431,7 +443,31 @@ class PlanRepository:
     @staticmethod
     def _row_to_plan(row):
         plan = Plan()
+#         plan.id = row.get("id")
+#         for key in row:
+#             print("key", key)
+#             if key in ("is_active", "auto_renew"):
+#                 value = row[key]
+#                 setattr(plan, key, bool(value) if value is not None else False)
+#             elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+#                 value = row[key]
+#                 setattr(plan, key, float(value) if value is not None else None)
+#             elif key in ("service_id"):
+#                 value = ServiceRepository.get_by_id(row[key])
+#                 setattr(plan, key, value if value else None)
+#             elif key in ("staff_id"):
+#                 value = StaffRepository.get_by_id(row[key])
+#                 if isinstance(value, dict) and "error" in value:
+#                     setattr(plan, key, None)
+#                 else:
+#                     setattr(plan, key, value)
+#             else:
+#                 print("key", key)
+#                 setattr(plan, key, row[key])
 
+#             print("data", key, row[key])
+#         print("plan", plan.to_dict_plan())
+#         return plan
         # Gán giá trị từng thuộc tính một cách tường minh
         plan.id = int(row["id"]) if row.get("id") is not None else 0
         plan.code = row.get("code")
@@ -474,3 +510,33 @@ class PlanRepository:
         plan.ON_a_call_cost = float(row["ON_a_call_cost"]) if row.get("ON_a_call_cost") is not None else None
 
         return plan
+    @staticmethod
+    def get_plan_by_subscription_id(subscription_id):
+        try:
+            result = db_instance.execute(
+                "CALL sp_get_plan_by_subscription_id(%s)",
+                [subscription_id],
+                fetchone=True,
+            )
+            if not result:
+                return None
+            return {
+                "plan_id": result.get("plan_id"),
+                "plan_code": result.get("plan_code"),
+                "price": result.get("price"),
+                "description": result.get("description"),
+                "service_id": result.get("service_id"),
+                "free_data": result.get("free_data"),
+                "free_on_network_a_call": result.get("free_on_network_a_call"),
+                "free_off_network_a_call": result.get("free_off_network_a_call"),
+                "free_on_network_call": result.get("free_on_network_call"),
+                "free_off_network_call": result.get("free_off_network_call"),
+                "free_on_network_SMS": result.get("free_on_network_SMS"),
+                "free_off_network_SMS": result.get("free_off_network_SMS"),
+                "auto_renew": result.get("auto_renew"),
+                "ON_a_call_cost": result.get("ON_a_call_cost"),
+                "ON_SMS_cost": result.get("ON_SMS_cost"),
+            }
+        except Exception as e:
+            print(f"[Repository] Lỗi khi gọi SP get_plan_by_subscription_id: {e}")
+            return None

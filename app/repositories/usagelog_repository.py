@@ -3,15 +3,17 @@ from app.database import db_instance
 from app.models.usagelog import UsageLog
 from app.repositories.subscriber_repository import SubscriberRepository
 
+
 def parse_datetime_safe(value):
     if isinstance(value, (datetime, date)):  # Kiểm tra datetime hoặc date
         return value
-    if value == '0000-00-00 00:00:00':  # Xử lý giá trị không hợp lệ
+    if value == "0000-00-00 00:00:00":  # Xử lý giá trị không hợp lệ
         return None
     try:
         return datetime.fromisoformat(value)
     except Exception:
         return None
+
 
 class UsageLogRepository:
     @staticmethod
@@ -28,10 +30,20 @@ class UsageLogRepository:
                     continue
                 try:
                     id_value = int(row.get("id")) if row.get("id") is not None else None
-                    subscriber_id = int(row.get("subscriber_id")) if row.get("subscriber_id") is not None else None
-                    usage_value = int(row.get("usage_value")) if row.get("usage_value") is not None else None
+                    subscriber_id = (
+                        int(row.get("subscriber_id"))
+                        if row.get("subscriber_id") is not None
+                        else None
+                    )
+                    usage_value = (
+                        int(row.get("usage_value"))
+                        if row.get("usage_value") is not None
+                        else None
+                    )
                 except (ValueError, TypeError) as e:
-                    print(f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}")
+                    print(
+                        f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}"
+                    )
                     continue
                 sub = SubscriberRepository.get_by_id(subscriber_id)
                 if sub:
@@ -44,7 +56,7 @@ class UsageLogRepository:
                         end_date=parse_datetime_safe(row.get("end_date")),
                         by_from=row.get("by_from"),
                         to=row.get("to"),
-                        contents=row.get("contents")
+                        contents=row.get("contents"),
                     )
                     logs.append(u.to_dict())
                 else:
@@ -93,12 +105,22 @@ class UsageLogRepository:
                     print(f"Cảnh báo: Row không phải dictionary: {row}")
                     continue
                 try:
-                    
+
                     id_value = int(row.get("id")) if row.get("id") is not None else None
-                    subscriber_id = int(row.get("subscriber_id")) if row.get("subscriber_id") is not None else None
-                    usage_value = int(row.get("usage_value")) if row.get("usage_value") is not None else None
+                    subscriber_id = (
+                        int(row.get("subscriber_id"))
+                        if row.get("subscriber_id") is not None
+                        else None
+                    )
+                    usage_value = (
+                        int(row.get("usage_value"))
+                        if row.get("usage_value") is not None
+                        else None
+                    )
                 except (ValueError, TypeError) as e:
-                    print(f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}")
+                    print(
+                        f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}"
+                    )
                     continue
                 sub = SubscriberRepository.get_by_id(subscriber_id)
                 if sub:
@@ -111,7 +133,7 @@ class UsageLogRepository:
                         end_date=parse_datetime_safe(row.get("end_date")),
                         by_from=row.get("by_from"),
                         to=row.get("to"),
-                        contents=row.get("contents")
+                        contents=row.get("contents"),
                     )
                     logs.append(u.to_dict())
                 else:
@@ -127,24 +149,36 @@ class UsageLogRepository:
             result = db_instance.execute(
                 "CALL SearchUsageLogs(%s, %s, %s)",
                 (log_type, subscriber_id, start_date),
-                fetchall=True
+                fetchall=True,
             )
             logs = []
             if not result or not result[0]:  # Kiểm tra result rỗng
-                print(f"Không có dữ liệu cho search type={log_type}, subscriber_id={subscriber_id}")
+                print(
+                    f"Không có dữ liệu cho search type={log_type}, subscriber_id={subscriber_id}"
+                )
                 return []
             for row in result[0]:
-                
+
                 if not isinstance(row, dict):  # Kiểm tra row là dictionary
                     print(f"Cảnh báo: Row không phải dictionary: {row}")
                     continue
                 try:
-                       
+
                     id_value = int(row.get("id")) if row.get("id") is not None else None
-                    subscriber_id_val = int(row.get("subscriber_id")) if row.get("subscriber_id") is not None else None
-                    usage_value = int(row.get("usage_value")) if row.get("usage_value") is not None else None
+                    subscriber_id_val = (
+                        int(row.get("subscriber_id"))
+                        if row.get("subscriber_id") is not None
+                        else None
+                    )
+                    usage_value = (
+                        int(row.get("usage_value"))
+                        if row.get("usage_value") is not None
+                        else None
+                    )
                 except (ValueError, TypeError) as e:
-                    print(f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}")
+                    print(
+                        f"Cảnh báo: Giá trị không hợp lệ: id={row.get('id')}, subscriber_id={row.get('subscriber_id')}, usage_value={row.get('usage_value')}, lỗi={e}"
+                    )
                     continue
                 sub = SubscriberRepository.get_by_id(subscriber_id_val)
                 if sub:
@@ -157,11 +191,13 @@ class UsageLogRepository:
                         end_date=parse_datetime_safe(row.get("end_date")),
                         by_from=row.get("by_from"),
                         to=row.get("to"),
-                        contents=row.get("contents")
+                        contents=row.get("contents"),
                     )
                     logs.append(u.to_dict())
                 else:
-                    print(f"Cảnh báo: Không tìm thấy subscriber với id={subscriber_id_val}")
+                    print(
+                        f"Cảnh báo: Không tìm thấy subscriber với id={subscriber_id_val}"
+                    )
             return logs
         except Exception as e:
             print(f"Lỗi khi tìm kiếm usage log: {e}")
@@ -184,7 +220,7 @@ class UsageLogRepository:
                 ),
                 fetchone=True,
             )
-            
+
             if result.get("error"):
                 print(f"Lỗi khi thêm usage log: {result['error']}")
                 return result["error"]
