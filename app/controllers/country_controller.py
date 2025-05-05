@@ -1,22 +1,26 @@
 from flask import Blueprint, render_template, request, jsonify
+from flask_login import login_required
 from app.services.country_service import CountryService
 
 country_bp = Blueprint("country", __name__, url_prefix="/countries")
 
 
 @country_bp.route("/", methods=["GET"])
+@login_required
 def index():
     print("hi")
     return render_template("countries/countries.html")
 
 
 @country_bp.route("/get-all", methods=["GET"])
+@login_required
 def get_all_countries():
     countries = CountryService.get_all_countries()
     return jsonify(countries), 200
 
 
 @country_bp.route("/<int:country_id>", methods=["GET"])
+@login_required
 def get_country_by_id(country_id):
     country = CountryService.get_country_by_id(country_id)
     if country:
@@ -25,6 +29,7 @@ def get_country_by_id(country_id):
 
 
 @country_bp.route("/", methods=["POST"])
+@login_required
 def create_country():
     data = request.get_json()
     result = CountryService.create_country(data)
@@ -56,6 +61,7 @@ def create_country():
 
 
 @country_bp.route("/<int:country_id>", methods=["PUT"])
+@login_required
 def update_country(country_id):
     data = request.get_json()
     result = CountryService.update_country(country_id, data)
@@ -65,6 +71,7 @@ def update_country(country_id):
 
 
 @country_bp.route("/<int:country_id>", methods=["DELETE"])
+@login_required
 def delete_country(country_id):
     result = CountryService.delete_country(country_id)
     if result.get("success"):

@@ -1,21 +1,25 @@
 from flask import Blueprint, render_template, request, jsonify
+from flask_login import login_required
 from app.services.network_service import NetworkService
 
 network_bp = Blueprint("network", __name__, url_prefix="/networks")
 
 
 @network_bp.route("/", methods=["GET"])
+@login_required
 def index():
     return render_template("networks/networks.html")
 
 
 @network_bp.route("/get-all", methods=["GET"])
+@login_required
 def get_all_networks():
     networks = NetworkService.get_all_networks()
     return jsonify(networks), 200
 
 
 @network_bp.route("/<int:network_id>", methods=["GET"])
+@login_required
 def get_network_by_id(network_id):
     network = NetworkService.get_network_by_id(network_id)
     if network:
@@ -27,6 +31,7 @@ def get_network_by_id(network_id):
 
 
 @network_bp.route("/", methods=["POST"])
+@login_required
 def create_network():
     data = request.get_json()
     result = NetworkService.create_network(data)
@@ -39,6 +44,7 @@ def create_network():
 
 
 @network_bp.route("/<int:network_id>", methods=["PUT"])
+@login_required
 def update_network(network_id):
     data = request.get_json()
     result = NetworkService.update_network(network_id, data)
@@ -51,6 +57,7 @@ def update_network(network_id):
 
 
 @network_bp.route("/<int:network_id>", methods=["DELETE"])
+@login_required
 def delete_network(network_id):
     result = NetworkService.delete_network(network_id)
 

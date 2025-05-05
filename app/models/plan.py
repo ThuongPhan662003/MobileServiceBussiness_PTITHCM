@@ -309,6 +309,7 @@ class Plan:
         self.__ON_a_call_cost = float(value) if value is not None else None
 
     def to_dict(self):
+        print("self: ",self.service_id)
         return {
             "id": self.id,
             "code": self.code,

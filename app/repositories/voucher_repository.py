@@ -36,7 +36,6 @@ class VoucherRepository:
                     voucher.staff_id = None
 
                 voucher.packages = row.get("packages")
-                print("voucher------------------", voucher.to_dict)
                 vouchers.append(voucher.to_dict())
                 print(voucher)
 

@@ -17,6 +17,8 @@
     .flashes li.error { background-color: #f8d7da; color: #721c24; }
     .flashes li.success { background-color: #d4edda; color: #155724; }
     .required::after { content: " *"; color: red; }
+    .error { border-color: #e74c3c; }
+    .error-message { color: #e74c3c; font-size: 0.9em; margin-top: 5px; }
 </style>
 
 <div class="container">
@@ -139,29 +141,45 @@
         const registrationSyntax = document.getElementById('registration_syntax').value;
         const renewalSyntax = document.getElementById('renewal_syntax').value;
         const cancelSyntax = document.getElementById('cancel_syntax').value;
+        const serviceId = document.getElementById('service_id').value;
+        const staffId = document.getElementById('staff_id').value;
 
-        if (code.length > 50) {
-            alert('Mã gói cước không được vượt quá 50 ký tự');
-            e.preventDefault();
+        let errors = [];
+        if (!code || code.length > 50) {
+            errors.push('Mã gói cước không được để trống và không vượt quá 50 ký tự');
+            document.getElementById('code').classList.add('error');
         }
-        if (price <= 0) {
-            alert('Giá gói cước phải là số dương');
-            e.preventDefault();
+        if (!price || parseFloat(price) <= 0) {
+            errors.push('Giá gói cước phải là số dương');
+            document.getElementById('price').classList.add('error');
         }
-        if (duration <= 0) {
-            alert('Thời hạn phải là số dương');
-            e.preventDefault();
+        if (!duration || parseInt(duration) <= 0) {
+            errors.push('Thời hạn phải là số dương');
+            document.getElementById('duration').classList.add('error');
         }
         if (registrationSyntax && registrationSyntax.length > 255) {
-            alert('Cú pháp đăng ký không được vượt quá 255 ký tự');
-            e.preventDefault();
+            errors.push('Cú pháp đăng ký không được vượt quá 255 ký tự');
+            document.getElementById('registration_syntax').classList.add('error');
         }
         if (renewalSyntax && renewalSyntax.length > 255) {
-            alert('Cú pháp gia hạn không được vượt quá 255 ký tự');
-            e.preventDefault();
+            errors.push('Cú pháp gia hạn không được vượt quá 255 ký tự');
+            document.getElementById('renewal_syntax').classList.add('error');
         }
         if (cancelSyntax && cancelSyntax.length > 255) {
-            alert('Cú pháp hủy không được vượt quá 255 ký tự');
+            errors.push('Cú pháp hủy không được vượt quá 255 ký tự');
+            document.getElementById('cancel_syntax').classList.add('error');
+        }
+        if (!serviceId || parseInt(serviceId) <= 0) {
+            errors.push('ID Dịch vụ phải là số dương');
+            document.getElementById('service_id').classList.add('error');
+        }
+        if (staffId && parseInt(staffId) <= 0) {
+            errors.push('ID Nhân viên phải là số dương');
+            document.getElementById('staff_id').classList.add('error');
+        }
+
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
             e.preventDefault();
         }
     });

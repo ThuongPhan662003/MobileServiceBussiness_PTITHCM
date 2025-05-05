@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask_login import login_required
 
 from app.repositories.plan_repository import PlanRepository
 from app.repositories.subscriber_repository import SubscriberRepository
@@ -9,12 +10,14 @@ customer_plan_bp = Blueprint("customer_plan", __name__, url_prefix="/customer_pl
 
 
 @customer_plan_bp.route("/", methods=["GET"])
+@login_required
 def index():
     # Redirect đến trang mobile-plans khi truy cập /customer_plan
     return redirect(url_for("customer_plan.mobile_plans"))
 
 
 @customer_plan_bp.route("/mobile-plans", methods=["GET"])
+@login_required
 def mobile_plans():
     try:
         sub_service_id = request.args.get(
@@ -45,6 +48,7 @@ def mobile_plans():
 
 
 @customer_plan_bp.route("/main-plans", methods=["GET"])
+@login_required
 def main_plans():
     try:
         plans = PlanService.get_plans_by_service_id(
@@ -59,6 +63,7 @@ def main_plans():
 
 
 @customer_plan_bp.route("/plans/<int:plan_id>", methods=["GET"])
+@login_required
 def plan_details(plan_id):
     try:
         plan = PlanService.get_plan_details(plan_id)
@@ -74,6 +79,7 @@ def plan_details(plan_id):
 
 
 @customer_plan_bp.route("/register-plan", methods=["POST"])
+@login_required
 def register_plan():
     data = request.get_json()
     plan_code = data.get("plan_code")

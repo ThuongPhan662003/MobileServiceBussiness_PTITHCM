@@ -13,7 +13,7 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user
+from flask_login import current_user, login_required
 import paypalrestsdk
 import urllib
 import hmac
@@ -32,6 +32,7 @@ payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process"
 
 
 @payment_api_bp.route("/", methods=["GET"])
+@login_required
 def index():
     print("vô")
     code = request.args.get("plan_code")
@@ -52,6 +53,7 @@ def index():
 
 
 @payment_api_bp.route("/vnpay_pay", methods=["POST", "GET"])
+@login_required
 def vnpay_pay():
     form = PaymentForm(request.form)
     if request.method == "POST" and form.validate():
@@ -102,6 +104,7 @@ def vnpay_pay():
 
 
 @payment_api_bp.route("/vnpay_return")
+@login_required
 def vnpay_return():
     # Lấy tất cả tham số VNPAY trả về
     vnp = VnPay()
@@ -148,6 +151,7 @@ def vnpay_return():
 
 
 @payment_api_bp.route("/pay")
+@login_required
 def pay_paypal():
     # Lấy giá VND từ giao diện
     # vnd_price = float(request.form.get("item_price_vnd"))  # ví dụ 250000 VND
@@ -208,6 +212,7 @@ def pay_paypal():
 
 
 @payment_api_bp.route("/execute")
+@login_required
 def payment_paypal_execute():
     payment_id = request.args.get("paymentId")
     payer_id = request.args.get("PayerID")
@@ -284,6 +289,7 @@ def payment_paypal_execute():
 
 
 @payment_api_bp.route("/result")
+@login_required
 def payment_result():
     result = session.get("payment_result")
     if not result:
@@ -301,6 +307,7 @@ def payment_result():
 
 
 @payment_api_bp.route("/cancel")
+@login_required
 def payment_paypal_cancel():
     # Người dùng hủy thanh toán
     return render_template(

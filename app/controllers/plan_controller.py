@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for
+from flask_login import login_required
 from app.services.plan_service import PlanService
 from app.repositories.service_repository import ServiceRepository
 from app.repositories.staff_repository import StaffRepository
@@ -9,117 +10,198 @@ plan_bp = Blueprint("plan", __name__, url_prefix="/plans")
 def validate_plan_data(data, plan_id=None):
     errors = []
     # Kiểm tra mã code
-    if not data.get("code") or len(data.get("code", "").strip()) == 0:
-        errors.append("Mã gói cước là bắt buộc")
-    elif len(data.get("code", "")) > 50:
-        errors.append("Mã gói cước không được vượt quá 50 ký tự")
+    code = data.get("code", "").strip()
+    if not code:
+        errors.append({"field": "code", "message": "Mã gói cước là bắt buộc"})
+    elif len(code) > 50:
+        errors.append(
+            {"field": "code", "message": "Mã gói cước không được vượt quá 50 ký tự"}
+        )
     else:
-        # Kiểm tra trùng code
-        existing_plan = PlanService.get_plan_by_code(data.get("code"))
-        if existing_plan and (plan_id is None or existing_plan.id != plan_id):
-            errors.append("Mã gói cước đã tồn tại")
+        existing_plan = PlanService.get_plan_by_code(code)
+        if isinstance(existing_plan, dict) and "error" in existing_plan:
+            errors.append({"field": "code", "message": existing_plan["error"]})
+        elif existing_plan and (plan_id is None or existing_plan.id != plan_id):
+            errors.append(
+                {"field": "code", "message": f"Mã gói cước '{code}' đã tồn tại"}
+            )
 
     # Kiểm tra giá
-    if not data.get("price"):
-        errors.append("Giá gói cước là bắt buộc")
+    price = data.get("price")
+    if not price:
+        errors.append({"field": "price", "message": "Giá gói cước là bắt buộc"})
     else:
         try:
-            price = float(data.get("price"))
+            price = float(price)
             if price <= 0:
-                errors.append("Giá gói cước phải là số dương")
+                errors.append(
+                    {"field": "price", "message": "Giá gói cước phải là số dương"}
+                )
         except ValueError:
-            errors.append("Giá gói cước phải là số")
+            errors.append({"field": "price", "message": "Giá gói cước phải là số"})
 
     # Kiểm tra object_type
-    if not data.get("object_type") or data.get("object_type") not in ["TRATRUOC", "TRASAU"]:
-        errors.append("Hình thức thanh toán phải là TRATRUOC hoặc TRASAU")
+    object_type = data.get("object_type")
+    if not object_type or object_type not in ["TRATRUOC", "TRASAU"]:
+        errors.append(
+            {
+                "field": "object_type",
+                "message": "Hình thức thanh toán phải là TRATRUOC hoặc TRASAU",
+            }
+        )
 
     # Kiểm tra duration
-    if not data.get("duration"):
-        errors.append("Thời hạn là bắt buộc")
+    duration = data.get("duration")
+    if not duration:
+        errors.append({"field": "duration", "message": "Thời hạn là bắt buộc"})
     else:
         try:
-            duration = int(data.get("duration"))
+            duration = int(duration)
             if duration <= 0:
-                errors.append("Thời hạn phải là số dương")
+                errors.append(
+                    {"field": "duration", "message": "Thời hạn phải là số dương"}
+                )
         except ValueError:
-            errors.append("Thời hạn phải là số nguyên")
+            errors.append(
+                {"field": "duration", "message": "Thời hạn phải là số nguyên"}
+            )
 
     # Kiểm tra các trường số nguyên
-    for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                  "free_on_network_SMS", "free_off_network_a_call",
-                  "free_off_network_call", "free_off_network_SMS",
-                  "maximum_on_network_call"]:
-        if data.get(field):
+    for field in [
+        "free_data",
+        "free_on_network_a_call",
+        "free_on_network_call",
+        "free_on_network_SMS",
+        "free_off_network_a_call",
+        "free_off_network_call",
+        "free_off_network_SMS",
+        "maximum_on_network_call",
+    ]:
+        value = data.get(field)
+        if value:
             try:
-                value = int(data.get(field))
+                value = int(value)
                 if value < 0:
-                    errors.append(f"{field.replace('_', ' ').title()} phải không âm")
+                    errors.append(
+                        {
+                            "field": field,
+                            "message": f"{field.replace('_', ' ').title()} phải không âm",
+                        }
+                    )
             except ValueError:
-                errors.append(f"{field.replace('_', ' ').title()} phải là số nguyên")
+                errors.append(
+                    {
+                        "field": field,
+                        "message": f"{field.replace('_', ' ').title()} phải là số nguyên",
+                    }
+                )
 
     # Kiểm tra các trường số thực
     for field in ["ON_SMS_cost", "ON_a_call_cost"]:
-        if data.get(field):
+        value = data.get(field)
+        if value:
             try:
-                value = float(data.get(field))
+                value = float(value)
                 if value < 0:
-                    errors.append(f"{field.replace('_', ' ').title()} phải không âm")
+                    errors.append(
+                        {
+                            "field": field,
+                            "message": f"{field.replace('_', ' ').title()} phải không âm",
+                        }
+                    )
             except ValueError:
-                errors.append(f"{field.replace('_', ' ').title()} phải là số")
+                errors.append(
+                    {
+                        "field": field,
+                        "message": f"{field.replace('_', ' ').title()} phải là số",
+                    }
+                )
 
-    # Kiểm tra cú pháp (registration_syntax, renewal_syntax, cancel_syntax) chỉ kiểm tra trùng
+    # Kiểm tra cú pháp
     syntax_fields = ["registration_syntax", "renewal_syntax", "cancel_syntax"]
     for field in syntax_fields:
         value = data.get(field)
         if value:
             if len(value) > 255:
-                errors.append(f"{field.replace('_', ' ').title()} không được vượt quá 255 ký tự")
-            # Kiểm tra trùng cú pháp
-            if PlanService.check_syntax_exists(field, value, plan_id):
-                errors.append(f"{field.replace('_', ' ').title()} đã tồn tại")
+                errors.append(
+                    {
+                        "field": field,
+                        "message": f"{field.replace('_', ' ').title()} không được vượt quá 255 ký tự",
+                    }
+                )
+            else:
+                syntax_exists = PlanService.check_syntax_exists(field, value, plan_id)
+                if isinstance(syntax_exists, dict) and "error" in syntax_exists:
+                    errors.append({"field": field, "message": syntax_exists["error"]})
+                elif syntax_exists:
+                    errors.append(
+                        {
+                            "field": field,
+                            "message": f"{field.replace('_', ' ').title()} '{value}' đã tồn tại",
+                        }
+                    )
 
     # Kiểm tra service_id
-    if data.get("service_id"):
+    service_id = data.get("service_id")
+    if not service_id:
+        errors.append({"field": "service_id", "message": "ID Dịch vụ là bắt buộc"})
+    else:
         try:
-            service_id = int(data.get("service_id"))
+            service_id = int(service_id)
             service = ServiceRepository.get_by_id(service_id)
             if not service:
-                errors.append("ID Dịch vụ không tồn tại")
+                errors.append(
+                    {
+                        "field": "service_id",
+                        "message": f"ID Dịch vụ '{service_id}' không tồn tại",
+                    }
+                )
         except ValueError:
-            errors.append("ID Dịch vụ phải là số nguyên")
-    else:
-        errors.append("ID Dịch vụ là bắt buộc")
+            errors.append(
+                {"field": "service_id", "message": "ID Dịch vụ phải là số nguyên"}
+            )
 
     # Kiểm tra staff_id
-    if data.get("staff_id"):
+    staff_id = data.get("staff_id")
+    if staff_id:
         try:
-            staff_id = int(data.get("staff_id"))
+            staff_id = int(staff_id)
             staff = StaffRepository.get_by_id(staff_id)
-            if not staff:
-                errors.append("ID Nhân viên không tồn tại")
+            if isinstance(staff, dict) and "error" in staff:
+                errors.append({"field": "staff_id", "message": staff["error"]})
+            elif not staff:
+                errors.append(
+                    {
+                        "field": "staff_id",
+                        "message": f"ID Nhân viên '{staff_id}' không tồn tại",
+                    }
+                )
         except ValueError:
-            errors.append("ID Nhân viên phải là số nguyên")
+            errors.append(
+                {"field": "staff_id", "message": "ID Nhân viên phải là số nguyên"}
+            )
 
     return errors
 
 
 @plan_bp.route("/", methods=["GET"])
+@login_required
 def get_all_plans():
     try:
         plans = PlanService.get_all_plans()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             plan_list = [plan.to_dict() for plan in plans]
             return jsonify(plan_list), 200
         return render_template("Plan/plan.html", plans=plans)
     except Exception as e:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify({"error": f"Lỗi khi lấy danh sách gói cước: {str(e)}"}), 500
         flash(f"Lỗi: {str(e)}", "error")
         return render_template("Plan/plan.html", plans=[]), 500
 
 
 @plan_bp.route("/create", methods=["GET", "POST"])
+@login_required
 def create_plan():
     if request.method == "GET":
         return render_template("Plan/create_plan.html", data={})
@@ -129,21 +211,29 @@ def create_plan():
         errors = validate_plan_data(data)
         if errors:
             for error in errors:
-                flash(error, "error")
+                flash(f"Lỗi: {error['message']}", "error")
             return render_template("Plan/create_plan.html", data=data), 400
 
         # Chuyển đổi dữ liệu
         data["is_active"] = data.get("is_active") == "on"
         data["auto_renew"] = data.get("auto_renew") == "on"
-        for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                      "free_on_network_SMS", "free_off_network_a_call",
-                      "free_off_network_call", "free_off_network_SMS",
-                      "maximum_on_network_call"]:
+        for field in [
+            "free_data",
+            "free_on_network_a_call",
+            "free_on_network_call",
+            "free_on_network_SMS",
+            "free_off_network_a_call",
+            "free_off_network_call",
+            "free_off_network_SMS",
+            "maximum_on_network_call",
+        ]:
             data[field] = int(data.get(field, 0)) if data.get(field) else 0
         for field in ["ON_SMS_cost", "ON_a_call_cost"]:
             data[field] = float(data.get(field, 0)) if data.get(field) else None
         data["price"] = float(data.get("price")) if data.get("price") else None
-        data["service_id"] = int(data.get("service_id")) if data.get("service_id") else None
+        data["service_id"] = (
+            int(data.get("service_id")) if data.get("service_id") else None
+        )
         data["staff_id"] = int(data.get("staff_id")) if data.get("staff_id") else None
         data["duration"] = int(data.get("duration")) if data.get("duration") else None
 
@@ -151,11 +241,25 @@ def create_plan():
         if result.get("success"):
             flash("Thêm gói cước thành công!", "success")
             return redirect(url_for("plan.get_all_plans"))
-        flash(f"Lỗi: {result.get('error')}", "error")
+        error_msg = result.get("error", "Lỗi không xác định khi thêm gói cước")
+        if "Duplicate entry" in error_msg:
+            if "code" in error_msg:
+                flash("Lỗi: Mã gói cước đã tồn tại", "error")
+            elif "registration_syntax" in error_msg:
+                flash("Lỗi: Cú pháp đăng ký đã tồn tại", "error")
+            elif "renewal_syntax" in error_msg:
+                flash("Lỗi: Cú pháp gia hạn đã tồn tại", "error")
+            elif "cancel_syntax" in error_msg:
+                flash("Lỗi: Cú pháp hủy đã tồn tại", "error")
+            else:
+                flash(f"Lỗi: {error_msg}", "error")
+        else:
+            flash(f"Lỗi: {error_msg}", "error")
         return render_template("Plan/create_plan.html", data=data), 400
 
 
 @plan_bp.route("/update/<int:plan_id>", methods=["GET", "POST"])
+@login_required
 def update_plan(plan_id):
     plan = PlanService.get_plan_by_id(plan_id)
     if not plan:
@@ -163,28 +267,41 @@ def update_plan(plan_id):
         return redirect(url_for("plan.get_all_plans")), 404
 
     if request.method == "GET":
-        return render_template("Plan/update_plan.html", plan=plan.to_dict(), plan_id=plan_id)
+        return render_template(
+            "Plan/update_plan.html", plan=plan.to_dict_plan(), plan_id=plan_id
+        )
 
     if request.method == "POST":
         data = request.form.to_dict()
         errors = validate_plan_data(data, plan_id)
         if errors:
             for error in errors:
-                flash(error, "error")
-            return render_template("Plan/update_plan.html", plan=data, plan_id=plan_id), 400
+                flash(f"Lỗi: {error['message']}", "error")
+            return (
+                render_template("Plan/update_plan.html", plan=data, plan_id=plan_id),
+                400,
+            )
 
         # Chuyển đổi dữ liệu
         data["is_active"] = data.get("is_active") == "on"
         data["auto_renew"] = data.get("auto_renew") == "on"
-        for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                      "free_on_network_SMS", "free_off_network_a_call",
-                      "free_off_network_call", "free_off_network_SMS",
-                      "maximum_on_network_call"]:
+        for field in [
+            "free_data",
+            "free_on_network_a_call",
+            "free_on_network_call",
+            "free_on_network_SMS",
+            "free_off_network_a_call",
+            "free_off_network_call",
+            "free_off_network_SMS",
+            "maximum_on_network_call",
+        ]:
             data[field] = int(data.get(field, 0)) if data.get(field) else 0
         for field in ["ON_SMS_cost", "ON_a_call_cost"]:
             data[field] = float(data.get(field, 0)) if data.get(field) else None
         data["price"] = float(data.get("price")) if data.get("price") else None
-        data["service_id"] = int(data.get("service_id")) if data.get("service_id") else None
+        data["service_id"] = (
+            int(data.get("service_id")) if data.get("service_id") else None
+        )
         data["staff_id"] = int(data.get("staff_id")) if data.get("staff_id") else None
         data["duration"] = int(data.get("duration")) if data.get("duration") else None
 
@@ -192,42 +309,67 @@ def update_plan(plan_id):
         if result.get("success"):
             flash("Cập nhật gói cước thành công!", "success")
             return redirect(url_for("plan.get_all_plans"))
-        flash(f"Lỗi: {result.get('error')}", "error")
+        error_msg = result.get("error", "Lỗi không xác định khi cập nhật gói cước")
+        if "Duplicate entry" in error_msg:
+            if "code" in error_msg:
+                flash("Lỗi: Mã gói cước đã tồn tại", "error")
+            elif "registration_syntax" in error_msg:
+                flash("Lỗi: Cú pháp đăng ký đã tồn tại", "error")
+            elif "renewal_syntax" in error_msg:
+                flash("Lỗi: Cú pháp gia hạn đã tồn tại", "error")
+            elif "cancel_syntax" in error_msg:
+                flash("Lỗi: Cú pháp hủy đã tồn tại", "error")
+            else:
+                flash(f"Lỗi: {error_msg}", "error")
+        else:
+            flash(f"Lỗi: {error_msg}", "error")
         return render_template("Plan/update_plan.html", plan=data, plan_id=plan_id), 400
 
 
 @plan_bp.route("/lock/<int:plan_id>", methods=["POST"])
+@login_required
 def lock_plan(plan_id):
     result = PlanService.lock_plan(plan_id)
     if result.get("success"):
         flash("Khóa gói cước thành công!", "success")
-        return jsonify({'success': True})
+        return jsonify({"success": True})
     flash(f"Lỗi: {result.get('error')}", "error")
-    return jsonify({'error': result.get('error')}), 400
+    return jsonify({"error": result.get("error")}), 400
 
 
 @plan_bp.route("/search", methods=["POST"])
+@login_required
 def search_plans():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"error": "Dữ liệu JSON không hợp lệ"}), 400
+
         code = data.get("code") or None
         price = data.get("price") or None
         is_active = data.get("is_active")
         object_type = data.get("object_type")
+
+        print("Received data:", data)  # Debug log
 
         if not object_type or object_type.strip() == "":
             object_type = None
         if is_active == "" or is_active is None:
             is_active = None
         else:
-            is_active = int(is_active)
+            try:
+                is_active = int(is_active)
+            except (ValueError, TypeError):
+                return jsonify({"error": "Trạng thái phải là số (0 hoặc 1)"}), 400
         if price:
             try:
                 price = float(price)
-            except ValueError:
+            except (ValueError, TypeError):
                 return jsonify({"error": "Giá phải là số"}), 400
 
+        print("Processed params:", code, price, is_active, object_type)  # Debug log
         plans = PlanService.search_plans(code, price, is_active, object_type)
         return jsonify(plans)
     except Exception as e:
+        print("Error in search_plans:", str(e))  # Debug log
         return jsonify({"error": f"Lỗi khi tìm kiếm: {str(e)}"}), 500

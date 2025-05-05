@@ -170,8 +170,9 @@
             body: JSON.stringify(searchData)
         })
         .then(response => {
+            console.log("Response status:", response.status, response.statusText);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json().then(err => { throw new Error(err.error || `HTTP error! Status: ${response.status}`); });
             }
             return response.json();
         })
@@ -183,7 +184,7 @@
                 const row = `
                     <tr class="plan-row">
                         <td>${index + 1}</td>
-                        <td>${plan.code}</td>
+                        <td>${plan.code || ''}</td>
                         <td>${plan.description || ''}</td>
                         <td class="text-end">${new Intl.NumberFormat('vi-VN').format(plan.price)} đ</td>
                         <td>${plan.registration_syntax || ''}</td>
@@ -214,13 +215,13 @@
     }
 
     function resetSearch() {
-        const code = null;
-        const price = null;
-        const status = null;
-        const objectType = null;
+        document.getElementById("codeInput").value = '';
+        document.getElementById("priceInput").value = '';
+        document.getElementById("statusInput").value = '';
+        document.getElementById("objectTypeInput").value = '';
 
-        const searchData = { code, price, is_active: status, object_type: objectType };
-        console.log("Search data:", searchData);
+        const searchData = { code: null, price: null, is_active: null, object_type: null };
+        console.log("Reset search data:", searchData);
 
         fetch('/plans/search', {
             method: 'POST',
@@ -231,8 +232,9 @@
             body: JSON.stringify(searchData)
         })
         .then(response => {
+            console.log("Response status:", response.status, response.statusText);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json().then(err => { throw new Error(err.error || `HTTP error! Status: ${response.status}`); });
             }
             return response.json();
         })
@@ -244,7 +246,7 @@
                 const row = `
                     <tr class="plan-row">
                         <td>${index + 1}</td>
-                        <td>${plan.code}</td>
+                        <td>${plan.code || ''}</td>
                         <td>${plan.description || ''}</td>
                         <td class="text-end">${new Intl.NumberFormat('vi-VN').format(plan.price)} đ</td>
                         <td>${plan.registration_syntax || ''}</td>
