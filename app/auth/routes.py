@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, redirect, session, url_for, flash
+import re
+from flask import Blueprint, render_template, redirect, request, session, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app.services.account_service import AccountService
+from app.utils.email_sender import generate_and_send_otp, verify_otp
 from .forms import LoginForm, RegistrationForm
 from ..models import Account
 from . import auth
@@ -10,32 +12,9 @@ from ..services.plan_service import PlanService
 from ..services.subscriber_service import SubscriberService
 from ..services.subscription_service import SubscriptionService
 
-
-# auth = Blueprint("auth", __name__)
-
-
-# @auth.route("/login", methods=["GET", "POST"])
-# def login():
-#     print("current_usre", current_user)
-#     if current_user.get_id():
-#         return redirect(url_for("main_bp.index"))
-
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         result = AccountService.check_login(form.email.data, form.password.data)
-#         print("🧾 Kết quả đăng nhập:", result.get("data"))
-
-#         if result.get("success"):
-#             user = result["data"]
-#             print("user", user)
-#             login_user(user)
-#             flash(result.get("message"), "success")
-#             return redirect(url_for("main_bp.index"))
-#         else:
-#             flash(result.get("message"), "danger")
+email_otp_verified = set()
 
 
-#     return render_template("auth/login.html", form=form)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     print("current_user", current_user)
@@ -134,4 +113,83 @@ def view_subscriber(subscriber_id):
         subscriber=subscriber,
         customer=customer,
         subscriptions=subscriptions,
+    )
+
+
+@auth.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    step = int(request.args.get("step", 1))
+    email_or_phone = request.args.get("email", "")
+
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+
+        if step == 1:
+            # BƯỚC 1: Gửi mã xác thực
+            email_or_phone = form_data.get("email_or_phone", "").strip()
+
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email_or_phone):
+                flash("⚠️ Email không hợp lệ.", "danger")
+                return redirect(url_for("auth.forgot_password", step=1))
+
+            try:
+                generate_and_send_otp(email_or_phone)
+                flash("📨 Mã xác nhận đã được gửi đến email của bạn.", "info")
+                return redirect(
+                    url_for("auth.forgot_password", step=2, email=email_or_phone)
+                )
+            except Exception as e:
+                flash("❌ Gửi email thất bại: " + str(e), "danger")
+                return redirect(url_for("auth.forgot_password", step=1))
+
+        elif step == 2:
+            # BƯỚC 2: Xác nhận OTP
+            email_or_phone = form_data.get("email_or_phone", "").strip()
+            otp = form_data.get("otp", "").strip()
+
+            if verify_otp(email_or_phone, otp):
+                email_otp_verified.add(email_or_phone)
+                flash("✅ Xác minh thành công. Vui lòng đặt lại mật khẩu.", "success")
+                return redirect(
+                    url_for("auth.forgot_password", step=3, email=email_or_phone)
+                )
+            else:
+                flash("❌ Mã OTP không đúng hoặc đã hết hạn.", "danger")
+                return redirect(
+                    url_for("auth.forgot_password", step=2, email=email_or_phone)
+                )
+
+        elif step == 3:
+            # BƯỚC 3: Đặt lại mật khẩu
+            email_or_phone = form_data.get("email_or_phone", "").strip()
+            new_password = form_data.get("new_password", "")
+            confirm_password = form_data.get("confirm_password", "")
+
+            if new_password != confirm_password:
+                flash("❌ Mật khẩu xác nhận không khớp.", "danger")
+                return redirect(
+                    url_for("auth.forgot_password", step=3, email=email_or_phone)
+                )
+
+            if email_or_phone not in email_otp_verified:
+                flash("⚠️ Bạn cần xác minh OTP trước khi đặt lại mật khẩu.", "danger")
+                return redirect(url_for("auth.forgot_password", step=1))
+
+            try:
+                AccountService.reset_password_by_email_or_phone(
+                    email_or_phone, new_password
+                )
+                flash(
+                    "✅ Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập lại.",
+                    "success",
+                )
+                return redirect(url_for("auth.login"))
+            except Exception as e:
+                flash(f"❌ Có lỗi khi đặt lại mật khẩu: {str(e)}", "danger")
+                return redirect(
+                    url_for("auth.forgot_password", step=3, email=email_or_phone)
+                )
+
+    return render_template(
+        "auth/forgot_password.html", step=step, email_or_phone=email_or_phone
     )

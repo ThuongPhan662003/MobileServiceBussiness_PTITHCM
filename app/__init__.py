@@ -22,6 +22,7 @@ from app.controllers.customer_plan_controller import (
     customer_plan_bp,
 )  # Import Blueprint
 
+from app.controllers.otp_controller import otp_bp
 
 def create_app():
     app = Flask(__name__, static_folder="static")
@@ -57,6 +58,8 @@ def create_app():
     app.register_blueprint(report_bp)
 
     app.register_blueprint(payment_ui_bp)
+    
+    app.register_blueprint(otp_bp)
 
     # Register error handlers
     app.register_blueprint(exceptions)

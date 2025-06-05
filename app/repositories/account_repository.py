@@ -24,45 +24,6 @@ class AccountRepository:
             return []
 
     @staticmethod
-    # def check_login_by_username_and_password(username, password):
-    #     try:
-    #         print("username", username)
-    #         print("password", password)
-
-    #         # Gọi stored procedure với IN và OUT parameters
-    #         acc = db_instance.execute(
-    #             "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
-    #             (username, password),
-    #             fetchone=True,
-    #         )
-    #         print("acc", acc)
-
-    #         # Truy vấn lấy kết quả OUT
-    #         result = db_instance.execute(
-    #             "SELECT @p_status AS status, @p_message AS message;", fetchone=True
-    #         )
-    #         print("Kết quả OUT:", result)
-
-    #         # Kiểm tra kết quả OUT
-    #         if result:
-    #             status = result.get("status")
-    #             message = result.get("message")
-
-    #             # Nếu status == 1 là thành công → lấy account
-    #             if status == 1:
-    #                 user = AccountRepository.get_by_id(acc["account_id"])
-    #                 print("AccountRepository.get_by_id(username)", user.to_dict())
-
-    #                 return {"success": True, "message": message, "data": user}
-    #             else:
-    #                 # Trường hợp tài khoản sai hoặc bị vô hiệu hóa
-    #                 return {"success": False, "message": message}
-
-    #         return {"success": False, "message": "Không thể xác thực tài khoản"}
-
-    #     except Exception as e:
-    #         print(f"Lỗi khi đăng nhập: {e}")
-    #         return {"success": False, "message": str(e)}
     def check_login_by_username_and_password(username, password):
         try:
 
@@ -213,3 +174,21 @@ class AccountRepository:
             print(f"❌ Lỗi khi tạo account từ số điện thoại: {e}")
             return {"error": str(e)}
 
+    @staticmethod
+    def update_password_by_email_or_phone(identifier, hashed_password):
+        try:
+            sql = "CALL sp_accounts_update_password_by_username(%s, %s)"
+            db_instance.execute(sql, (identifier, hashed_password), commit=True)
+
+            return {
+                "success": True,
+                "message": "✅ Cập nhật mật khẩu thành công",
+                "data": {"username": identifier},
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"❌ Cập nhật mật khẩu thất bại: {str(e)}",
+                "data": None,
+            }

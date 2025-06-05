@@ -38,7 +38,7 @@ class Database:
                 print("✅ Đã thực thi truy vấn:", sql)
 
                 if commit:
-                    self.commit()
+                    self.connection.commit()
                     print("✅ Đã commit dữ liệu")
 
                 if fetchone:
@@ -92,8 +92,3 @@ db_instance = Database()
 @atexit.register
 def cleanup():
     db_instance.close()
-
-
-
-
-
