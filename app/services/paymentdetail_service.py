@@ -17,10 +17,16 @@ class PaymentDetailService:
     def create_payment_detail(payment_id: int, plan_id: int):
         try:
             # Lấy thông tin từ bảng plan
-            plan = PlanRepository.get_by_id(plan_id)  # Giả sử bạn có phương thức này
+            plan = PlanRepository.get_by_id(plan_id)
             if not plan:
-                return {"error": "Không tìm thấy thông tin gói cước"}
-            # Chuẩn bị dữ liệu để chèn vào paymentdetail
+                return {
+                    "success": False,
+                    "error": "Không tìm thấy thông tin gói cước",
+                    "message": "Không tìm thấy thông tin gói cước",
+                    "data": None,
+                }
+
+            # Chuẩn bị dữ liệu để chèn vào payment_detail
             payment_detail_data = {
                 "payment_id": payment_id,
                 "free_data": plan.free_data,
@@ -34,17 +40,37 @@ class PaymentDetailService:
                 "ON_SMS_cost": plan.ON_SMS_cost,
             }
 
-            payment_detail_data = {key: value if value is not None else None for key, value in
-                                   payment_detail_data.items()}
+            # Bảo vệ nếu có giá trị None
+            payment_detail_data = {
+                key: (value if value is not None else None)
+                for key, value in payment_detail_data.items()
+            }
+
+            # Gọi insert từ repository
             result = PaymentDetailRepository.insert(payment_detail_data)
 
             if result.get("success"):
-                return {"success": True, "message": "Thêm thông tin payment detail thành công"}
+                return {
+                    "success": True,
+                    "error": None,
+                    "message": "Thêm thông tin payment detail thành công",
+                    "data": payment_detail_data,
+                }
             else:
-                return {"error": result.get("error", "Không thể thêm payment detail")}
+                return {
+                    "success": False,
+                    "error": result.get("error", "Không thể thêm payment detail"),
+                    "message": result.get("message", "Không thể thêm payment detail"),
+                    "data": None,
+                }
 
         except Exception as e:
-            return {"error": str(e)}
+            return {
+                "success": False,
+                "error": str(e),
+                "message": "Lỗi ngoại lệ khi tạo payment detail",
+                "data": None,
+            }
 
     @staticmethod
     def update_payment_detail(detail_id, data: dict):
@@ -79,7 +105,6 @@ class PaymentDetailService:
                 return {"error": result}
         except Exception as e:
             return {"error": str(e)}
-
 
     @staticmethod
     def get_by_payment_id(payment_id):

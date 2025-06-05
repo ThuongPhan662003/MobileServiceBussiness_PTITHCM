@@ -153,8 +153,9 @@ def pay_paypal():
     # vnd_price = float(request.form.get("item_price_vnd"))  # ví dụ 250000 VND
     # usd_price = round(vnd_price / 25000, 2)  # Tạm quy đổi: 1 USD = 25,000 VND
 
-    # item_name = request.form.get("item_name")
-    # package_id = request.form.get("package_id")
+    item_name = request.form.get("item_name")
+    package_id = request.form.get("package_id")
+    print("item_name", item_name)
     vnd_price = 25000  # ví dụ 250000 VND
     usd_price = round(vnd_price / 25000, 2)  # Tạm quy đổi: 1 USD = 25,000 VND
 

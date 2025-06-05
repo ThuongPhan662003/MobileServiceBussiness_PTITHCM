@@ -59,12 +59,12 @@ class PaymentDetailRepository:
     @staticmethod
     def insert(payment_detail_data: dict):
         try:
-            print("Fdsfs",payment_detail_data["payment_id"])
+            print("Fdsfs", payment_detail_data)
 
             # Thực thi câu lệnh SQL để chèn thông tin vào payment_detail
+
             result = db_instance.execute(
-                "INSERT INTO payment_detail (payment_id, free_data, free_ON_a_call, free_OffN_a_call, free_ON_call, free_OffN_call, free_ON_SMS, free_OffN_SMS, ON_a_call_cost, ON_SMS_cost) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL AddPaymentDetail(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     payment_detail_data["payment_id"],
                     payment_detail_data["free_data"],
@@ -78,14 +78,29 @@ class PaymentDetailRepository:
                     payment_detail_data["ON_SMS_cost"],
                 ),
                 commit=True,
+                fetchone=True,  # ⚠️ Đây là lệnh INSERT nên không dùng fetchone
             )
-
-            return {"success": True}
-
+            if result and result.get("success"):
+                return {
+                    "success": True,
+                    "error": None,
+                    "message": result.get("message", "Thêm payment detail thành công."),
+                    "data": payment_detail_data,
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get("message", "Thêm payment detail thất bại."),
+                    "message": result.get("message", "Thêm payment detail thất bại."),
+                    "data": None,
+                }
         except Exception as e:
-            # Ghi log lỗi
-            print(f"Error inserting payment detail: {str(e)}")
-            return {"error": str(e)}
+            return {
+                "success": False,
+                "error": str(e),
+                "message": "Lỗi ngoại lệ khi thêm payment detail.",
+                "data": None,
+            }
 
     @staticmethod
     def update(detail_id, data: PaymentDetail):
