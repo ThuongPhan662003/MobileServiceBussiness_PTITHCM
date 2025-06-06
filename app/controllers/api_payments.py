@@ -13,7 +13,7 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user
+from flask_login import current_user, login_required
 import paypalrestsdk
 import urllib
 import hmac
@@ -31,6 +31,7 @@ from app.utils.ip import get_client_ip
 payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process")
 
 
+@login_required
 @payment_api_bp.route("/", methods=["GET"])
 def index():
     print("vô")
@@ -51,6 +52,7 @@ def index():
     )
 
 
+@login_required
 @payment_api_bp.route("/vnpay_pay", methods=["POST", "GET"])
 def vnpay_pay():
     form = PaymentForm(request.form)
@@ -101,6 +103,7 @@ def vnpay_pay():
     return render_template("payments/user/payment.html", form=form, title="Thanh toán")
 
 
+@login_required
 @payment_api_bp.route("/vnpay_return")
 def vnpay_return():
     # Lấy tất cả tham số VNPAY trả về
@@ -147,20 +150,29 @@ def vnpay_return():
     )
 
 
+@login_required
 @payment_api_bp.route("/pay")
 def pay_paypal():
     # Lấy giá VND từ giao diện
+    # print("Vào hàm pay_paypal", request.form.get("item_price_vnd"))
     # vnd_price = float(request.form.get("item_price_vnd"))  # ví dụ 250000 VND
-    # usd_price = round(vnd_price / 25000, 2)  # Tạm quy đổi: 1 USD = 25,000 VND
+    # # usd_price = round(vnd_price / 25000, 2)  # Tạm quy đổi: 1 USD = 25,000 VND
 
-    item_name = request.form.get("item_name")
-    package_id = request.form.get("package_id")
+    # item_name = request.form.get("item_name")
+    # package_id = request.form.get("package_id")
+    item_name = request.args.get("item_name")
+    vnd_price = request.args.get("item_price_vnd", type=float)
+    package_id = request.args.get("package_id", type=int)
+
+    print("✔️ item_name:", item_name)
+    print("✔️ vnd_price:", vnd_price)
+    print("✔️ plan_id:", package_id)
     print("item_name", item_name)
-    vnd_price = 25000  # ví dụ 250000 VND
+    # vnd_price = 25000  # ví dụ 250000 VND
     usd_price = round(vnd_price / 25000, 2)  # Tạm quy đổi: 1 USD = 25,000 VND
 
-    item_name = "5G30"
-    package_id = "1"
+    # item_name = "5G30"
+    # package_id = "1"
 
     session["vnd_price"] = vnd_price
     session["usd_price"] = usd_price
@@ -208,6 +220,7 @@ def pay_paypal():
         return redirect(url_for("payment_api_bp.index"))
 
 
+@login_required
 @payment_api_bp.route("/execute")
 def payment_paypal_execute():
     payment_id = request.args.get("paymentId")
@@ -284,6 +297,7 @@ def payment_paypal_execute():
     return redirect(url_for("payment_api_bp.payment_result"))
 
 
+@login_required
 @payment_api_bp.route("/result")
 def payment_result():
     result = session.get("payment_result")
@@ -301,6 +315,7 @@ def payment_result():
     )
 
 
+@login_required
 @payment_api_bp.route("/cancel")
 def payment_paypal_cancel():
     # Người dùng hủy thanh toán

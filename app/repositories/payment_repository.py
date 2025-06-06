@@ -85,7 +85,6 @@ class PaymentRepository:
             result = db_instance.execute(
                 "CALL AddPayment(%s, %s, %s, %s, %s)",
                 (
-
                     data.subscription_id,
                     data.total_amount,
                     data.payment_method,
@@ -95,18 +94,18 @@ class PaymentRepository:
                 fetchone=True,
             )
 
-
             if not result:
                 return {"error": "Không có phản hồi từ stored procedure"}
 
             # Kiểm tra kết quả từ stored procedure
             if result.get("success") == 1:
                 # Giả sử stored procedure trả về id_payment
-                id_payment = result.get("id_payment")  # Giả sử bạn nhận id_payment từ kết quả
+                id_payment = result.get(
+                    "id_payment"
+                )  # Giả sử bạn nhận id_payment từ kết quả
                 return {"success": True, "id_payment": id_payment}  # Trả về id_payment
             else:
                 return {"error": result.get("message", "Lỗi không xác định")}
-
 
         except Exception as e:
             logger.error(f"Lỗi khi thêm payment: {e}")
@@ -211,11 +210,11 @@ class PaymentRepository:
 
     @staticmethod
     def create_full_payment_transaction(
-        plan_code: str, subscriber_id: int, payment_method
-    :str):
+        plan_code: str, subscriber_id: int, payment_method: str
+    ):
         try:
             result = db_instance.execute(
-                "CALL CreateFullPaymentTransaction(%s, %s)",
+                "CALL CreateFullPaymentTransaction(%s, %s,%s)",
                 (plan_code, subscriber_id, payment_method),
                 fetchone=True,
                 commit=True,
