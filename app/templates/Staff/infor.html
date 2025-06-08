@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <!-- Avatar -->
+        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
+            <img src="{{ staff.avatar_url or 'https://i.pravatar.cc/150' }}" alt="Ảnh nhân viên"
+                class="w-full h-full object-cover">
+        </div>
+
+        <!-- Thông tin nhân viên -->
+        <div class="flex-1">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ staff.full_name }}</h2>
+            <p class="text-gray-500 mb-6">Mã nhân viên: <span class="font-semibold">{{ staff.id }}</span></p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                    <p><span class="font-medium">Mã thẻ:</span> {{ staff.card_id }}</p>
+                    <p><span class="font-medium">Số điện thoại:</span> {{ staff.phone }}</p>
+                    <p><span class="font-medium">Giới tính:</span> {{ staff.gender }}</p>
+                    <p><span class="font-medium">Ngày sinh:</span> {{ staff.birthday.strftime('%d/%m/%Y') }}</p>
+                </div>
+                <div>
+                    <p><span class="font-medium">Email:</span> {{ staff.email }}</p>
+                    <p><span class="font-medium">Tình trạng:</span>
+                        <span class="{{ 'text-green-600' if staff.is_active else 'text-red-500' }}">
+                            {{ 'Đang hoạt động' if staff.is_active else 'Ngừng hoạt động' }}
+                        </span>
+                    </p>
+                    <p><span class="font-medium">Account ID:</span> {{ staff.account_id }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

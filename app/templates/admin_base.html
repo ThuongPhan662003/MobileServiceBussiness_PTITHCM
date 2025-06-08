@@ -269,6 +269,14 @@
                 <li><a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                 </li>
                 <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Trang Chủ</a></li>
+                <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Trang Chủ</a></li>
+                <li>
+                    <a href="{{ url_for('staff.staff_detail', staff_id=session['staff_id']) }}">
+                        <i class="fas fa-user"></i> Thông Tin Nhân Viên
+                    </a>
+
+                </li>
+
                 <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a></li>
             </ul>
         </nav>
@@ -300,9 +308,7 @@
             <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
                 <i class="fas fa-clipboard-list"></i> Nhật kí hoạt động
             </a>
-            <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
-                <i class="fas fa-clipboard-list"></i> Nhật kí hoạt động
-            </a>
+
             <a href="{{ url_for('plan.get_all_plans') }}">
                 <i class="fas fa-receipt"></i> Gói cước
             </a>

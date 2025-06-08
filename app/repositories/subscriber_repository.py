@@ -38,9 +38,9 @@ class SubscriberRepository:
                 )
                 s.warning_date = row.get("warning_date")
                 s.subscriber = row.get("subscriber")
-                s.ON_a_call_cost=row.get("ON_a_call_cost")
-                s.ON_SMS_cost=row.get("ON_SMS_cost")
-
+                s.ON_a_call_cost = row.get("ON_a_call_cost")
+                s.ON_SMS_cost = row.get("ON_SMS_cost")
+                s.subscriber = row.get("subscriber")
                 subscribers.append(s.to_dict())
 
             return subscribers
@@ -86,8 +86,9 @@ class SubscriberRepository:
             result = db_instance.execute(
                 """
                 CALL GetActiveServiceIdBySubscriber(%s);
-                """, (subscriber_id,),
-                fetchall=True
+                """,
+                (subscriber_id,),
+                fetchall=True,
             )
 
             # Kiểm tra kết quả trả về có dữ liệu hay không
@@ -96,7 +97,9 @@ class SubscriberRepository:
                 print(f"Kết quả trả về từ database: {result}")  # In ra kết quả trả về
                 return result
             else:
-                return []  # Trả về danh sách rỗng nếu không có gói cước nào được đăng ký
+                return (
+                    []
+                )  # Trả về danh sách rỗng nếu không có gói cước nào được đăng ký
 
         except Exception as e:
             print(f"Lỗi khi lấy service_id của thuê bao {subscriber_id}: {e}")

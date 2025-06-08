@@ -5,18 +5,21 @@ from config import Config
 def create_procedure():
     drop_sql = "DROP PROCEDURE IF EXISTS sp_accounts_update_password_by_username"
 
+    # create_sql = """
+    # CREATE PROCEDURE sp_accounts_update_password_by_username (
+    #     IN p_username VARCHAR(255),
+    #     IN p_new_password VARCHAR(255)
+    # )
+    # BEGIN
+    #     UPDATE accounts
+    #     SET password = p_new_password
+    #     WHERE username = p_username;
+    # END;
+    # """  # <-- Lưu ý dấu ; sau END
     create_sql = """
-    CREATE PROCEDURE sp_accounts_update_password_by_username (
-        IN p_username VARCHAR(255),
-        IN p_new_password VARCHAR(255)
-    )
-    BEGIN
-        UPDATE accounts
-        SET password = p_new_password
-        WHERE username = p_username;
-    END;
-    """  # <-- Lưu ý dấu ; sau END
 
+
+    """  # <-- Lưu ý dấu ; sau END
     try:
         conn = pymysql.connect(
             host=Config.DB_HOST,
@@ -27,7 +30,7 @@ def create_procedure():
             cursorclass=pymysql.cursors.DictCursor,
         )
         with conn.cursor() as cursor:
-            cursor.execute(drop_sql)
+            # cursor.execute(drop_sql)
             cursor.execute(create_sql)  # ✅ Không split, giữ nguyên toàn bộ
         print("✅ Tạo stored procedure thành công.")
     except Exception as e:

@@ -129,11 +129,11 @@
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h2>Admin Dashboard</h2>
-        <p>Welcome to the admin dashboard. Here you can manage the application.</p>
+        <!-- <h2>Admin Dashboard</h2>
+        <p>Welcome to the admin dashboard. Here you can manage the application.</p> -->
     </div>
-
-    <div class="dashboard-cards">
+    {% include 'reports/revenue_chart.html' %}
+    <!-- <div class="dashboard-cards">
         <div class="card">
             <h3>Services</h3>
             <p>Manage mobile services.</p>
@@ -169,6 +169,6 @@
             <p>View system reports and analytics.</p>
             <a href="{{ url_for('admin_main_bp.index') }}" class="btn">View Reports</a>
         </div>
-    </div>
+    </div> -->
 </div>
 {% endblock %}
