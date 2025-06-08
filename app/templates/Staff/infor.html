@@ -7,9 +7,21 @@
     <div class="flex-shrink-0">
         <div
             class="w-36 h-36 rounded-full overflow-hidden border-4 border-blue-500 shadow-md transition-transform duration-300 hover:scale-105">
-            <img src="{{ staff.avatar_url or 'https://i.pravatar.cc/150' }}" class="w-full h-full object-cover"
-                alt="Avatar">
+            {% set avatar_url = staff.avatar_url %}
+            {% if not avatar_url %}
+            {% set seed = staff.id or 1 %}
+            {% if staff.gender == 'Nam' %}
+            {% set avatar_number = (seed * 7) % 50 + 1 %}
+            {% elif staff.gender == 'Nữ' %}
+            {% set avatar_number = (seed * 9) % 50 + 51 %}
+            {% else %}
+            {% set avatar_number = 0 %}
+            {% endif %}
+            {% set avatar_url = 'https://i.pravatar.cc/150/' ~ avatar_number %}
+            {% endif %}
+            <img src="{{ avatar_url }}" class="w-full h-full object-cover" alt="Avatar">
         </div>
+
     </div>
 
     <!-- Thông tin -->
