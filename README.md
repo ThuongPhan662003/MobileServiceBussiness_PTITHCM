@@ -13,7 +13,61 @@ Dự án **Quản Lý Nhà Hàng** được xây dựng bằng Flask, cung cấp
 
 ## Cấu trúc thư mục
 
----
+```
+MobileService/
+│
+├── app/
+│   ├── __init__.py
+│   ├── controllers/
+│   │   ├── __init__.py
+│   │   ├── auth_controller.py
+│   │   ├── home_controller.py
+│   │   └── ... (các controller khác)
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── user_service.py
+│   │   ├── payment_service.py
+│   │   └── ... (các service khác)
+│   ├── repository/
+│   │   ├── __init__.py
+│   │   ├── user_repository.py
+│   │   ├── contract_repository.py
+│   │   └── ... (các repository khác)
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── account.py
+│   │   ├── contract.py
+│   │   ├── country.py
+│   │   ├── customer.py
+│   │   ├── function.py
+│   │   ├── network.py
+│   │   ├── payment.py
+│   │   ├── paymentdetail.py
+│   │   ├── permissiondetail.py
+│   │   ├── plan.py
+│   │   ├── plannetwork.py
+│   │   ├── rolegroup.py
+│   │   ├── rolegroupdetail.py
+│   │   ├── service.py
+│   │   ├── staff.py
+│   │   ├── subscription.py
+│   │   ├── usage_log.py
+│   │   ├── voucher.py
+│   │   └── subscriber.py
+│   ├── templates/
+│   │   └── ... (các file .html)
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── img/
+│   └── ... (các file, thư mục khác nếu có)
+│
+├── venv/                  # Môi trường ảo (không cần commit lên git)
+├── run.py                 # File chạy chính của ứng dụng
+├── requirements.txt       # Danh sách thư viện cần cài đặt
+├── README.md
+└── .env                   # Thông tin cấu hình môi trường
+```
 
 ## Cài đặt
 

@@ -1,4 +1,13 @@
-from flask import Blueprint, abort, request, jsonify, render_template
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    redirect,
+    request,
+    jsonify,
+    render_template,
+    url_for,
+)
 from app.services.staff_service import StaffService
 
 
@@ -63,7 +72,34 @@ def lock_staff(staff_id):
 @staff_bp.route("/<int:staff_id>", methods=["GET"])
 def staff_detail(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
-    print(staff)
+    print("dữ liệu", staff)
     # if not staff:
     #     abort(404, description="Không tìm thấy nhân viên")
     return render_template("Staff/infor.html", staff=staff)
+
+
+@staff_bp.route("/edit/<int:staff_id>", methods=["GET", "POST"])
+def edit_staff(staff_id):
+    staff = StaffService.get_staff_by_id(staff_id)
+    if not staff:
+        flash("Không tìm thấy nhân viên", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        data = {
+            "full_name": request.form.get("full_name"),
+            "card_id": request.form.get("card_id"),
+            "phone": request.form.get("phone"),
+            "email": request.form.get("email"),
+            "gender": request.form.get("gender"),
+            "birthday": request.form.get("birthday"),  # YYYY-MM-DD
+            "is_active": True if request.form.get("is_active") == "on" else False,
+        }
+        success = StaffService.update_staff(staff_id, data)
+        if success:
+            flash("Cập nhật thành công", "success")
+            return redirect(url_for("staff.edit_staff", staff_id=staff_id))
+        else:
+            flash("Cập nhật thất bại", "danger")
+
+    return render_template("staff/edit.html", staff=staff)

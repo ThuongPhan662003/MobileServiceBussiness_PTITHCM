@@ -1,37 +1,81 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-    <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
-        <!-- Avatar -->
-        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
-            <img src="{{ staff.avatar_url or 'https://i.pravatar.cc/150' }}" alt="Ảnh nhân viên"
-                class="w-full h-full object-cover">
+<!-- <div class="max-w-4xl mx-auto mt-14 bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-200"> -->
+<div class="flex flex-col md:flex-row items-center md:items-start p-8 gap-10 bg-gradient-to-br from-white to-gray-50">
+    <!-- Avatar -->
+    <div class="flex-shrink-0">
+        <div
+            class="w-36 h-36 rounded-full overflow-hidden border-4 border-blue-500 shadow-md transition-transform duration-300 hover:scale-105">
+            <img src="{{ staff.avatar_url or 'https://i.pravatar.cc/150' }}" class="w-full h-full object-cover"
+                alt="Avatar">
+        </div>
+    </div>
+
+    <!-- Thông tin -->
+    <div class="flex-1 text-gray-700 space-y-4">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800 tracking-tight">{{ staff.full_name or 'Không rõ' }}</h2>
+            <p class="text-sm text-gray-500">Mã nhân viên: <strong>#{{ staff.id }}</strong></p>
         </div>
 
-        <!-- Thông tin nhân viên -->
-        <div class="flex-1">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ staff.full_name }}</h2>
-            <p class="text-gray-500 mb-6">Mã nhân viên: <span class="font-semibold">{{ staff.id }}</span></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-sm">
+            <div>
+                <p><span class="font-semibold">📇 Mã thẻ:</span> {{ staff.card_id or 'Không rõ' }}</p>
+                <p><span class="font-semibold">📞 Điện thoại:</span> {{ staff.phone or 'Không rõ' }}</p>
+                <p><span class="font-semibold">⚥ Giới tính:</span> {{ staff.gender or 'Không rõ' }}</p>
+                <p><span class="font-semibold">🎂 Ngày sinh:</span>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div>
-                    <p><span class="font-medium">Mã thẻ:</span> {{ staff.card_id }}</p>
-                    <p><span class="font-medium">Số điện thoại:</span> {{ staff.phone }}</p>
-                    <p><span class="font-medium">Giới tính:</span> {{ staff.gender }}</p>
-                    <p><span class="font-medium">Ngày sinh:</span> {{ staff.birthday.strftime('%d/%m/%Y') }}</p>
-                </div>
-                <div>
-                    <p><span class="font-medium">Email:</span> {{ staff.email }}</p>
-                    <p><span class="font-medium">Tình trạng:</span>
-                        <span class="{{ 'text-green-600' if staff.is_active else 'text-red-500' }}">
-                            {{ 'Đang hoạt động' if staff.is_active else 'Ngừng hoạt động' }}
-                        </span>
-                    </p>
-                    <p><span class="font-medium">Account ID:</span> {{ staff.account_id }}</p>
-                </div>
+                    {{ staff.birthday}}
+
+                </p>
             </div>
+            <div>
+                <p><span class="font-semibold">✉️ Email:</span> {{ staff.email or 'Không rõ' }}</p>
+                <p><span class="font-semibold">🔐 Tài khoản ID:</span> {{ staff.account_id.id if staff.account_id
+                    else 'Không có' }}</p>
+                <p><span class="font-semibold">🟢 Trạng thái:</span>
+                    <span
+                        class="{{ 'text-green-600 font-semibold' if staff.is_active else 'text-red-500 font-semibold' }}">
+                        {{ 'Đang hoạt động' if staff.is_active else 'Ngừng hoạt động' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="pt-4 flex justify-end gap-4">
+            <a href="/staffs/edit/{{ staff.id }}"
+                class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow">
+                <i class="fas fa-pen mr-2"></i> Chỉnh sửa
+            </a>
+
         </div>
     </div>
 </div>
+<!-- </div> -->
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Cấu hình tùy chỉnh nếu cần -->
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                },
+                colors: {
+                    primary: '#1e40af', // Màu xanh chính
+                },
+            },
+        },
+    }
+</script>
+
+<!-- Font Awesome (icon) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 {% endblock %}

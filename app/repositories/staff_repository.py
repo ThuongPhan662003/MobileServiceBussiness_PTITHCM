@@ -1,3 +1,4 @@
+from datetime import date
 from app.database import db_instance
 from app.models.staff import Staff
 from app.services.account_service import AccountService
@@ -51,11 +52,30 @@ class StaffRepository:
                 "CALL GetStaffById(%s)", (staff_id,), fetchone=True
             )
             if result:
+                print("Kết quả từ SP:", result)
                 staff = Staff()
-                for key in result:
-                    setattr(staff, key, result[key])
-                staff["is_active"] = True if result["is_active"] else False
-                return staff
+                staff.id = result.get("id")
+                staff.full_name = result.get("full_name")
+                staff.card_id = result.get("card_id")
+                staff.phone = result.get("phone")
+                staff.email = result.get("email")
+                staff.is_active = True if result.get("is_active") else False
+                staff.gender = result.get("gender")
+                staff.birthday = result.get("birthday")
+                print("Ngày sinh:", staff.birthday)
+                acc = AccountService.get_account_by_id(result.get("account_id"))
+                staff.account_id = acc
+                # if staff.birthday and isinstance(staff.birthday, date):
+                #     staff.birthday = staff.birthday.strftime("%d/%m/%Y")
+
+                # for key in result:
+                #     if hasattr(staff, key):
+                #         setattr(staff, key, result[key])
+                # # Đảm bảo `is_active` là kiểu bool
+                # if hasattr(staff, "is_active"):
+                #     staff.is_active = True if result.get("is_active") else False
+                print("Nhân viên:", staff.to_dict())
+                return staff.to_dict()
             return None
         except Exception as e:
             print(f"Lỗi khi lấy nhân viên theo ID: {e}")
