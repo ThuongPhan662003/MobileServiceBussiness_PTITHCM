@@ -331,6 +331,25 @@
         color: white;
     }
 
+    #viewContractModal .modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    #contractModal .modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    #viewContractModal .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #viewContractModal .modal-body::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 4px;
+    }
+
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -422,8 +441,8 @@
         </div>
     </div>
 
-    <div class="contract-table">
-        <table class="table">
+    <div class="contract-table w-full max-h-[500px] overflow-y-auto">
+        <table class=" table min-w-full table-auto divide-y divide-gray-200 text-sm text-left">
             <thead>
                 <tr>
                     <th>ID</th>

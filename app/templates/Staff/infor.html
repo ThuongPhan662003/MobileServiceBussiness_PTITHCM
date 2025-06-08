@@ -1,33 +1,14 @@
 {% extends "admin_base.html" %}
 
 {% block content %}
-<!-- <div class="max-w-4xl mx-auto mt-14 bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-200"> -->
-<div class="flex flex-col md:flex-row items-center md:items-start p-8 gap-10 bg-gradient-to-br from-white to-gray-50">
-    <!-- Avatar -->
-    <div class="flex-shrink-0">
-        <div
-            class="w-36 h-36 rounded-full overflow-hidden border-4 border-blue-500 shadow-md transition-transform duration-300 hover:scale-105">
-            {% set avatar_url = staff.avatar_url %}
-            {% if not avatar_url %}
-            {% set seed = staff.id or 1 %}
-            {% if staff.gender == 'Nam' %}
-            {% set avatar_number = (seed * 7) % 50 + 1 %}
-            {% elif staff.gender == 'Nữ' %}
-            {% set avatar_number = (seed * 9) % 50 + 51 %}
-            {% else %}
-            {% set avatar_number = 0 %}
-            {% endif %}
-            {% set avatar_url = 'https://i.pravatar.cc/150/' ~ avatar_number %}
-            {% endif %}
-            <img src="{{ avatar_url }}" class="w-full h-full object-cover" alt="Avatar">
-        </div>
+<div class="flex flex-col gap-8 text-gray-700">
 
-    </div>
+    <!-- 🧾 THÔNG TIN NHÂN VIÊN -->
+    <div class="bg-white shadow-md rounded-xl p-6 space-y-4">
+        <h2 class="text-2xl font-bold text-blue-700">🧾 Thông tin nhân viên</h2>
 
-    <!-- Thông tin -->
-    <div class="flex-1 text-gray-700 space-y-4">
         <div>
-            <h2 class="text-3xl font-bold text-gray-800 tracking-tight">{{ staff.full_name or 'Không rõ' }}</h2>
+            <h3 class="text-xl font-semibold text-gray-800">{{ staff.full_name or 'Không rõ' }}</h3>
             <p class="text-sm text-gray-500">Mã nhân viên: <strong>#{{ staff.id }}</strong></p>
         </div>
 
@@ -36,17 +17,14 @@
                 <p><span class="font-semibold">📇 Mã thẻ:</span> {{ staff.card_id or 'Không rõ' }}</p>
                 <p><span class="font-semibold">📞 Điện thoại:</span> {{ staff.phone or 'Không rõ' }}</p>
                 <p><span class="font-semibold">⚥ Giới tính:</span> {{ staff.gender or 'Không rõ' }}</p>
-                <p><span class="font-semibold">🎂 Ngày sinh:</span>
-
-                    {{ staff.birthday}}
-
-                </p>
+                <p><span class="font-semibold">🎂 Ngày sinh:</span> {{ staff.birthday or 'Không rõ' }}</p>
             </div>
             <div>
                 <p><span class="font-semibold">✉️ Email:</span> {{ staff.email or 'Không rõ' }}</p>
-                <p><span class="font-semibold">🔐 Tài khoản ID:</span> {{ staff.account_id.id if staff.account_id
-                    else 'Không có' }}</p>
-                <p><span class="font-semibold">🟢 Trạng thái:</span>
+                <p><span class="font-semibold">🔐 Tài khoản ID:</span>
+                    {{ staff.account_id.id if staff.account_id else 'Không có' }}
+                </p>
+                <p><span class="font-semibold">🟢 Trạng thái nhân viên:</span>
                     <span
                         class="{{ 'text-green-600 font-semibold' if staff.is_active else 'text-red-500 font-semibold' }}">
                         {{ 'Đang hoạt động' if staff.is_active else 'Ngừng hoạt động' }}
@@ -55,20 +33,75 @@
             </div>
         </div>
 
-        <div class="pt-4 flex justify-end gap-4">
-            <a href="/staffs/edit/{{ staff.id }}"
+        <div class="pt-4 flex justify-end">
+            <a href="{{ url_for('staff.edit_staff', staff_id=staff.id) }}"
                 class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow">
-                <i class="fas fa-pen mr-2"></i> Chỉnh sửa
+                <i class="fas fa-user-edit mr-2"></i> Chỉnh sửa nhân viên
             </a>
-
         </div>
     </div>
-</div>
-<!-- </div> -->
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Cấu hình tùy chỉnh nếu cần -->
+    <!-- 🔐 THÔNG TIN TÀI KHOẢN -->
+    {% if staff.account_id %}
+    <div class="bg-white shadow-md rounded-xl p-6 space-y-4">
+        <h2 class="text-2xl font-bold text-green-700">🔐 Thông tin tài khoản</h2>
+
+        <ul class="space-y-2 text-sm">
+            <li><span class="font-semibold">👤 Username:</span> {{ staff.account_id.username }}</li>
+            <li>
+                <span class="font-semibold">🔑 Mật khẩu:</span>
+                <span style="position: relative;">
+                    <input id="passwordField" type="password" value="{{ staff.account_id.password or '********' }}"
+                        class="border rounded px-2 py-1 text-sm text-gray-700 w-48" readonly />
+                    <button type="button" onclick="togglePassword()"
+                        style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%);">
+                        <i id="eyeIcon" class="fas fa-eye text-gray-600"></i>
+                    </button>
+                </span>
+            </li>
+
+            <li>
+                <span class="font-semibold">🟢 Trạng thái tài khoản:</span>
+                <span
+                    class="{{ 'text-green-600 font-semibold' if staff.account_id.is_active else 'text-red-500 font-semibold' }}">
+                    {{ 'Kích hoạt' if staff.account_id.is_active else 'Ngừng hoạt động' }}
+                </span>
+            </li>
+            {% if staff.account_id.created_at %}
+            <li><span class="font-semibold">📅 Ngày tạo:</span> {{ staff.account_id.created_at.strftime('%d/%m/%Y') }}
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="pt-4 flex justify-end">
+            <a href="{{ url_for('staff.edit_account', staff_id=session['staff_id']) }}"
+                class="inline-flex items-center px-5 py-2.5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 shadow">
+                <i class="fas fa-user-cog mr-2"></i> Chỉnh sửa tài khoản
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+<script>
+    function togglePassword() {
+        const input = document.getElementById("passwordField");
+        const icon = document.getElementById("eyeIcon");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+</script>
+
+<!-- Tailwind CDN và cấu hình -->
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
     tailwind.config = {
         theme: {
@@ -77,17 +110,12 @@
                     sans: ['Inter', 'ui-sans-serif', 'system-ui'],
                 },
                 colors: {
-                    primary: '#1e40af', // Màu xanh chính
+                    primary: '#1e40af',
                 },
             },
         },
     }
 </script>
 
-<!-- Font Awesome (icon) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 {% endblock %}

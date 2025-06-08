@@ -14,73 +14,9 @@ class StaffService:
     def get_staff_by_id(staff_id):
         return StaffRepository.get_by_id(staff_id)
 
-    # @staticmethod
-    # def create_staff(data: dict):
-    # try:
-    # birthday_str = data.get("birthday")
-    # birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
-
-    # staff_model = Staff(
-    # full_name=data.get("full_name"),
-    # card_id=data.get("card_number"),
-    # phone=data.get("phone"),
-    # email=data.get("email"),
-    # gender=data.get("gender"),
-    # birthday=birthday,
-
-    # )
-
-    # staff = StaffViewModel(
-    # staff_model,
-    # role_name=data.get("role_name"),
-    # username=data.get("username"),
-    # password=data.get("password")
-    # )
-    # print(staff)
-    # result = StaffRepository.insert(staff)
-    # if result is True:
-    # return {"success": True}
-    # else:
-    # return {"error": result}
-
-    # except Exception as e:
-    # return {"error": str(e)}
-
     @staticmethod
     def get_staff_by_account_id(account_id):
         return StaffRepository.get_by_account_id(account_id)
-
-    # @staticmethod
-    # def create_staff(data: dict):
-    # try:
-    # birthday_str = data.get("birthday")
-    # birthday = datetime.strptime(birthday_str, "%Y-%m-%d") if birthday_str else None
-
-    # staff_model = Staff(
-    # full_name=data.get("full_name"),
-    # card_id=data.get("card_number"),
-    # phone=data.get("phone"),
-    # email=data.get("email"),
-    # gender=data.get("gender"),
-    # birthday=birthday,
-
-    # )
-
-    # staff = StaffViewModel(
-    # staff_model,
-    # role_name=data.get("role_name"),
-    # username=data.get("username"),
-    # password=data.get("password")
-    # )
-    # print(staff)
-    # result = StaffRepository.insert(staff)
-    # if result is True:
-    # return {"success": True}
-    # else:
-    # return {"error": result}
-
-    # except Exception as e:
-    # return {"error": str(e)}
 
     @staticmethod
     def create_staff(data: dict):
@@ -254,3 +190,11 @@ class StaffService:
             is_active=filters.get("is_active"),
             role_name=filters.get("role"),
         )
+
+    @staticmethod
+    def update_info_staff(staff_id, data):
+        return StaffRepository.update_staff(staff_id, data)
+
+    @staticmethod
+    def update_account(account_id, data):
+        return StaffRepository.update_account(account_id, data)
