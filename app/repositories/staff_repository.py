@@ -356,3 +356,30 @@ class StaffRepository:
         except Exception as e:
             print(f"Lỗi khi cập nhật tài khoản: {e}")
             return {"success": 0, "message": str(e)}
+
+    @staticmethod
+    def get_object_by_id(staff_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetStaffById(%s)", (staff_id,), fetchone=True
+            )
+            if result:
+                print("Kết quả từ SP:", result)
+                staff = Staff()
+                staff.id = result.get("id")
+                staff.full_name = result.get("full_name")
+                staff.card_id = result.get("card_id")
+                staff.phone = result.get("phone")
+                staff.email = result.get("email")
+                staff.is_active = True if result.get("is_active") else False
+                staff.gender = result.get("gender")
+                staff.birthday = result.get("birthday")
+                print("Ngày sinh:", staff.birthday)
+                acc = AccountService.get_account_by_id(result.get("account_id"))
+                staff.account_id = acc
+                print("Nhân viên:", staff.to_dict())
+                return staff
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy nhân viên theo ID: {e}")
+            return None

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-
+from flask_login import login_required
+from app.utils.decorator import required
 from decimal import Decimal
 import hashlib
 from flask import (
@@ -33,7 +34,8 @@ payment_api_bp = Blueprint("payment_api_bp", __name__, url_prefix="/pay-process"
 
 @login_required
 @payment_api_bp.route("/", methods=["GET"])
-def index():
+@required
+def index_payment_api():
     print("vô")
     code = request.args.get("plan_code")
     price = request.args.get("price")
@@ -54,6 +56,7 @@ def index():
 
 @login_required
 @payment_api_bp.route("/vnpay_pay", methods=["POST", "GET"])
+@required
 def vnpay_pay():
     form = PaymentForm(request.form)
     if request.method == "POST" and form.validate():
@@ -105,6 +108,7 @@ def vnpay_pay():
 
 @login_required
 @payment_api_bp.route("/vnpay_return")
+@required
 def vnpay_return():
     # Lấy tất cả tham số VNPAY trả về
     vnp = VnPay()
@@ -152,6 +156,7 @@ def vnpay_return():
 
 @login_required
 @payment_api_bp.route("/pay")
+@required
 def pay_paypal():
     # Lấy giá VND từ giao diện
     # print("Vào hàm pay_paypal", request.form.get("item_price_vnd"))
@@ -222,6 +227,7 @@ def pay_paypal():
 
 @login_required
 @payment_api_bp.route("/execute")
+@required
 def payment_paypal_execute():
     payment_id = request.args.get("paymentId")
     payer_id = request.args.get("PayerID")
@@ -299,6 +305,7 @@ def payment_paypal_execute():
 
 @login_required
 @payment_api_bp.route("/result")
+@required
 def payment_result():
     result = session.get("payment_result")
     if not result:
@@ -317,6 +324,7 @@ def payment_result():
 
 @login_required
 @payment_api_bp.route("/cancel")
+@required
 def payment_paypal_cancel():
     # Người dùng hủy thanh toán
     return render_template(

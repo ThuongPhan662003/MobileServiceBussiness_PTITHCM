@@ -198,3 +198,7 @@ class StaffService:
     @staticmethod
     def update_account(account_id, data):
         return StaffRepository.update_account(account_id, data)
+
+    @staticmethod
+    def get_object_by_id(staff_id):
+        return StaffRepository.get_object_by_id(staff_id)

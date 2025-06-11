@@ -1,18 +1,24 @@
 from flask import Blueprint, json, render_template, request, jsonify
 from app.services.rolegroup_service import RoleGroupService
 from app.services.staff_service import StaffService
+from flask_login import login_required
+from app.utils.decorator import required
 
 role_group_bp = Blueprint("role_group", __name__, url_prefix="/role_groups")
 
 
+@login_required
 @role_group_bp.route("/", methods=["GET"])
+@required
 def get_all_role_groups():
     role_groups = RoleGroupService.get_all_role_groups()
     # return jsonify(role_groups), 200
     return render_template("admin_home/role.html", role_groups=role_groups)
 
 
+@login_required
 @role_group_bp.route("/staffsByRoleGroup/<int:role_group_id>", methods=["GET"])
+@required
 def get_staffs_by_role_group(role_group_id):
     try:
         # Gọi RoleGroupService để lấy danh sách nhân viên
@@ -23,7 +29,9 @@ def get_staffs_by_role_group(role_group_id):
         return jsonify({"error": str(e)}), 400
 
 
+@login_required
 @role_group_bp.route("/AddstaffsByRoleGroup", methods=["POST"])
+@required
 def add_staffs_by_role_group():
     try:
         data = request.get_json()
@@ -44,7 +52,9 @@ def add_staffs_by_role_group():
         return jsonify({"error": str(e)}), 400
 
 
+@login_required
 @role_group_bp.route("/functions/<int:role_group_id>", methods=["GET"])
+@required
 def get_role_group_functions(role_group_id):
     try:
         result = RoleGroupService.get_role_group_functions(role_group_id)
@@ -61,9 +71,11 @@ def get_role_group_functions(role_group_id):
         return jsonify({"error": str(e)}), 500
 
 
+@login_required
 @role_group_bp.route(
     "/remove_function/<int:role_group_id>/<int:function_id>", methods=["DELETE"]
 )
+@required
 def remove_function_from_role_group(role_group_id, function_id):
     try:
 
@@ -84,7 +96,9 @@ def remove_function_from_role_group(role_group_id, function_id):
         return jsonify({"error": "Có lỗi xảy ra khi xóa chức năng"}), 500
 
 
+@login_required
 @role_group_bp.route("/add_funcs/<int:role_id>", methods=["POST"])
+@required
 def add_functions_to_role_group(role_id):
     print("role_id", role_id)
     try:
@@ -132,7 +146,9 @@ def add_functions_to_role_group(role_id):
         return jsonify({"error": str(e)}), 500
 
 
+@login_required
 @role_group_bp.route("/<int:role_group_id>", methods=["GET"])
+@required
 def get_role_group_by_id(role_group_id):
     role_group = RoleGroupService.get_role_group_by_id(role_group_id)
     if role_group:
@@ -140,10 +156,12 @@ def get_role_group_by_id(role_group_id):
     return jsonify({"error": "Role group not found"}), 404
 
 
+@login_required
 @role_group_bp.route(
     "/remove_staff/role_group=<int:role_group_id>&account_id=<int:account_id>",
     methods=["DELETE"],
 )
+@required
 def remove_staff_from_role_group(role_group_id, account_id):
     try:
         print("reomoce")
@@ -153,15 +171,19 @@ def remove_staff_from_role_group(role_group_id, account_id):
         return jsonify({"error": str(e)}), 400
 
 
+@login_required
 @role_group_bp.route(
     "/get_staffs_not_in_role_group/<int:role_group_id>", methods=["GET"]
 )
+@required
 def get_staffs_not_in_role_group(role_group_id):
     staffs = RoleGroupService.get_staffs_not_in_role_group(role_group_id)
     return jsonify(staffs), 200
 
 
+@login_required
 @role_group_bp.route("/", methods=["POST"])
+@required
 def create_role_group():
     data = request.get_json()
     result = RoleGroupService.create_role_group(data)
@@ -170,7 +192,9 @@ def create_role_group():
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @role_group_bp.route("/<int:role_group_id>", methods=["PUT"])
+@required
 def update_role_group(role_group_id):
     data = request.get_json()
     result = RoleGroupService.update_role_group(role_group_id, data)
@@ -179,7 +203,9 @@ def update_role_group(role_group_id):
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @role_group_bp.route("/<int:role_group_id>", methods=["DELETE"])
+@required
 def delete_role_group(role_group_id):
     result = RoleGroupService.delete_role_group(role_group_id)
     if result.get("success"):

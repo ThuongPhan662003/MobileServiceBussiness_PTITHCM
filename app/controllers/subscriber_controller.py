@@ -1,14 +1,23 @@
 from flask import Blueprint, request, jsonify, render_template
 from app.services.subscriber_service import SubscriberService
+from flask_login import login_required
+from app.utils.decorator import required
 
-subscriber_bp = Blueprint('subscriber_bp', __name__, url_prefix='/subscribers')
 
-@subscriber_bp.route('/', methods=['GET'])
+subscriber_bp = Blueprint("subscriber_bp", __name__, url_prefix="/subscribers")
+
+
+@login_required
+@subscriber_bp.route("/", methods=["GET"])
+@required
 def get_all_subscribers():
     subscribers = SubscriberService.get_all_subscribers()
     return render_template("admin_home/subscribers.html", subscribers=subscribers)
 
-@subscriber_bp.route('/<int:subscriber_id>', methods=['GET'])
+
+@login_required
+@subscriber_bp.route("/<int:subscriber_id>", methods=["GET"])
+@required
 def get_subscriber(subscriber_id):
     subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
     if subscriber:
@@ -16,7 +25,9 @@ def get_subscriber(subscriber_id):
     return jsonify({"error": "Subscriber not found"}), 404
 
 
-@subscriber_bp.route('/', methods=['POST'])
+@login_required
+@subscriber_bp.route("/", methods=["POST"])
+@required
 def create_subscriber():
     data = request.get_json()
     print("Received data:", data)
@@ -27,7 +38,10 @@ def create_subscriber():
         return jsonify({"message": "Subscriber created successfully"}), 201
     return jsonify({"error": result.get("error", "Unknown error")}), 400
 
-@subscriber_bp.route('/<int:subscriber_id>', methods=['PUT'])
+
+@login_required
+@subscriber_bp.route("/<int:subscriber_id>", methods=["PUT"])
+@required
 def update_subscriber(subscriber_id):
     data = request.get_json()
     result = SubscriberService.update_subscriber(subscriber_id, data)
@@ -35,7 +49,10 @@ def update_subscriber(subscriber_id):
         return jsonify({"message": "Subscriber updated successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
 
-@subscriber_bp.route('/<int:subscriber_id>', methods=['DELETE'])
+
+@login_required
+@subscriber_bp.route("/<int:subscriber_id>", methods=["DELETE"])
+@required
 def delete_subscriber(subscriber_id):
     result = SubscriberService.delete_subscriber(subscriber_id)
     if result.get("success"):

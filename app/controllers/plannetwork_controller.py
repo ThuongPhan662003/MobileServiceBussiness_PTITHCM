@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.plannetwork_service import PlanNetworkService
+from flask_login import login_required
+from app.utils.decorator import required
 
 plan_network_bp = Blueprint("plan_network", __name__, url_prefix="/plan_networks")
 
@@ -21,7 +23,9 @@ def get_plan_network_by_id(pn_id):
     return jsonify({"error": "Plan network not found"}), 404
 
 
+@login_required
 @plan_network_bp.route("/", methods=["POST"])
+@required
 def create_plan_network():
     data = request.get_json()
     result = PlanNetworkService.create_plan_network(data)
@@ -30,7 +34,9 @@ def create_plan_network():
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @plan_network_bp.route("/<int:pn_id>", methods=["PUT"])
+@required
 def update_plan_network(pn_id):
     data = request.get_json()
     result = PlanNetworkService.update_plan_network(pn_id, data)
@@ -39,7 +45,9 @@ def update_plan_network(pn_id):
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @plan_network_bp.route("/<int:pn_id>", methods=["DELETE"])
+@required
 def delete_plan_network(pn_id):
     result = PlanNetworkService.delete_plan_network(pn_id)
 

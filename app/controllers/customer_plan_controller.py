@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-
+from flask_login import login_required
+from app.utils.decorator import required
 from app.repositories.plan_repository import PlanRepository
 from app.repositories.subscriber_repository import SubscriberRepository
 
@@ -24,7 +25,7 @@ def mobile_plans():
             1
         )  # Lấy sub-services của gói dịch vụ di động (id=1)
         plans = PlanService.get_plans_by_service_id(sub_service_id)
-        print(plans)
+        print("helod", plans)
         return render_template(
             "Plan_customer/list.html",
             plans=plans,
@@ -73,7 +74,9 @@ def plan_details(plan_id):
         )
 
 
+@login_required
 @customer_plan_bp.route("/register-plan", methods=["POST"])
+@required
 def register_plan():
     data = request.get_json()
     plan_code = data.get("plan_code")

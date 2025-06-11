@@ -83,3 +83,27 @@ class FunctionRepository:
         except Exception as e:
             print(f"Lỗi khi xóa function: {e}")
             return False
+
+    @staticmethod
+    def get_funcs_role_group_id(role_group_id):
+        try:
+            result = db_instance.execute(
+                "CALL sp_get_functions_by_rolegroup_id(%s) ",
+                (role_group_id),
+                fetchall=True,
+            )
+            functions = []
+            print("kết quả,", result[0])
+            for row in result[0]:
+                print("roww", row)
+                func = Function()
+                func.id = row.get("id")
+                func.function_name = row.get("function_name")
+                func.syntax_name = row.get("syntax_name")
+                print("hàm", row.get("function_name"))
+                functions.append(func)
+
+            return functions
+        except Exception as e:
+            print(f"Lỗi khi lấy danh sách function: {e}")
+            return []

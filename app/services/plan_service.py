@@ -145,3 +145,7 @@ class PlanService:
     @staticmethod
     def get_all_codes():
         return PlanRepository.get_all_codes()
+
+    @staticmethod
+    def get_all_plan_object():
+        return PlanRepository.get_all_plan()

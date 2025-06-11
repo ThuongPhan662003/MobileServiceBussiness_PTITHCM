@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, render_template, flash, redirect,
 from app.services.plan_service import PlanService
 from app.repositories.service_repository import ServiceRepository
 from app.repositories.staff_repository import StaffRepository
+from flask_login import login_required
+from app.utils.decorator import required
 
 plan_bp = Blueprint("plan", __name__, url_prefix="/plans")
 
@@ -31,7 +33,10 @@ def validate_plan_data(data, plan_id=None):
             errors.append("Giá gói cước phải là số")
 
     # Kiểm tra object_type
-    if not data.get("object_type") or data.get("object_type") not in ["TRATRUOC", "TRASAU"]:
+    if not data.get("object_type") or data.get("object_type") not in [
+        "TRATRUOC",
+        "TRASAU",
+    ]:
         errors.append("Hình thức thanh toán phải là TRATRUOC hoặc TRASAU")
 
     # Kiểm tra duration
@@ -46,10 +51,16 @@ def validate_plan_data(data, plan_id=None):
             errors.append("Thời hạn phải là số nguyên")
 
     # Kiểm tra các trường số nguyên
-    for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                  "free_on_network_SMS", "free_off_network_a_call",
-                  "free_off_network_call", "free_off_network_SMS",
-                  "maximum_on_network_call"]:
+    for field in [
+        "free_data",
+        "free_on_network_a_call",
+        "free_on_network_call",
+        "free_on_network_SMS",
+        "free_off_network_a_call",
+        "free_off_network_call",
+        "free_off_network_SMS",
+        "maximum_on_network_call",
+    ]:
         if data.get(field):
             try:
                 value = int(data.get(field))
@@ -74,7 +85,9 @@ def validate_plan_data(data, plan_id=None):
         value = data.get(field)
         if value:
             if len(value) > 255:
-                errors.append(f"{field.replace('_', ' ').title()} không được vượt quá 255 ký tự")
+                errors.append(
+                    f"{field.replace('_', ' ').title()} không được vượt quá 255 ký tự"
+                )
             # Kiểm tra trùng cú pháp
             if PlanService.check_syntax_exists(field, value, plan_id):
                 errors.append(f"{field.replace('_', ' ').title()} đã tồn tại")
@@ -104,22 +117,32 @@ def validate_plan_data(data, plan_id=None):
     return errors
 
 
+@plan_bp.route("/list", methods=["GET"])
+def get_all_plan_list():
+
+    plans = PlanService.get_all_plan_object()
+    plan_list = [plan.to_dict() for plan in plans]
+    return jsonify(plan_list), 200
+
+
 @plan_bp.route("/", methods=["GET"])
 def get_all_plans():
     try:
         plans = PlanService.get_all_plans()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             plan_list = [plan.to_dict() for plan in plans]
             return jsonify(plan_list), 200
         return render_template("Plan/plan.html", plans=plans)
     except Exception as e:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify({"error": f"Lỗi khi lấy danh sách gói cước: {str(e)}"}), 500
         flash(f"Lỗi: {str(e)}", "error")
         return render_template("Plan/plan.html", plans=[]), 500
 
 
+@login_required
 @plan_bp.route("/create", methods=["GET", "POST"])
+@required
 def create_plan():
     if request.method == "GET":
         return render_template("Plan/create_plan.html", data={})
@@ -135,15 +158,23 @@ def create_plan():
         # Chuyển đổi dữ liệu
         data["is_active"] = data.get("is_active") == "on"
         data["auto_renew"] = data.get("auto_renew") == "on"
-        for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                      "free_on_network_SMS", "free_off_network_a_call",
-                      "free_off_network_call", "free_off_network_SMS",
-                      "maximum_on_network_call"]:
+        for field in [
+            "free_data",
+            "free_on_network_a_call",
+            "free_on_network_call",
+            "free_on_network_SMS",
+            "free_off_network_a_call",
+            "free_off_network_call",
+            "free_off_network_SMS",
+            "maximum_on_network_call",
+        ]:
             data[field] = int(data.get(field, 0)) if data.get(field) else 0
         for field in ["ON_SMS_cost", "ON_a_call_cost"]:
             data[field] = float(data.get(field, 0)) if data.get(field) else None
         data["price"] = float(data.get("price")) if data.get("price") else None
-        data["service_id"] = int(data.get("service_id")) if data.get("service_id") else None
+        data["service_id"] = (
+            int(data.get("service_id")) if data.get("service_id") else None
+        )
         data["staff_id"] = int(data.get("staff_id")) if data.get("staff_id") else None
         data["duration"] = int(data.get("duration")) if data.get("duration") else None
 
@@ -155,7 +186,9 @@ def create_plan():
         return render_template("Plan/create_plan.html", data=data), 400
 
 
+@login_required
 @plan_bp.route("/update/<int:plan_id>", methods=["GET", "POST"])
+@required
 def update_plan(plan_id):
     plan = PlanService.get_plan_by_id(plan_id)
     if not plan:
@@ -163,7 +196,9 @@ def update_plan(plan_id):
         return redirect(url_for("plan.get_all_plans")), 404
 
     if request.method == "GET":
-        return render_template("Plan/update_plan.html", plan=plan.to_dict(), plan_id=plan_id)
+        return render_template(
+            "Plan/update_plan.html", plan=plan.to_dict(), plan_id=plan_id
+        )
 
     if request.method == "POST":
         data = request.form.to_dict()
@@ -171,20 +206,31 @@ def update_plan(plan_id):
         if errors:
             for error in errors:
                 flash(error, "error")
-            return render_template("Plan/update_plan.html", plan=data, plan_id=plan_id), 400
+            return (
+                render_template("Plan/update_plan.html", plan=data, plan_id=plan_id),
+                400,
+            )
 
         # Chuyển đổi dữ liệu
         data["is_active"] = data.get("is_active") == "on"
         data["auto_renew"] = data.get("auto_renew") == "on"
-        for field in ["free_data", "free_on_network_a_call", "free_on_network_call",
-                      "free_on_network_SMS", "free_off_network_a_call",
-                      "free_off_network_call", "free_off_network_SMS",
-                      "maximum_on_network_call"]:
+        for field in [
+            "free_data",
+            "free_on_network_a_call",
+            "free_on_network_call",
+            "free_on_network_SMS",
+            "free_off_network_a_call",
+            "free_off_network_call",
+            "free_off_network_SMS",
+            "maximum_on_network_call",
+        ]:
             data[field] = int(data.get(field, 0)) if data.get(field) else 0
         for field in ["ON_SMS_cost", "ON_a_call_cost"]:
             data[field] = float(data.get(field, 0)) if data.get(field) else None
         data["price"] = float(data.get("price")) if data.get("price") else None
-        data["service_id"] = int(data.get("service_id")) if data.get("service_id") else None
+        data["service_id"] = (
+            int(data.get("service_id")) if data.get("service_id") else None
+        )
         data["staff_id"] = int(data.get("staff_id")) if data.get("staff_id") else None
         data["duration"] = int(data.get("duration")) if data.get("duration") else None
 
@@ -196,14 +242,16 @@ def update_plan(plan_id):
         return render_template("Plan/update_plan.html", plan=data, plan_id=plan_id), 400
 
 
+@login_required
 @plan_bp.route("/lock/<int:plan_id>", methods=["POST"])
+@required
 def lock_plan(plan_id):
     result = PlanService.lock_plan(plan_id)
     if result.get("success"):
         flash("Khóa gói cước thành công!", "success")
-        return jsonify({'success': True})
+        return jsonify({"success": True})
     flash(f"Lỗi: {result.get('error')}", "error")
-    return jsonify({'error': result.get('error')}), 400
+    return jsonify({"error": result.get("error")}), 400
 
 
 @plan_bp.route("/search", methods=["POST"])

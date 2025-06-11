@@ -2,6 +2,8 @@
 
 from flask import Blueprint, request, jsonify
 from app.utils.email_sender import generate_and_send_otp, verify_otp
+from flask_login import login_required
+from app.utils.decorator import required
 
 otp_bp = Blueprint("otp", __name__, url_prefix="/otp")
 

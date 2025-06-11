@@ -4,18 +4,24 @@ from flask_login import current_user
 from app.services.staff_service import StaffService
 
 from app.services.voucher_service import VoucherService
+from flask_login import login_required
+from app.utils.decorator import required
 
 voucher_bp = Blueprint("voucher", __name__, url_prefix="/vouchers")
 
 
+@login_required
 @voucher_bp.route("/", methods=["GET"])
+@required
 def voucher_list():
     all_vouchers = VoucherService.get_all_vouchers()
     print("all_vouchers", all_vouchers)
     return render_template("vouchers/voucher_list.html", vouchers=all_vouchers)
 
 
+@login_required
 @voucher_bp.route("/", methods=["POST"])
+@required
 def voucher_create():
     data = request.get_json()
     print("Received data:", StaffService.get_staff_by_account_id(current_user.get_id()))
@@ -48,7 +54,9 @@ def voucher_create():
     )
 
 
+@login_required
 @voucher_bp.route("/<int:voucher_id>", methods=["PUT"])
+@required
 def voucher_edit(voucher_id):
     data = request.get_json()
     print("Request data:", data)
@@ -80,7 +88,9 @@ def voucher_edit(voucher_id):
         )
 
 
+@login_required
 @voucher_bp.route("/<int:voucher_id>", methods=["DELETE"])
+@required
 def voucher_delete(voucher_id):
     result = VoucherService.delete_voucher(voucher_id)
     if result.get("success"):
@@ -88,7 +98,9 @@ def voucher_delete(voucher_id):
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @voucher_bp.route("/<int:voucher_id>", methods=["GET"])
+@required
 def get_voucher_by_id(voucher_id):
     voucher = VoucherService.get_voucher_by_id(voucher_id)
     if voucher:
