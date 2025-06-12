@@ -9,7 +9,7 @@ network_bp = Blueprint("network", __name__, url_prefix="/networks")
 @login_required
 @network_bp.route("/", methods=["GET"])
 @required
-def index():
+def index_networks():
     return render_template("networks/networks.html")
 
 

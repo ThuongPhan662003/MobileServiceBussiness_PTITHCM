@@ -44,7 +44,12 @@
     <div class="box">
         <h1>403 - Truy cập bị từ chối</h1>
         <p>Bạn không có quyền truy cập vào chức năng này.</p>
-        <a href="{{ url_for('auth.login') }}">Quay lại trang đăng nhập</a>
+
+        {% if session['role_type'] == 'Thuê bao' %}
+        <a href="{{ url_for('main_bp.index') }}">Quay lại trang chính</a>
+        {% else %}
+        <a href="{{ url_for('admin_main_bp.admin_index') }}">Quay lại trang chính</a>
+        {% endif %}
     </div>
 </body>
 

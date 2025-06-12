@@ -13,8 +13,8 @@ admin_main_bp = Blueprint("admin_main_bp", __name__, url_prefix="/admin")
 
 @login_required
 @admin_main_bp.route("/")
-@login_required
-def index():
+@required
+def admin_index():
     today = datetime.today().date()
     default_start_date = (
         today - timedelta(days=30)

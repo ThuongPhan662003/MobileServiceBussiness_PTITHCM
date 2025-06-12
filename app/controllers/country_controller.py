@@ -9,7 +9,7 @@ country_bp = Blueprint("country", __name__, url_prefix="/countries")
 @login_required
 @country_bp.route("/", methods=["GET"])
 @required
-def index():
+def index_countries():
     print("hi")
     return render_template("countries/countries.html")
 

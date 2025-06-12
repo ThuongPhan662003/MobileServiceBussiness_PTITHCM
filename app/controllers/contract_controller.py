@@ -11,7 +11,7 @@ contract_bp = Blueprint("contract", __name__, url_prefix="/contracts")
 @login_required
 @contract_bp.route("/", methods=["GET"])
 @required
-def index():
+def index_contracts():
     print("hi")
     return render_template("contracts/contracts.html")
 

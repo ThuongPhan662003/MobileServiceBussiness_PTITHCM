@@ -47,18 +47,18 @@ def login():
                 session["main_balance"] = user_data.get("main_balance")
                 session["subscriber_type"] = user_data.get("subscriber")
                 print("ssss", session["subscriber_type"])
-                flash(result.get("message"), "success")
+                flash("Đăng nhập thành công", "success")
             else:
                 session["staff_id"] = user_data.get("staff_id")
                 session["full_name"] = user_data.get("full_name")
                 session["email"] = user_data.get("email")
                 session["phone"] = user_data.get("phone")
                 session["gender"] = user_data.get("gender")
-                flash(result.get("message"), "success")
+                flash("Đăng nhập thành công", "success")
             print("role_tpe", result["data"]["role_name"])
             # ➤ Điều hướng theo role
             if result["data"]["role_name"] != "Thuê bao":
-                return redirect(url_for("admin_main_bp.index"))
+                return redirect(url_for("admin_main_bp.admin_index"))
             else:
                 return redirect(url_for("main_bp.index"))
         else:
