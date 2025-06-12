@@ -30,6 +30,7 @@ def login():
             user = result["data"]["account_id"]
 
             user_data = result.get("data", {})
+            print("dữ", user_data)
             role = user_data.get("role_name")
             login_user(user)  # cần đảm bảo `user` là instance của UserMixin
             session.permanent = True
@@ -40,10 +41,8 @@ def login():
             if role == "Thuê bao":
                 session["subscriber_id"] = user_data.get("subscriber_id")
 
-                session["full_name"] = user_data.get(
-                    "customer_name"
-                )  # lấy tên từ customer
-                session["phone"] = user_data.get("phone_number")
+                session["full_name"] = user_data.get("full_name")  # lấy tên từ customer
+                session["phone"] = user_data.get("phone")
                 session["main_balance"] = user_data.get("main_balance")
                 session["subscriber_type"] = user_data.get("subscriber")
                 print("ssss", session["subscriber_type"])
