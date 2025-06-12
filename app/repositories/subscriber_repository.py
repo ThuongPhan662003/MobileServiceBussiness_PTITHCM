@@ -69,7 +69,7 @@ class SubscriberRepository:
                 s.warning_date = result.get("warning_date")
                 s.subscriber = result.get("subscriber")
                 s.account_id = result.get("account_id")
-                s.subscriber_type = result.get("subscriber_type")
+                s.subscriber_type = result.get("subscriber")
                 s.ON_a_call_cost = result.get("ON_a_call_cost")
                 s.ON_SMS_cost = result.get("ON_SMS_cost")
                 return s
@@ -120,17 +120,15 @@ class SubscriberRepository:
     @staticmethod
     def create(data: Subscriber):
         try:
-            # Chuyển đổi bool subscriber thành chuỗi "TRASAU" hoặc "TRATRUOC"
             subscriber_type = "TRASAU" if data.subscriber else "TRATRUOC"
-
+            # Gọi procedure mới, không cần truyền account_id nữa
             result = db_instance.execute(
-                "CALL AddSubscriber(%s, %s, %s, %s, %s, %s, %s, %s)",
+                "CALL AddSubscriber(%s, %s, %s, %s, %s, %s, %s)",
                 (
                     data.phone_number,
                     float(data.main_balance or 0),
                     data.expiration_date,
                     data.customer_id,
-                    data.account_id,
                     float(data.ON_a_call_cost or 0),
                     float(data.ON_SMS_cost or 0),
                     subscriber_type,
@@ -139,13 +137,20 @@ class SubscriberRepository:
                 commit=True,
             )
 
-            if result and result.get("error"):
-                return result["error"]
-            return True
+            if result and result.get("success"):
+                return {
+                    "success": True,
+                    "message": result.get("message")
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": result.get("message", "Có lỗi xảy ra")
+                }
 
         except Exception as e:
             print(f"❌ Lỗi khi tạo subscriber: {e}")
-            return str(e)
+            return {"success": False, "message": str(e)}
 
     @staticmethod
     def update(subscriber_id, data: Subscriber):
@@ -161,7 +166,7 @@ class SubscriberRepository:
                     data.expiration_date,
                     data.is_active,
                     data.warning_date,
-                    data.subscriber,  # Tên hiển thị hoặc mã thuê bao
+                    data.subscriber,
                     data.customer_id,
                     data.account_id,
                     float(data.ON_a_call_cost or 0),

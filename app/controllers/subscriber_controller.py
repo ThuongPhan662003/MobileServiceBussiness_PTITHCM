@@ -29,14 +29,15 @@ def get_subscriber(subscriber_id):
 @subscriber_bp.route("/", methods=["POST"])
 @required
 def create_subscriber():
-    data = request.get_json()
-    print("Received data:", data)
-    if not data:
-        return jsonify({"error": "No data provided"}), 400
-    result = SubscriberService.create_subscriber(data)
-    if result.get("success"):
-        return jsonify({"message": "Subscriber created successfully"}), 201
-    return jsonify({"error": result.get("error", "Unknown error")}), 400
+    try:
+        data = request.get_json()
+        result = SubscriberService.create_subscriber(data)
+        if result.get('success'):
+            return jsonify({'success': True, 'message': 'Thêm thuê bao thành công!'}), 201
+        else:
+            return jsonify({'success': False, 'message': result.get('message', 'Lỗi không xác định')}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Đã xảy ra lỗi: {str(e)}'}), 500
 
 
 @login_required
