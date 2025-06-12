@@ -1,0 +1,51 @@
+<!-- templates/subscriber/activity_log.html -->
+{% extends "base.html" %}
+
+{% block title %}Nhật ký hoạt động{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-8 px-4">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📑 Nhật ký hoạt động</h2>
+
+    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+        <table class="min-w-full table-auto text-left border border-gray-200">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="px-4 py-3">#</th>
+                    <th class="px-4 py-3">Loại</th>
+                    <th class="px-4 py-3">Thời gian</th>
+                    <th class="px-4 py-3">Từ</th>
+                    <th class="px-4 py-3">Đến</th>
+                    <th class="px-4 py-3">Nội dung</th>
+                    <th class="px-4 py-3">Dữ liệu</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600">
+                {% for log in logs %}
+                <tr class="border-t">
+                    <td class="px-4 py-2">{{ loop.index }}</td>
+                    <td class="px-4 py-2">
+                        {% if log.type == 'TINNHAN' %}
+                        📩 Tin nhắn
+                        {% elif log.type == 'CUOCGOI' %}
+                        📞 Cuộc gọi
+                        {% elif log.type == 'DULIEU' %}
+                        🌐 Dữ liệu
+                        {% else %}
+                        {{ log.type }}
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        {{ log.start_date }}
+                    </td>
+                    <td class="px-4 py-2">{{ log.by_from }}</td>
+                    <td class="px-4 py-2">{{ log.to }}</td>
+                    <td class="px-4 py-2">{{ log.contents }}</td>
+                    <td class="px-4 py-2">{{ log.usage_value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
