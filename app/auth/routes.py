@@ -114,8 +114,6 @@ def view_subscriber(subscriber_id):
         customer=customer,
         subscriptions=subscriptions,
     )
-
-
 @auth.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     step = int(request.args.get("step", 1))

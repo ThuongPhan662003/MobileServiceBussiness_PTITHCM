@@ -107,13 +107,10 @@ class SubscriptionRepository:
             result = db_instance.execute(
                 "CALL DeleteSubscription(%s)", (subscription_id,), fetchone=True
             )
-            if result.get("error"):
-                print(f"Lỗi khi xóa subscription: {result['error']}")
-                return result["error"]
-            return True
+            return result
+
         except Exception as e:
-            print(f"Lỗi khi xóa subscription: {e}")
-            return False
+            return {"success": False, "message": f"Lỗi khi xóa subscription: {str(e)}"}
 
     @staticmethod
     def get_by_subscriber_and_plan(subscriber_id, plan_id):
@@ -178,8 +175,10 @@ LIMIT 1;
                 for row in result[0]:  # Truy cập phần tử đầu tiên trong danh sách (mảng 2 chiều)
                     subscription = {
                         'subscription_id': row['subscription_id'],
+                        'plan_id':row['plan_id'],
                         'plan_code': row['plan_code'],
                         'free_data': row['free_data'],
+                        'cancel_at':row['cancel_at'],
                         'expiration_date': row['expiration_date']
                     }
                     subscriptions.append(subscription)

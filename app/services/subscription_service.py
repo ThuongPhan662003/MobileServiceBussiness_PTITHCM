@@ -116,12 +116,9 @@ class SubscriptionService:
     def delete_subscription(subscription_id):
         try:
             result = SubscriptionRepository.delete(subscription_id)
-            if result is True:
-                return {"success": True}
-            else:
-                return {"error": result}
+            return result
         except Exception as e:
-            return {"error": str(e)}
+            return {"success": False, "message": f"Lỗi hệ thống: {str(e)}"}
 
     @staticmethod
     def get_plan_exp(subscriber_id):

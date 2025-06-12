@@ -43,9 +43,11 @@ def update_subscription(subscription_id):
 @subscription_bp.route("/<int:subscription_id>", methods=["DELETE"])
 def delete_subscription(subscription_id):
     result = SubscriptionService.delete_subscription(subscription_id)
-    if result.get("success"):
-        return jsonify({"message": "Subscription deleted successfully"}), 200
-    return jsonify({"error": result.get("error")}), 400
+    if isinstance(result, dict) and result.get("success"):
+        return jsonify({"success": True, "message": result.get("message")}), 200
+    else:
+        return jsonify({"success": False, "message": result.get("message", "Hủy subscription thất bại!")}), 400
+
 # Endpoint đăng ký gói cước qua tài khoản gốc
 
 @subscription_bp.route("/deduct/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
