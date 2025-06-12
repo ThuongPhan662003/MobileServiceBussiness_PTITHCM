@@ -65,15 +65,6 @@ class StaffRepository:
                 print("Ngày sinh:", staff.birthday)
                 acc = AccountService.get_account_by_id(result.get("account_id"))
                 staff.account_id = acc
-                # if staff.birthday and isinstance(staff.birthday, date):
-                #     staff.birthday = staff.birthday.strftime("%d/%m/%Y")
-
-                # for key in result:
-                #     if hasattr(staff, key):
-                #         setattr(staff, key, result[key])
-                # # Đảm bảo `is_active` là kiểu bool
-                # if hasattr(staff, "is_active"):
-                #     staff.is_active = True if result.get("is_active") else False
                 print("Nhân viên:", staff.to_dict())
                 return staff.to_dict()
             return None
@@ -229,6 +220,7 @@ class StaffRepository:
                     data.password,
                 ),
                 fetchone=True,
+                commit=True,
             )
             if result.get("error"):
                 print(f"Lỗi khi cập nhật nhân viên: {result['error']}")
@@ -292,3 +284,102 @@ class StaffRepository:
         except Exception as e:
             print(f"Lỗi tìm kiếm nhân viên: {e}")
             return []
+
+    @staticmethod
+    def update_staff(staff_id, data: dict):
+        try:
+
+            result = db_instance.execute(
+                "CALL sp_staff_update_contact(%s, %s,%s)",
+                (staff_id, data.get("email"), data.get("phone")),
+                fetchone=True,
+                commit=True,
+            )
+            print("result staff", result)
+            if result is None:
+                # Trường hợp procedure bị lỗi và không trả về gì (do SIGNAL)
+                return {
+                    "success": 0,
+                    "message": "Lỗi không xác định khi cập nhật thông tin",
+                }
+
+            # Kiểm tra kết quả trả về từ procedure
+            if result.get("success") == 1:
+                return {
+                    "success": 1,
+                    "message": result.get("message", "Cập nhật thành công"),
+                }
+            else:
+                return {
+                    "success": 0,
+                    "message": result.get("message", "Cập nhật thất bại"),
+                }
+
+        except Exception as e:
+            print(f"Lỗi khi cập nhật thông tin: {e}")
+            return {"success": 0, "message": str(e)}
+
+    @staticmethod
+    def update_account(staff_id, data: dict):
+        try:
+            print(f"Updating account ID: {staff_id}")
+
+            result = db_instance.execute(
+                "CALL sp_accounts_update(%s, %s)",
+                (
+                    staff_id,
+                    data.get("password"),
+                ),
+                fetchone=True,
+                commit=True,
+            )
+            print("result---", result)
+            if result is None:
+                # Trường hợp procedure bị lỗi và không trả về gì (do SIGNAL)
+                return {
+                    "success": 0,
+                    "message": "Lỗi không xác định khi cập nhật tài khoản",
+                }
+
+            # Kiểm tra kết quả trả về từ procedure
+            if result.get("success") == 1:
+                return {
+                    "success": 1,
+                    "message": result.get("message", "Cập nhật thành công"),
+                }
+            else:
+                return {
+                    "success": 0,
+                    "message": result.get("message", "Cập nhật thất bại"),
+                }
+
+        except Exception as e:
+            print(f"Lỗi khi cập nhật tài khoản: {e}")
+            return {"success": 0, "message": str(e)}
+
+    @staticmethod
+    def get_object_by_id(staff_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetStaffById(%s)", (staff_id,), fetchone=True
+            )
+            if result:
+                print("Kết quả từ SP:", result)
+                staff = Staff()
+                staff.id = result.get("id")
+                staff.full_name = result.get("full_name")
+                staff.card_id = result.get("card_id")
+                staff.phone = result.get("phone")
+                staff.email = result.get("email")
+                staff.is_active = True if result.get("is_active") else False
+                staff.gender = result.get("gender")
+                staff.birthday = result.get("birthday")
+                print("Ngày sinh:", staff.birthday)
+                acc = AccountService.get_account_by_id(result.get("account_id"))
+                staff.account_id = acc
+                print("Nhân viên:", staff.to_dict())
+                return staff
+            return None
+        except Exception as e:
+            print(f"Lỗi khi lấy nhân viên theo ID: {e}")
+            return None

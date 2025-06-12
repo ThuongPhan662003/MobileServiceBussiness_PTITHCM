@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Lỗi hệ thống</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .error-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 480px;
+            width: 90%;
+        }
+
+        .error-container h1 {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .error-container p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .error-container a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .error-container a:hover {
+            background-color: #2980b9;
+        }
+
+        .error-container .code {
+            font-size: 1.5rem;
+            color: #999;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="code">Lỗi 500</div>
+        <h1>Đã xảy ra lỗi</h1>
+        <p>Chúng tôi rất tiếc, hệ thống đang gặp sự cố. Vui lòng thử lại sau.</p>
+
+        {% if session.get('role_type') == 'Thuê bao' %}
+        <a href="{{ url_for('main_bp.index') }}">🏠 Quay lại trang chính</a>
+        {% else %}
+        <a href="{{ url_for('admin_main_bp.admin_index') }}">🏠 Về trang quản trị</a>
+        {% endif %}
+    </div>
+</body>
+
+</html>

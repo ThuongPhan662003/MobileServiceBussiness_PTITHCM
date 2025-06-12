@@ -1,5 +1,8 @@
 {% extends "admin_base.html" %}
+
 {% block content %}
+<!-- Flash Message (nằm ngoài block content, hiển thị đầu trang) -->
+
 <!-- <div class="max-w-3xl mx-auto mt-12 p-8 bg-white rounded-2xl shadow-md border border-gray-200"> -->
 <h2 class="text-2xl font-bold text-gray-800 mb-6">Chỉnh sửa thông tin nhân viên</h2>
 
@@ -8,12 +11,12 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Họ và tên</label>
             <input type="text" name="full_name" value="{{ staff.full_name }}"
-                class="form-input mt-1 block w-full border rounded-lg px-3 py-2" required>
+                class="form-input mt-1 block w-full border rounded-lg px-3 py-2" readonly>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Mã thẻ</label>
+            <label class="block text-sm font-medium text-gray-700">CCCD</label>
             <input type="text" name="card_id" value="{{ staff.card_id }}"
-                class="form-input mt-1 block w-full border rounded-lg px-3 py-2">
+                class="form-input mt-1 block w-full border rounded-lg px-3 py-2" readonly>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
@@ -27,7 +30,7 @@
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Giới tính</label>
-            <select name="gender" class="form-select mt-1 block w-full rounded-lg px-3 py-2">
+            <select name="gender" class="form-select mt-1 block w-full rounded-lg px-3 py-2" readonly>
                 <option value="Nam" {{ 'selected' if staff.gender=='Nam' else '' }}>Nam</option>
                 <option value="Nữ" {{ 'selected' if staff.gender=='Nữ' else '' }}>Nữ</option>
                 <option value="Khác" {{ 'selected' if staff.gender=='Khác' else '' }}>Khác</option>
@@ -35,7 +38,7 @@
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Ngày sinh</label>
-            <input type="date" name="birthday" value="{{ staff.birthday}}" class="...">
+            <input type="date" name="birthday" value="{{ staff.birthday}}" class="..." readonly>
 
         </div>
     </div>
@@ -49,7 +52,7 @@
     </div>
 
     <div class="mt-6 flex justify-end gap-4">
-        <a href="{{ url_for('staff.edit_staff', staff_id=staff.id) }}"
+        <a href="{{ url_for('staff.staff_detail', staff_id=staff.id) }}"
             class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Hủy</a>
         <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Lưu thay
             đổi</button>

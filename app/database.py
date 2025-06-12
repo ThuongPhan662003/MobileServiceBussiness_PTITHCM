@@ -38,7 +38,7 @@ class Database:
                 print("✅ Đã thực thi truy vấn:", sql)
 
                 if commit:
-                    self.connection.commit()
+                    conn.commit()
                     print("✅ Đã commit dữ liệu")
 
                 if fetchone:

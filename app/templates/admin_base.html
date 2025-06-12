@@ -266,13 +266,14 @@
         </div>
         <nav>
             <ul>
-                <li><a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <li><a href="{{ url_for('admin_main_bp.admin_index') }}"><i class="fas fa-tachometer-alt"></i>
+                        Dashboard</a>
                 </li>
                 <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Trang Chủ</a></li>
-                <li><a href="{{ url_for('main_bp.index') }}"><i class="fas fa-home"></i> Trang Chủ</a></li>
+
                 <li>
                     <a href="{{ url_for('staff.staff_detail', staff_id=session['staff_id']) }}">
-                        <i class="fas fa-user"></i> Thông Tin Nhân Viên
+                        <i class="fas fa-user"></i> Thông Tin {{session['full_name']}}
                     </a>
 
                 </li>
@@ -287,7 +288,7 @@
             <h2><i class="fas fa-cogs"></i> Menu Quản Lý</h2>
             <a href="#" onclick="toggleMenu('usersMenu')"><i class="fas fa-users"></i> Người Dùng</a>
 
-            <a href="{{ url_for('admin_main_bp.index') }}"><i class="fas fa-user-shield"></i> Vai Trò</a>
+            <a href="{{ url_for('admin_main_bp.admin_index') }}"><i class="fas fa-user-shield"></i> Vai Trò</a>
 
             <a href="{{ url_for('service_bp.service_list') }}" onclick="toggleMenu('plansMenu')">
                 <i class="fas fa-boxes"></i> Gói Dịch Vụ
@@ -313,15 +314,15 @@
                 <i class="fas fa-receipt"></i> Gói cước
             </a>
 
-            <a href="{{ url_for('contract.index') }}">
+            <a href="{{ url_for('contract.index_contracts') }}">
                 <i class="fas fa-file-contract"></i> Hợp đồng
             </a>
 
-            <a href="{{ url_for('network.index') }}">
+            <a href="{{ url_for('network.index_networks') }}">
                 <i class="fas fa-network-wired"></i> Network
             </a>
 
-            <a href="{{ url_for('country.index') }}">
+            <a href="{{ url_for('country.index_countries') }}">
                 <i class="fas fa-globe-asia"></i> Đất nước
             </a>
 
@@ -348,15 +349,30 @@
 
 
         <main class="content" id="contentArea">
-            {% with messages = get_flashed_messages() %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                <li>{{ message }}</li>
+            <div class="flashes" id="flash-container">
+                {% for category, message in messages %}
+                <div class="flash-message" style="
+                        background: {{ 'lightgreen' if category == 'success' else '#ffdddd' }};
+                        border-left: 4px solid {{ '#28a745' if category == 'success' else '#ee2b47' }};
+                        padding: 10px 15px;
+                        margin-bottom: 10px;
+                        border-radius: 4px;
+                        font-size: 0.95rem;
+                        color: {{ '#155724' if category == 'success' else '#721c24' }};
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;">
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.remove()"
+                        style="background: none; border: none; font-size: 16px; color: inherit; cursor: pointer;">&times;</button>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
             {% endif %}
             {% endwith %}
+
             <div class="content-inner">
                 {% block content %}{% endblock %}
             </div>

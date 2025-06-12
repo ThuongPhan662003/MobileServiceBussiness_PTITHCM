@@ -1,0 +1,41 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Chỉnh sửa tài khoản</h2>
+<form method="POST">
+    <div class="mb-4">
+        <label class="block text-sm font-medium">Username</label>
+        <input type="text" name="username" value="{{ account.username }}"
+            class="form-input w-full px-3 py-2 border rounded">
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium">Mật khẩu mới (nếu muốn đổi)</label>
+        <input type="password" name="new_password" class="form-input w-full px-3 py-2 border rounded">
+    </div>
+
+    <div class="flex justify-end gap-4">
+        <a href="{{ url_for('staff.staff_detail', staff_id=session['staff_id']) }}"
+            class="px-4 py-2 bg-gray-300 rounded">Hủy</a>
+        <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded">Lưu</button>
+    </div>
+</form>
+<!-- </div> -->
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- (Tùy chọn) Cấu hình Tailwind nếu muốn mở rộng -->
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', 'ui-sans-serif'],
+                }
+            }
+        }
+    }
+</script>
+<!-- Font Awesome (Icon cho nút, biểu tượng) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer">
+
+{% endblock %}
