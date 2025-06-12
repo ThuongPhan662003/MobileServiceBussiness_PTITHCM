@@ -1,6 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, jsonify, url_for
 from app.forms.service_forms.service_forms import ServiceForm
 from app.services.service_service import ServiceService
+from flask_login import login_required
+from app.utils.decorator import required
 
 service_bp = Blueprint("service_bp", __name__, url_prefix="/services")
 
@@ -39,7 +41,9 @@ def service_list():
     )
 
 
+@login_required
 @service_bp.route("/create", methods=["POST"])
+@required
 def service_create():
     try:
         data = request.get_json()
@@ -84,7 +88,9 @@ def service_create():
         )
 
 
+@login_required
 @service_bp.route("/<int:service_id>", methods=["PUT"])
+@required
 def service_edit(service_id):
     data = request.get_json()
     result = ServiceService.update_service(service_id, data)
@@ -112,7 +118,9 @@ def service_edit(service_id):
     )
 
 
+@login_required
 @service_bp.route("/<int:service_id>", methods=["DELETE"])
+@required
 def service_delete(service_id):
     result = ServiceService.delete_service(service_id)
     if result.get("success"):

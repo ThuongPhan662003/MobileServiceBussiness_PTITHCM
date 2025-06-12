@@ -4,13 +4,60 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/plans/plan_detail.css') }}">
+<style>
+    .plan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
 
+    .plan-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: 0.3s;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .plan-card .price {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #ee2b47;
+        margin: 10px 0;
+    }
+
+    .plan-detail-link {
+        text-decoration: none !important;
+        color: #dc3545 !important;
+        /* Màu giống btn-outline-danger */
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        padding: 6px 12px;
+        transition: background 0.2s, color 0.2s;
+        display: inline-block;
+        margin-left: 5px;
+    }
+
+    .plan-detail-link:hover {
+        background: #dc3545;
+        color: #fff !important;
+        text-decoration: none;
+    }
+</style>
 Hero Section
 <section class="hero">
     <div class="container-hero">
         <h1>Flask Mobile Services</h1>
         <p>Your reliable mobile network with modern plans & high-speed internet.</p>
-        
+
     </div>
 </section>
 
@@ -42,105 +89,93 @@ Hero Section
         </div>
     </div>
 </section>
-
-<!-- Plans Section -->
+<!-- Thêm vào phía trên phần All Plans Section -->
+<div style="margin: 20px 0; text-align: right;">
+    <label for="service-filter" style="font-weight: bold; margin-right: 8px;">Lọc theo loại dịch vụ:</label>
+    <select id="service-filter" onchange="filterPlansByService()">
+        <option value="all">Tất cả</option>
+        <!-- Các option bên dưới sẽ được render động hoặc bạn có thể hardcode -->
+        <option value="1">Dịch vụ 1</option>
+        <option value="2">Dịch vụ 2</option>
+        <option value="3">Dịch vụ 3</option>
+        <!-- ... -->
+    </select>
+</div>
+<!-- All Plans Section -->
 <section class="plans">
     <div class="container-plans">
-        <h2 class="section-title">Plans & Pricing</h2>
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('basic')">Basic</button>
-            <button class="tab-btn" onclick="showTab('premium')">Premium</button>
-            <button class="tab-btn" onclick="showTab('family')">Family</button>
-        </div>
-
-        <div class="tab-content active" id="basic">
-            <div class="plan-grid">
-                <div class="plan-card">
-                    <h3>Basic 5GB</h3>
-                    <p>5GB + Unlimited Calls</p>
-                    <span class="price">$10/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Basic 10GB</h3>
-                    <p>10GB + Unlimited Calls</p>
-                    <span class="price">$15/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Basic 5GB</h3>
-                    <p>5GB + Unlimited Calls</p>
-                    <span class="price">$10/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Basic 5GB</h3>
-                    <p>5GB + Unlimited Calls</p>
-                    <span class="price">$10/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Basic 5GB</h3>
-                    <p>5GB + Unlimited Calls</p>
-                    <span class="price">$10/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-content" id="premium">
-            <div class="plan-grid">
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Premium 50GB</h3>
-                    <p>50GB + Unlimited Calls & SMS</p>
-                    <span class="price">$30/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-content" id="family">
-            <div class="plan-grid">
-                <div class="plan-card">
-                    <h3>Family Plan</h3>
-                    <p>100GB + 4 Users</p>
-                    <span class="price">$50/month</span>
-                    <a href="{{ url_for('main_bp.index') }}" class="btn btn-primary">View Details</a>
-                </div>
-            </div>
+        <h2 class="section-title">All Available Plans</h2>
+        <div class="plan-grid" id="all-plans-container">
+            <!-- JS will render plans here -->
         </div>
     </div>
 </section>
+
+<script>
+    // Tải toàn bộ gói cước khi trang được tải
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchAllPlans();
+    });
+
+    function fetchAllPlans() {
+        fetch("/plans/list")
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById("all-plans-container");
+                if (!container) return;
+
+                container.innerHTML = data.map(plan => {
+                    const priceFormatted = parseInt(plan.price).toLocaleString('vi-VN') + 'đ';
+                    const duration = plan.duration || 30;
+                    const dataPerDay = plan.free_data ? (plan.free_data / duration).toFixed(1) : 0;
+
+                    // Tạo nội dung động tuỳ theo giá trị
+                    let content = `
+                    <div class="plan-card" style="overflow: hidden; border-radius: 12px;">
+                        <div style="background: #f2274e; color: white; padding: 10px 15px; font-weight: bold; font-size: 1.1rem;">
+                            ${plan.code} - ${duration} ngày
+                        </div>
+                        <div style="padding: 16px; background: #fff; text-align: left;">
+                `;
+
+                    if (plan.free_data && plan.free_data > 0) {
+                        content += `<p><i class="fas fa-wifi"></i> Data: <strong>${dataPerDay}GB/ngày</strong></p>`;
+                    }
+
+                    if (plan.free_on_network_call > 0) {
+                        content += `<p><i class="fas fa-phone-alt"></i> Gọi nội mạng: <strong>${plan.free_on_network_call} phút</strong></p>`;
+                    } else if (plan.free_on_network_call === 0 && plan.free_on_network_a_call === 0) {
+                        content += `<p><i class="fas fa-phone-alt"></i> Gọi nội mạng: <strong>Miễn phí</strong></p>`;
+                    }
+
+                    if (plan.free_off_network_call > 0) {
+                        content += `<p><i class="fas fa-phone-square-alt"></i> Gọi ngoại mạng: <strong>${plan.free_off_network_call} phút</strong></p>`;
+                    }
+
+                    if (plan.auto_renew) {
+                        content += `<p><i class="fas fa-sync-alt"></i> Tự động gia hạn: <strong>Có</strong></p>`;
+                    }
+
+                    content += `
+                        <p style="font-size: 1.2rem; font-weight: bold; color: #f2274e;">${priceFormatted}</p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <button class="btn btn-outline-danger" onclick="registerPlan('${plan.code}')">Đăng ký</button>
+                            <a href="/customer_plan/plans/${plan.id}" class="btn btn-outline-danger plan-detail-link">Xem chi tiết</a>
+                            
+                        </div>
+                    </div>
+                `;
+
+                    return content;
+                }).join('');
+            })
+            .catch(err => {
+                console.error("Lỗi khi tải gói cước:", err);
+            });
+    }
+
+</script>
 
 <script>
     function showTab(tabId) {

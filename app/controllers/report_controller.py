@@ -3,11 +3,15 @@ from flask import Blueprint, jsonify, render_template, request
 from app.services.plan_service import PlanService
 from app.services.report_service import ReportService
 from app.services.service_service import ServiceService
+from flask_login import login_required
+from app.utils.decorator import required
 
 report_bp = Blueprint("report_bp", __name__, url_prefix="/reports")
 
 
+@login_required
 @report_bp.route("/revenue", methods=["GET"])
+@required
 def revenue_report_view():
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -43,7 +47,9 @@ def revenue_report_view():
     )
 
 
+@login_required
 @report_bp.route("/revenue/data", methods=["GET"])
+@required
 def revenue_data_api():
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")

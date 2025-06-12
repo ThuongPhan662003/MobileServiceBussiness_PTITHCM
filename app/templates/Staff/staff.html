@@ -576,11 +576,17 @@
                             <option value="Nhân viên">Nhân viên</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="update_role">Tài khoản</label>
-                        <button type="submit" class="btn submit">Reset tài khoản</button>
+                    <div class="form-group btn-group">
+                        <button type="submit" class="btn submit">Xác nhận</button>
+                        <button type="button" class="btn cancel" onclick="closeUpdateModal()">Hủy</button>
                     </div>
+                    <div class="form-group">
+                        <label>Tài khoản</label>
+                        <button type="button" class="btn submit" onclick="resetPassword()">Reset mật khẩu</button>
+                    </div>
+
+
+
                     <!-- <div class="form-group">
                         <label for="update_password">Mật khẩu</label>
                         <div style="position: relative;">
@@ -594,10 +600,7 @@
                             ">👁</span>
                         </div>
                     </div> -->
-                    <div class="form-group btn-group">
-                        <button type="submit" class="btn submit">Xác nhận</button>
-                        <button type="button" class="btn cancel" onclick="closeUpdateModal()">Hủy</button>
-                    </div>
+
                 </div>
             </div>
         </form>
@@ -605,7 +608,9 @@
 </div>
 
 
+
 <script>
+    let currentEditingStaffId = null;
     const toggleUpdatePassword = document.getElementById("toggleUpdatePassword");
     const updatePasswordField = document.getElementById("update_password");
 
@@ -620,6 +625,7 @@
 
     // Mở modal Cập nhật và điền dữ liệu vào form
     function openUpdateModal(staff) {
+        currentEditingStaffId = staff.id;
         console.log(staff)
         document.getElementById("updateModal").style.display = "block";
         document.getElementById("update_full_name").value = staff.full_name;
@@ -630,6 +636,9 @@
         document.getElementById("update_role").value = staff.role_name;
         document.getElementById("update_password").value = ""; // mật khẩu sẽ do admin nhập lại
         document.getElementById("staffUpdateForm").setAttribute("action", "/staffs/update/" + staff.id);
+        // Gán URL action cho form reset mật khẩu
+        document.getElementById("resetForm").setAttribute("action", "/staffs/accounts/edit/" + staff.id);
+
     }
 
 
@@ -637,7 +646,37 @@
     function closeUpdateModal() {
         document.getElementById("updateModal").style.display = "none";
     }
+    function resetPassword() {
+        const staffId = currentEditingStaffId; // biến toàn cục bạn sẽ set khi mở modal
+        if (!staffId) {
+            alert("Không xác định được nhân viên.");
+            return;
+        }
 
+        if (!confirm("Bạn có chắc chắn muốn reset mật khẩu tài khoản này không?")) return;
+
+        fetch(`/staffs/accounts/edit/${staffId}`, {
+            method: "POST"
+        })
+            .then(async response => {
+                let data;
+                try {
+                    data = await response.json();
+                } catch (err) {
+                    throw new Error("Phản hồi không hợp lệ từ server.");
+                }
+                console.log("data", data)
+                if (response.ok) {
+                    alert(data.message || "Đã gửi lại mật khẩu cho nhân viên.");
+                } else {
+                    alert(data.error || "Có lỗi khi reset mật khẩu.");
+                }
+            })
+            .catch(err => {
+                alert("Lỗi kết nối đến server: " + err.message);
+                console.error(err);
+            });
+    }
     // Gửi form cập nhật nhân viên
     async function submitUpdateForm(event) {
         event.preventDefault(); // Ngừng hành động mặc định (không chuyển trang)
@@ -745,23 +784,23 @@
 
     // Khởi tạo khi load trang
     displayPage(1);
-</script>
+</>
 
 
 
-<script>
+        <script>
     // Khóa nhân viên
-    function lockStaff(button) {
+            function lockStaff(button) {
         const staffId = button.getAttribute("data-staff-id");
-        if (confirm("Bạn có chắc chắn muốn khóa nhân viên này không?")) {
-            fetch(`/staffs/lock/${staffId}`, { method: 'POST' })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert("Có lỗi xảy ra khi khóa nhân viên.");
-                    }
-                });
+            if (confirm("Bạn có chắc chắn muốn khóa nhân viên này không?")) {
+                fetch(`/staffs/lock/${staffId}`, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert("Có lỗi xảy ra khi khóa nhân viên.");
+                        }
+                    });
         }
     }
 

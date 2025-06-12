@@ -23,49 +23,84 @@ class AccountRepository:
             print(f"Lỗi khi lấy danh sách account: {e}")
             return []
 
+    # @staticmethod
+    # def check_login_by_username_and_password(username, password):
+    #     try:
+
+    #         def run(cursor, conn):
+    #             print("username", username)
+    #             print("password", password)
+
+    #             # Gọi stored procedure có OUT
+    #             cursor.execute(
+    #                 "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
+    #                 (username, password),
+    #             )
+
+    #             # Lấy dữ liệu người dùng (acc)
+    #             acc = cursor.fetchone()
+    #             print("acc", acc)
+
+    #             # Lấy OUT parameter
+    #             cursor.execute("SELECT @p_status AS status, @p_message AS message")
+    #             result = cursor.fetchone()
+    #             print("Kết quả OUT:", result)
+
+    #             return acc, result
+
+    #         acc, result = db_instance.execute_with_connection(run)
+
+    #         if result:
+    #             status = result.get("status")
+    #             message = result.get("message")
+
+    #             if status == 1:
+    #                 if acc:
+    #                     print("kết quả", acc)
+    #                     user_info = dict(acc)
+    #                     user_info["role_type"] = acc.get("role_type")
+    #                     user = AccountRepository.get_by_id(
+    #                         user_info["account_id"]
+    #                     )  # vẫn dùng execute()
+    #                     user_info["account_id"] = user
+    #                     return {"success": True, "message": message, "data": user_info}
+    #                 else:
+    #                     return {"success": True, "message": message, "data": None}
+    #             else:
+    #                 return {"success": False, "message": message}
+
+    #         return {"success": False, "message": "Không thể xác thực tài khoản"}
+
+    #     except Exception as e:
+    #         print(f"Lỗi khi đăng nhập: {e}")
+    #         return {"success": False, "message": str(e)}
     @staticmethod
     def check_login_by_username_and_password(username, password):
         try:
 
-            def run(cursor, conn):
-                print("username", username)
-                print("password", password)
-
-                # Gọi stored procedure có OUT
-                cursor.execute(
-                    "CALL sp_account_check_login(%s, %s, @p_status, @p_message)",
-                    (username, password),
-                )
-
-                # Lấy dữ liệu người dùng (acc)
-                acc = cursor.fetchone()
-                print("acc", acc)
-
-                # Lấy OUT parameter
-                cursor.execute("SELECT @p_status AS status, @p_message AS message")
-                result = cursor.fetchone()
-                print("Kết quả OUT:", result)
-
-                return acc, result
-
-            acc, result = db_instance.execute_with_connection(run)
-
+            result = db_instance.execute(
+                "CALL sp_get_user_info_with_roles(%s,%s)",
+                (username, password),
+                fetchone=True,
+            )
+            print("kết quả", result)
             if result:
-                status = result.get("status")
+                re = result
                 message = result.get("message")
-
-                if status == 1:
-                    if acc:
-                        print("kết quả", acc)
-                        user_info = dict(acc)
-                        user_info["role_type"] = acc.get("role_type")
-                        user = AccountRepository.get_by_id(
-                            user_info["account_id"]
-                        )  # vẫn dùng execute()
-                        user_info["account_id"] = user
-                        return {"success": True, "message": message, "data": user_info}
+                account_id = result.get("account_id")
+                if account_id:
+                    acc = AccountRepository.get_by_id(
+                        result.get("account_id")
+                    )  # vẫn dùng execute()
+                    print("tài khoản", type(acc), acc.to_dict())
+                    re["account_id"] = acc
+                    if result.get("role_name") == "Thuê bao":
+                        return {"success": True, "message": message, "data": re}
                     else:
-                        return {"success": True, "message": message, "data": None}
+                        acc = AccountRepository.get_by_id(
+                            result.get("account_id")
+                        )  # vẫn dùng execute()
+                        return {"success": True, "message": message, "data": re}
                 else:
                     return {"success": False, "message": message}
 
@@ -81,14 +116,13 @@ class AccountRepository:
             result = db_instance.execute(
                 "CALL GetAccountById(%s)", (account_id,), fetchone=True
             )
-            print("resulr login", result)
             if result:
                 account = Account()
                 account.id = result.get("id")
                 account.username = result.get("username")
                 account.password = result.get("password")
                 account.is_active = True if result.get("is_active") else False
-                print("account", account.to_dict())
+                print("tien", account.to_dict())
                 return account
             return None
         except Exception as e:

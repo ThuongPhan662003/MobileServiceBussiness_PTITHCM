@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, session
 from flask_login import current_user
-
+from flask_login import login_required
+from app.utils.decorator import required
 from app.services.plan_service import PlanService
 from app.services.report_service import ReportService
 from app.services.service_service import ServiceService
@@ -10,8 +11,10 @@ from datetime import datetime, timedelta
 admin_main_bp = Blueprint("admin_main_bp", __name__, url_prefix="/admin")
 
 
+@login_required
 @admin_main_bp.route("/")
-def index():
+@required
+def admin_index():
     today = datetime.today().date()
     default_start_date = (
         today - timedelta(days=30)

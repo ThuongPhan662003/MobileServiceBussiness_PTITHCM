@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, redirect, request, session, url_fo
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app.services.account_service import AccountService
+from app.utils.decorator import required
 from app.utils.email_sender import generate_and_send_otp, verify_otp
 from .forms import LoginForm, RegistrationForm
 from ..models import Account
@@ -27,38 +28,36 @@ def login():
 
         if result.get("success"):
             user = result["data"]["account_id"]
-            print("user", user)
 
             user_data = result.get("data", {})
-            print("user_data", user_data)
-            role = user_data.get("role_type")
+            print("dữ", user_data)
+            role = user_data.get("role_name")
             login_user(user)  # cần đảm bảo `user` là instance của UserMixin
             session.permanent = True
             # ✅ Gán session theo role_type
             session["role_type"] = role
+            session["role_id"] = user_data.get("role_id")
+            session["account_id"] = user_data.get("account_id").id
+            if role == "Thuê bao":
+                session["subscriber_id"] = user_data.get("subscriber_id")
 
-            if role == "staff":
+                session["full_name"] = user_data.get("full_name")  # lấy tên từ customer
+                session["phone"] = user_data.get("phone")
+                session["main_balance"] = user_data.get("main_balance")
+                session["subscriber_type"] = user_data.get("subscriber")
+                print("ssss", session["subscriber_type"])
+                flash("Đăng nhập thành công", "success")
+            else:
                 session["staff_id"] = user_data.get("staff_id")
                 session["full_name"] = user_data.get("full_name")
                 session["email"] = user_data.get("email")
                 session["phone"] = user_data.get("phone")
                 session["gender"] = user_data.get("gender")
-
-            elif role == "subscriber":
-                session["subscriber_id"] = user_data.get("subscriber_id")
-
-                session["full_name"] = user_data.get(
-                    "customer_name"
-                )  # lấy tên từ customer
-                session["phone"] = user_data.get("phone_number")
-                session["main_balance"] = user_data.get("main_balance")
-                session["subscriber_type"] = user_data.get("subscriber_type")
-                flash(result.get("message"), "success")
-
+                flash("Đăng nhập thành công", "success")
+            print("role_tpe", result["data"]["role_name"])
             # ➤ Điều hướng theo role
-            if result["data"]["role_type"] == "staff":
-                print("staff")
-                return redirect(url_for("admin_main_bp.index"))
+            if result["data"]["role_name"] != "Thuê bao":
+                return redirect(url_for("admin_main_bp.admin_index"))
             else:
                 return redirect(url_for("main_bp.index"))
         else:
@@ -68,9 +67,11 @@ def login():
     return render_template("auth/login.html", form=form)
 
 
-@auth.route("/logout")
 @login_required
+@auth.route("/logout")
+# @required
 def logout():
+
     print("logout", current_user)
     logout_user()
     session.clear()
@@ -95,7 +96,9 @@ def register():
     return render_template("auth/register.html", form=form)
 
 
+@login_required
 @auth.route("/subscribers/<int:subscriber_id>", methods=["GET"])
+@required
 def view_subscriber(subscriber_id):
     # Lấy thông tin của subscriber, customer và subscription
     subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
@@ -117,6 +120,7 @@ def view_subscriber(subscriber_id):
 
 
 @auth.route("/forgot-password", methods=["GET", "POST"])
+@required
 def forgot_password():
     step = int(request.args.get("step", 1))
     email_or_phone = request.args.get("email", "")

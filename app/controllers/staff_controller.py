@@ -10,12 +10,16 @@ from flask import (
 )
 from app.services.account_service import AccountService
 from app.services.staff_service import StaffService
-
+from flask_login import login_required
+from app.utils.decorator import required
+from app.utils.email_sender import generate_random_password, send_reset_email
 
 staff_bp = Blueprint("staff", __name__, url_prefix="/staffs")
 
 
+@login_required
 @staff_bp.route("/", methods=["GET"])
+@required
 def get_all_staffs():
     # Kiểm tra xem có tham số tìm kiếm không
     if any(
@@ -42,7 +46,9 @@ def get_staff_by_id(staff_id):
     return jsonify({"error": "Staff not found"}), 404
 
 
+@login_required
 @staff_bp.route("/create", methods=["POST"])
+@required
 def create_staff():
     data = request.form.to_dict()
     result = StaffService.create_staff(data)
@@ -52,7 +58,9 @@ def create_staff():
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @staff_bp.route("/update/<int:staff_id>", methods=["POST"])
+@required
 def update_staff(staff_id):
     data = request.form.to_dict()
     result = StaffService.update_staff(staff_id, data)
@@ -62,7 +70,9 @@ def update_staff(staff_id):
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @staff_bp.route("/lock/<int:staff_id>", methods=["POST"])
+@required
 def lock_staff(staff_id):
     result = StaffService.delete_staff(staff_id)
     if result.get("success"):
@@ -70,7 +80,9 @@ def lock_staff(staff_id):
     return jsonify({"error": result.get("error")}), 400
 
 
+@login_required
 @staff_bp.route("/detail/<int:staff_id>", methods=["GET"])
+@required
 def staff_detail(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     print("dữ liệu", staff)
@@ -79,7 +91,9 @@ def staff_detail(staff_id):
     return render_template("Staff/infor.html", staff=staff)
 
 
+@login_required
 @staff_bp.route("/edit/<int:staff_id>", methods=["GET", "POST"])
+@required
 def edit_staff(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     print("meo")
@@ -105,22 +119,45 @@ def edit_staff(staff_id):
     return render_template("Staff/edit_staff.html", staff=staff)
 
 
-@staff_bp.route("/accounts/edit/<int:staff_id>", methods=["GET", "POST"])
-def edit_account(staff_id):
+# @login_required
+# @staff_bp.route("/accounts/edit/<int:staff_id>", methods=["GET", "POST"])
+# @required
+# def edit_account(staff_id):
+#     staff = StaffService.get_staff_by_id(staff_id)
+#     account = AccountService.get_account_by_id(staff["account_id"]["id"])
+#     if request.method == "POST":
+#         new_password = request.form.get("new_password")
+#         data = {"password": new_password}
+#         result = StaffService.update_account(staff_id, data)
+#         if result and result.get("success") == 1:
+#             flash(result.get("message", "Cập nhật thành công!"), "success")
+#         else:
+#             flash(
+#                 result.get("message", "Có lỗi xảy ra khi cập nhật tài khoản."),
+#                 "error",
+#             )
+
+#         return redirect(url_for("staff.staff_detail", staff_id=staff_id))
+
+#     return render_template("Staff/edit_account.html", account=account)
+
+
+@login_required
+@staff_bp.route("/accounts/edit/<int:staff_id>", methods=["POST"])
+@required
+def edit_account_of_staff(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     account = AccountService.get_account_by_id(staff["account_id"]["id"])
-    if request.method == "POST":
-        new_password = request.form.get("new_password")
+
+    try:
+        new_password = generate_random_password()
         data = {"password": new_password}
         result = StaffService.update_account(staff_id, data)
+
         if result and result.get("success") == 1:
-            flash(result.get("message", "Cập nhật thành công!"), "success")
+            send_reset_email(staff.get("email"), staff.get("full_name"), new_password)
+            return jsonify({"message": "Đã gửi mật khẩu mới qua email!"}), 200
         else:
-            flash(
-                result.get("message", "Có lỗi xảy ra khi cập nhật tài khoản."),
-                "error",
-            )
-
-        return redirect(url_for("staff.staff_detail", staff_id=staff_id))
-
-    return render_template("Staff/edit_account.html", account=account)
+            return jsonify({"error": result.get("message", "Cập nhật thất bại.")}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

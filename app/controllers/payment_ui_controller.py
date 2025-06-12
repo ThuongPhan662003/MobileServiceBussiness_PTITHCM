@@ -3,7 +3,8 @@ from app.services.payment_service import PaymentService
 from app.services.paymentdetail_service import PaymentDetailService
 import paypalrestsdk
 import logging
-
+from flask_login import login_required
+from app.utils.decorator import required
 from app.services.plan_service import PlanService
 
 payment_ui_bp = Blueprint("payment_ui_bp", __name__, url_prefix="/ui/payments")
@@ -19,7 +20,9 @@ paypalrestsdk.configure(
 )
 
 
+@login_required
 @payment_ui_bp.route("/history", methods=["GET"])
+@required
 def payment_history():
     payment_method = request.args.get("payment_method", "Tất cả")
     payments = PaymentService.get_all_payments()
@@ -40,7 +43,9 @@ def payment_history():
     )
 
 
+@login_required
 @payment_ui_bp.route("/history/search", methods=["POST"])
+@required
 def search_payments():
     data = request.form
     subscription_id = data.get("subscription_id")
@@ -75,12 +80,16 @@ def search_payments():
     )
 
 
+@login_required
 @payment_ui_bp.route("/history/reset", methods=["GET"])
+@required
 def reset_search():
     return redirect(url_for("payment_ui_bp.payment_history"))
 
 
+@login_required
 @payment_ui_bp.route("/details/<int:payment_id>", methods=["GET"])
+@required
 def payment_details(payment_id):
     payment = PaymentService.get_payment_by_id(payment_id)
     details = PaymentDetailService.get_by_payment_id(payment_id)
@@ -94,7 +103,9 @@ def payment_details(payment_id):
     return jsonify({"error": "Payment not found"}), 404
 
 
+@login_required
 @payment_ui_bp.route("/pay/<int:payment_id>", methods=["POST"])
+@required
 def initiate_payment(payment_id):
     payment = PaymentService.get_payment_by_id(payment_id)
     if not payment or payment.is_paid:
@@ -148,11 +159,15 @@ def initiate_payment(payment_id):
         return jsonify({"error": "Internal server error"}), 500
 
 
+@login_required
 @payment_ui_bp.route("/payment/success/<int:payment_id>", methods=["GET"])
+@required
 def payment_success(payment_id):
     return redirect(url_for("payment_ui_bp.payment_history"))
 
 
+@login_required
 @payment_ui_bp.route("/payment/cancel", methods=["GET"])
+@required
 def payment_cancel():
     return redirect(url_for("payment_ui_bp.payment_history"))
