@@ -31,10 +31,6 @@ class SubscriberService:
             print(phone_number)
             if not phone_number:
                 return {"success": False, "message": "Số điện thoại không được để trống"}
-            account_result = AccountRepository.create_account_from_phone(phone_number)
-            account_id = account_result
-            print("Kết quả từ AccountRepository:", account_result)
-            data["account_id"] = account_id
             # Lấy và chuyển đổi các thông tin khác
             main_balance = Decimal(data.get("main_balance", 0))
             expiration_date_str = data.get("expiration_date")
@@ -66,7 +62,6 @@ class SubscriberService:
                 expiration_date=expiration_date,
                 subscriber=subscriber,  # Truyền vào chuỗi "Trả sau" hoặc "Trả trước"
                 customer_id=customer_id,
-                account_id=account_id,
                 ON_a_call_cost=call_cost,
                 ON_SMS_cost=sms_cost
             )
@@ -88,7 +83,6 @@ class SubscriberService:
             phone_number = data.get("phone_number")
             if not phone_number or not phone_number.isdigit():
                 return {"error": "Số điện thoại không hợp lệ"}
-
             main_balance = Decimal(data.get("main_balance", 0))
             customer_id = int(data.get("customer_id"))
             account_id = int(data.get("account_id"))
@@ -100,9 +94,8 @@ class SubscriberService:
             warning_date = datetime.strptime(warning_date_str, "%Y-%m-%d") if warning_date_str else None
 
             is_active = str(data.get("is_active", "true")).lower() == "true"
-            is_messaged = str(data.get("is_messaged", "false")).lower() == "true"
 
-            subscriber_type = data.get("subscriber_type", "Trả trước").strip()
+            subscriber_type = data.get("subscriber", "TRATRUOC").strip()
 
             # Tạo đối tượng subscriber để update
             subscriber = Subscriber(
@@ -112,10 +105,10 @@ class SubscriberService:
                 expiration_date=expiration_date,
                 is_active=is_active,
                 customer_id=customer_id,
+                subscriber=subscriber_type,
                 warning_date=warning_date,
-                is_messaged=is_messaged,
-                account_id=account_id,
-                subscriber_type=subscriber_type
+                account_id=account_id
+
             )
 
             result = SubscriberRepository.update(subscriber_id, subscriber)
