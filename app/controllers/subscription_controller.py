@@ -58,7 +58,16 @@ def delete_subscription(subscription_id):
     if isinstance(result, dict) and result.get("success"):
         return jsonify({"success": True, "message": result.get("message")}), 200
     else:
-        return jsonify({"success": False, "message": result.get("message", "Hủy subscription thất bại!")}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": result.get("message", "Hủy subscription thất bại!"),
+                }
+            ),
+            400,
+        )
+
 
 # Endpoint đăng ký gói cước qua tài khoản gốc
 

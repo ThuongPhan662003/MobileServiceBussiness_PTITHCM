@@ -1,6 +1,15 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import (
+    Blueprint,
+    redirect,
+    request,
+    jsonify,
+    render_template,
+    session,
+    url_for,
+)
 from app.services.subscriber_service import SubscriberService
 from flask_login import login_required
+from app.services.usagelog_service import UsageLogService
 from app.utils.decorator import required
 
 
@@ -32,12 +41,23 @@ def create_subscriber():
     try:
         data = request.get_json()
         result = SubscriberService.create_subscriber(data)
-        if result.get('success'):
-            return jsonify({'success': True, 'message': 'Thêm thuê bao thành công!'}), 201
+        if result.get("success"):
+            return (
+                jsonify({"success": True, "message": "Thêm thuê bao thành công!"}),
+                201,
+            )
         else:
-            return jsonify({'success': False, 'message': result.get('message', 'Lỗi không xác định')}), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": result.get("message", "Lỗi không xác định"),
+                    }
+                ),
+                400,
+            )
     except Exception as e:
-        return jsonify({'success': False, 'message': f'Đã xảy ra lỗi: {str(e)}'}), 500
+        return jsonify({"success": False, "message": f"Đã xảy ra lỗi: {str(e)}"}), 500
 
 
 @login_required
@@ -59,3 +79,10 @@ def delete_subscriber(subscriber_id):
     if result.get("success"):
         return jsonify({"message": "Subscriber deleted successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
+
+
+@subscriber_bp.route("/activity-log/<int:subscriber_id>", methods=["GET"])
+def activity_log(subscriber_id):
+    logs = UsageLogService.get_usagelog_by_subscriber_id(subscriber_id)
+    print("vôvov")
+    return render_template("subscribers/activity_log.html", logs=logs)

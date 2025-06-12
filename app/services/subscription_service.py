@@ -23,20 +23,26 @@ class SubscriptionService:
         try:
             subscriber = SubscriberRepository.get_by_id(subscriber_id)
 
-            plans = PlanRepository.get_by_plan_id(plan_id)
-            print(f"Plans object: {plans.to_dict()}")  # In ra toàn bộ đối tượng plans
+            plans = PlanRepository.get_by_id(plan_id)
             created_at = datetime.now()
             plan = PlanDetailRepository.get_by_id(plan_id)
 
             if not plan:
                 return {"error": "Không tìm thấy gói cước."}
 
-            active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
+            active_service_ids_set = SubscriberRepository.get_active_service_ids(
+                subscriber_id
+            )
 
-            active_service_ids_flat = {service['service_id'] for sublist in active_service_ids_set for service in
-                                       sublist}
+            active_service_ids_flat = {
+                service["service_id"]
+                for sublist in active_service_ids_set
+                for service in sublist
+            }
 
-            print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")  # In service_id của gói cước
+            print(
+                f"Plans Service ID muốn đăng ký: {plans.service_id.id}"
+            )  # In service_id của gói cước
             print(f"Active Service IDs đã được xử lý: {active_service_ids_flat}")
 
             # Kiểm tra gói cước muốn đăng ký
@@ -45,22 +51,30 @@ class SubscriptionService:
                     return {"error": "Bạn đã đăng kí gói cước chính."}
 
             elif plans.service_id.id in {3, 4, 5, 6}:
-                if any(service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat):
-                    return {
-                        "error": "Bạn đã đăng kí gói cước di động."
-                    }
+                if any(
+                    service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat
+                ):
+                    return {"error": "Bạn đã đăng kí gói cước di động."}
             activation_date = datetime.now()
             if subscriber.subscriber_type == "TRATRUOC":
                 if plan.duration < 1:
-                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                    expiration_date = datetime.now() + timedelta(
+                        hours=plan.duration * 24
+                    )
                 else:
-                    today = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+                    today = datetime(
+                        datetime.now().year, datetime.now().month, datetime.now().day
+                    )
                     expiration_date = today + timedelta(days=int(plan.duration))
             else:
                 if plan.duration < 1:
-                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                    expiration_date = datetime.now() + timedelta(
+                        hours=plan.duration * 24
+                    )
                 elif 1 <= plan.duration <= 30:
-                    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                    today = datetime.now().replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    )
                     expiration_date = today + timedelta(days=int(plan.duration))
                 else:
                     now = datetime.now()
@@ -84,7 +98,11 @@ class SubscriptionService:
             result = SubscriptionRepository.insert(subscription)
 
             if isinstance(result, dict) and result.get("subscription_id"):
-                return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
+                return {
+                    "success": True,
+                    "created": True,
+                    "subscription_id": result["subscription_id"],
+                }
             else:
                 return {"error": "Lỗi khi tạo subscription."}
 
@@ -131,9 +149,11 @@ class SubscriptionService:
             if result:
                 return result
             else:
-                print("Không tìm thấy thông tin gói cước cho subscriber_id:", subscriber_id)
+                print(
+                    "Không tìm thấy thông tin gói cước cho subscriber_id:",
+                    subscriber_id,
+                )
                 return None  # Hoặc có thể trả về một danh sách rỗng nếu cần
         except Exception as e:
             print(f"Lỗi khi lấy thông tin gói cước: {e}")
             return None
-

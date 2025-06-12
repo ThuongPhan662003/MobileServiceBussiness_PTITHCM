@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from app.repositories.usagelog_repository import UsageLogRepository
 from app.models.usagelog import UsageLog
+
 
 def parse_datetime_safe(value):
     if isinstance(value, (datetime, date)):
@@ -9,6 +10,7 @@ def parse_datetime_safe(value):
         return datetime.fromisoformat(value)
     except Exception:
         return None
+
 
 class UsageLogService:
     @staticmethod
@@ -41,7 +43,9 @@ class UsageLogService:
     @staticmethod
     def search_usagelogs(log_type: str, subscriber_id: str, start_date: str):
         try:
-            start_date = datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
+            start_date = (
+                datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
+            )
             result = UsageLogRepository.search(log_type, int(subscriber_id), start_date)
             return result
         except Exception as e:
@@ -51,20 +55,34 @@ class UsageLogService:
     @staticmethod
     def add_usagelog(log_type: str, data: dict):
         try:
-            start_date = datetime.strptime(data.get("start_date"), "%Y-%m-%dT%H:%M") if data.get("start_date") else None
-            end_date = datetime.strptime(data.get("end_date"), "%Y-%m-%dT%H:%M") if data.get("end_date") else None
-            
+            start_date = (
+                datetime.strptime(data.get("start_date"), "%Y-%m-%dT%H:%M")
+                if data.get("start_date")
+                else None
+            )
+            end_date = (
+                datetime.strptime(data.get("end_date"), "%Y-%m-%dT%H:%M")
+                if data.get("end_date")
+                else None
+            )
+
             log = UsageLog(
                 type=log_type,
-                usage_value=int(data.get("usage_value")) if data.get("usage_value") else None,
-                subscriber_id=int(data.get("subscriber_id")) if data.get("subscriber_id") else None,
+                usage_value=(
+                    int(data.get("usage_value")) if data.get("usage_value") else None
+                ),
+                subscriber_id=(
+                    int(data.get("subscriber_id"))
+                    if data.get("subscriber_id")
+                    else None
+                ),
                 start_date=start_date,
                 end_date=end_date if log_type != "TINNHAN" else start_date,
                 by_from=data.get("by_from"),
                 to=data.get("to") if log_type != "DULIEU" else None,
-                contents=data.get("contents") if log_type == "TINNHAN" else None
+                contents=data.get("contents") if log_type == "TINNHAN" else None,
             )
-            
+
             result = UsageLogRepository.insert(log)
             if result is True:
                 return {"success": True}
@@ -73,3 +91,12 @@ class UsageLogService:
         except Exception as e:
             print(f"Lỗi trong add_usagelog: {e}")
             return {"error": str(e)}
+
+    @staticmethod
+    def get_usagelog_by_subscriber_id(subscriber_id):
+        try:
+            result = UsageLogRepository.get_by_subscriber_id(subscriber_id)
+            return result
+        except Exception as e:
+            print(f"Lỗi trong get_usagelog_by_id: {e}")
+            return None
