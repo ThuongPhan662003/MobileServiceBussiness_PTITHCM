@@ -12,7 +12,7 @@ def required(f):
 
         role_id = session.get("role_id")
         if not role_id:
-            return redirect(url_for("login"))  # hoặc một trang đăng nhập
+            return redirect(url_for("auth.login"))  # hoặc một trang đăng nhập
 
         # Lấy danh sách function user có quyền
         funcs = FunctionRepository.get_funcs_role_group_id(role_id)
