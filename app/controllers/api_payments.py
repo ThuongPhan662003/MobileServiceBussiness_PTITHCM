@@ -152,16 +152,8 @@ def deposit_execute():
             + (Decimal(str(amount)) * Decimal("25000")),
             "customer_id": subscriber.customer_id,
             "account_id": subscriber.account_id,
-            "expiration_date": (
-                subscriber.expiration_date.strftime("%Y-%m-%d")
-                if subscriber.expiration_date
-                else None
-            ),
-            "warning_date": (
-                subscriber.warning_date.strftime("%Y-%m-%d")
-                if subscriber.warning_date
-                else None
-            ),
+            "expiration_date": None,
+            "warning_date": None,
             "is_active": str(subscriber.is_active).lower(),
             "subscriber": subscriber.subscriber_type,
         }
@@ -189,7 +181,6 @@ def deposit_execute():
             }
 
             return redirect(url_for("payment_api_bp.deposit_result"))
-
 
     session["payment_result"] = {
         "status": "failure",

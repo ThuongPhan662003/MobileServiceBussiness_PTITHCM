@@ -55,8 +55,8 @@ def get_usagelog_by_id(log_id):
 def create_usagelog():
     try:
         data = request.get_json()
-        log_type = data.get("type")
-        result = UsageLogService.add_usagelog(log_type, data)
+        print("data-", data)
+        result = UsageLogService.add_usagelog(data)
 
         if result.get("success"):
             return (
@@ -76,8 +76,8 @@ def create_usagelog():
                 {
                     "status_code": 400,
                     "data": None,
-                    "message": "Failed to create usage log",
-                    "error": result.get("error"),
+                    "message": result.get("message"),
+                    "error": False,
                 }
             ),
             400,
@@ -90,7 +90,7 @@ def create_usagelog():
                 {
                     "status_code": 500,
                     "data": None,
-                    "message": "Server error occurred",
+                    "message": str(e),
                     "error": str(e),
                 }
             ),
@@ -232,3 +232,24 @@ def reset_usagelogs(log_type):
             ),
             500,
         )
+
+
+@login_required
+@usagelog_bp.get("/promotions/<int:subscriber_id>")
+# @required
+def get_latest_promotions(subscriber_id: int):
+    result = UsageLogService.get_latest_promotions(subscriber_id)
+    if result["status_code"] == 200:
+        return {"status_code": 200, "data": result["data"]}
+    else:
+        return {"status_code": 500, "error": result["error"]}
+
+
+@usagelog_bp.get("/check-phone/<phone_number>")
+@login_required
+def check_phone_in_subscribers(phone_number: str):
+    result = UsageLogService.check_phone_belongs_to_subscriber(phone_number)
+    if result["status_code"] == 200:
+        return jsonify(result)
+    else:
+        return jsonify({"status_code": 500, "error": result["error"]})

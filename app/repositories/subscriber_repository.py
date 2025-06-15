@@ -138,14 +138,11 @@ class SubscriberRepository:
             )
 
             if result and result.get("success"):
-                return {
-                    "success": True,
-                    "message": result.get("message")
-                }
+                return {"success": True, "message": result.get("message")}
             else:
                 return {
                     "success": False,
-                    "message": result.get("message", "Có lỗi xảy ra")
+                    "message": result.get("message", "Có lỗi xảy ra"),
                 }
 
         except Exception as e:
@@ -175,11 +172,12 @@ class SubscriberRepository:
                 fetchone=True,
                 commit=True,
             )
+            print("kesds", result)
             if result and not result.get("success"):
                 return result.get("message", "Cập nhật thất bại")
             return True
         except Exception as e:
-            print(f"Lỗi khi cập nhật subscriber: {e}")
+            print(f"Lỗi khi cập nhật subscriber: {str(e)}")
             return False
 
     @staticmethod
