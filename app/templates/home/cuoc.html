@@ -85,6 +85,23 @@
     </div>
   </div>
 
+  <!-- Tabs Section -->
+  <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
+    <div class="flex space-x-4 border-b border-gray-200">
+      <button class="tab-btn py-2 px-4 text-gray-600 hover:text-gray-900 tab-active" data-tab="mobile-services">Gói dịch vụ di động</button>
+      <button class="tab-btn py-2 px-4 text-gray-600 hover:text-gray-900" data-tab="main-services">Gói dịch vụ cước chính</button>
+      <button class="tab-btn py-2 px-4 text-gray-600 hover:text-gray-900" data-tab="messages">Tin nhắn</button>
+    </div>
+    <div id="mobile-services" class="tab-content mt-4">
+      <p class="text-gray-600">Nội dung cho Gói dịch vụ di động (Placeholder).</p>
+    </div>
+    <div id="main-services" class="tab-content mt-4 hidden">
+      <p class="text-gray-600">Nội dung cho Gói dịch vụ cước chính (Placeholder).</p>
+    </div>
+    <div id="messages" class="tab-content mt-4 hidden">
+      <p class="text-gray-600">Nội dung tin nhắn (không hiển thị vì chuyển hướng).</p>
+    </div>
+  </div>
 
   <!-- Recharge Modal -->
   <div id="rechargeModal"
@@ -97,7 +114,6 @@
         </button>
       </div>
       <form id="rechargeForm" action="{{ url_for('payment_api_bp.deposit') }}" method="POST">
-
         <div class="mb-4">
           <label class="block text-gray-600 font-medium mb-2">Chọn số tiền nạp (VND)</label>
           <div class="grid grid-cols-4 gap-2 mb-4">
@@ -128,7 +144,6 @@
       </form>
     </div>
   </div>
-
 
   <!-- Subscriptions Section -->
   {% if subscriptions %}
@@ -231,5 +246,32 @@
       setTimeout(() => notification.remove(), 500);
     }, 3000);
   }
+
+  // Tab switching logic
+  document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const tabId = button.getAttribute('data-tab');
+
+      // If "Messages" tab is clicked, redirect to activity log page
+      if (tabId === 'messages') {
+        window.location.href = '/subscribers/activity-log/{{ subscriber.id }}';
+        return;
+      }
+
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+      });
+      // Add active class to clicked tab
+      button.classList.add('tab-active');
+
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      // Show the selected tab content
+      document.getElementById(tabId).classList.remove('hidden');
+    });
+  });
 </script>
 {% endblock %}
