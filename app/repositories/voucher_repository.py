@@ -13,7 +13,6 @@ class VoucherRepository:
         try:
             result = db_instance.execute("SELECT * FROM v_vouchers", fetchall=True)
             vouchers = []
-
             for row in result[0]:
                 voucher = Voucher()
                 voucher.id = row.get("id")
@@ -36,14 +35,12 @@ class VoucherRepository:
                     voucher.staff_id = None
 
                 voucher.packages = row.get("packages")
-                print("voucher------------------", voucher.to_dict)
-                vouchers.append(voucher.to_dict())
-                print(voucher)
+                vouchers.append(voucher)
 
-            return vouchers
+            return vouchers 
 
         except Exception as e:
-            print(f"Lỗi khi lấy danh sách voucher: {e}")
+            print(f"Lỗi khi lấy danh sách voucher: {str(e)}")
             return []
 
     @staticmethod
@@ -64,7 +61,7 @@ class VoucherRepository:
                 voucher.usage_limit = result.get("usage_limit")
                 voucher.remaining_count = result.get("remaining_count")
                 voucher.is_active = True if result.get("is_active") else False
-                voucher.staff_id = StaffRepository.get_by_id(result.get("staff_id"))
+                voucher.staff_id = StaffRepository.get_object_by_id(result.get("staff_id"))
                 voucher.packages = result.get("packages")
                 return voucher
             return None

@@ -286,9 +286,9 @@
     <div class="layout">
         <aside class="sidebar" id="sidebar">
             <h2><i class="fas fa-cogs"></i> Menu Quản Lý</h2>
-            <a href="#" onclick="toggleMenu('usersMenu')"><i class="fas fa-users"></i> Người Dùng</a>
+            
 
-            <a href="{{ url_for('admin_main_bp.admin_index') }}"><i class="fas fa-user-shield"></i> Vai Trò</a>
+           
 
             <a href="{{ url_for('service_bp.service_list') }}" onclick="toggleMenu('plansMenu')">
                 <i class="fas fa-boxes"></i> Gói Dịch Vụ
@@ -306,9 +306,9 @@
                 <i class="fas fa-user-lock"></i> Phân quyền
             </a>
 
-            <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
+            <!-- <a href="{{ url_for('usagelog.get_all_usagelogs') }}">
                 <i class="fas fa-clipboard-list"></i> Nhật kí hoạt động
-            </a>
+            </a> -->
 
             <a href="{{ url_for('plan.get_all_plans') }}">
                 <i class="fas fa-receipt"></i> Gói cước
@@ -344,7 +344,7 @@
 
             <div class="submenu" id="reportsMenu"></div>
 
-            <a href="#"><i class="fas fa-sliders-h"></i> Cài Đặt</a>
+            
         </aside>
 
 
