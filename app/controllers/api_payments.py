@@ -55,18 +55,80 @@ def index_payment_api():
 
 
 @login_required
-@payment_api_bp.route("/deposit", methods=["POST"])
+@payment_api_bp.route("/deposit-index", methods=["POST"])
 # @required
 def deposit():
     money = float(request.form.get("amount", 0))
     return render_template("payments/user/deposit.html", money=money)
 
 
-# 1. THỰC HIỆN THANH TOÁN THÀNH CÔNG TỪ PAYPAL
 @login_required
-@payment_api_bp.route("/execute", methods=["GET", "POST"])
-def deposit_paypal_execute():
-    payment_id = request.args.get("paymentId")
+@payment_api_bp.route("/deposit-pay", methods=["POST"])
+def deposit_pay():
+    try:
+        vnd_price = request.form.get("money", type=float)
+        if not vnd_price or vnd_price <= 0:
+            flash("Số tiền nạp không hợp lệ.", "danger")
+            return redirect(url_for("payment_api_bp.deposit"))
+
+        usd_price = round(vnd_price / 25000, 2)
+
+        # Lưu session để dùng lại
+        session["vnd_price"] = vnd_price
+        session["usd_price"] = usd_price
+        session["item_name"] = f"Nạp {vnd_price:,.0f} VND"
+
+        payment = paypalrestsdk.Payment(
+            {
+                "intent": "sale",
+                "payer": {"payment_method": "paypal"},
+                "redirect_urls": {
+                    "return_url": url_for(
+                        "payment_api_bp.deposit_execute", _external=True
+                    ),
+                    "cancel_url": url_for(
+                        "payment_api_bp.deposit_paypal_cancel", _external=True
+                    ),
+                },
+                "transactions": [
+                    {
+                        "item_list": {
+                            "items": [
+                                {
+                                    "name": "Nạp tiền",
+                                    "sku": "DEPOSIT",
+                                    "price": str(usd_price),
+                                    "currency": "USD",
+                                    "quantity": 1,
+                                }
+                            ]
+                        },
+                        "amount": {"total": str(usd_price), "currency": "USD"},
+                        "description": f"Nạp tiền vào ví (≈ {vnd_price:,.0f} VND)",
+                    }
+                ],
+            }
+        )
+
+        if payment.create():
+            # Lưu Payment ID để xử lý execute sau này
+            session["payment_id"] = payment.id
+            for link in payment.links:
+                if link.method == "REDIRECT":
+                    return redirect(link.href)
+
+        flash("Tạo yêu cầu thanh toán thất bại: " + payment.error["message"], "danger")
+        return redirect(url_for("payment_api_bp.deposit_result"))
+
+    except Exception as e:
+        flash(f"Lỗi: {str(e)}", "danger")
+        return redirect(url_for("payment_api_bp.deposit"))
+
+
+@login_required
+@payment_api_bp.route("/deposit-execute", methods=["GET"])
+def deposit_execute():
+    payment_id = session.get("payment_id")
     payer_id = request.args.get("PayerID")
 
     if not payment_id or not payer_id:
@@ -82,9 +144,6 @@ def deposit_paypal_execute():
     if payment.execute({"payer_id": payer_id}):
         amount = payment.transactions[0].amount.total
         currency = payment.transactions[0].amount.currency
-
-        # Ghi log (hoặc xử lý logic hệ thống)
-        subscriber_data = SubscriberService.get_by_account_id(current_user.get_id())
 
         session["payment_result"] = {
             "status": "success",
@@ -106,10 +165,9 @@ def deposit_paypal_execute():
             "message": "Thanh toán thành công!",
         }
 
-        # Ở đây bạn có thể gọi hàm recharge tiền cho thuê bao nếu cần
+        # TODO: Recharge vào ví ở đây nếu cần
         return redirect(url_for("payment_api_bp.deposit_result"))
 
-    # Nếu thất bại
     session["payment_result"] = {
         "status": "failure",
         "provider": "PayPal",
@@ -118,14 +176,13 @@ def deposit_paypal_execute():
     return redirect(url_for("payment_api_bp.deposit_result"))
 
 
-# 2. HIỂN THỊ KẾT QUẢ THANH TOÁN
 @login_required
 @payment_api_bp.route("/deposit-result")
 def deposit_result():
     result = session.get("payment_result")
     if not result:
         flash("Không có dữ liệu thanh toán để hiển thị.", "danger")
-        return redirect(url_for("payment_api_bp.index"))
+        return redirect(url_for("payment_api_bp.deposit"))
 
     return render_template(
         "payments/user/deposit_result.html",
