@@ -96,7 +96,7 @@ class StaffService:
             staff = StaffViewModel(
                 staff_model,
                 role_name=data.get("role_name"),
-                username=data.get("username"),
+                username=username,
                 password=new_password,
             )
             result = StaffRepository.insert(staff)
