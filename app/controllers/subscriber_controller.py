@@ -18,7 +18,7 @@ subscriber_bp = Blueprint("subscriber_bp", __name__, url_prefix="/subscribers")
 
 @login_required
 @subscriber_bp.route("/", methods=["GET"])
-@required
+# @required
 def get_all_subscribers():
     subscribers = SubscriberService.get_all_subscribers()
     return render_template("admin_home/subscribers.html", subscribers=subscribers)
@@ -26,7 +26,7 @@ def get_all_subscribers():
 
 @login_required
 @subscriber_bp.route("/<int:subscriber_id>", methods=["GET"])
-@required
+# @required
 def get_subscriber(subscriber_id):
     subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
     if subscriber:
@@ -36,7 +36,7 @@ def get_subscriber(subscriber_id):
 
 @login_required
 @subscriber_bp.route("/", methods=["POST"])
-@required
+# @required
 def create_subscriber():
     try:
         data = request.get_json()
@@ -62,7 +62,7 @@ def create_subscriber():
 
 @login_required
 @subscriber_bp.route("/<int:subscriber_id>", methods=["PUT"])
-@required
+# @required
 def update_subscriber(subscriber_id):
     data = request.get_json()
     result = SubscriberService.update_subscriber(subscriber_id, data)
@@ -73,7 +73,7 @@ def update_subscriber(subscriber_id):
 
 @login_required
 @subscriber_bp.route("/<int:subscriber_id>", methods=["DELETE"])
-@required
+# @required
 def delete_subscriber(subscriber_id):
     result = SubscriberService.delete_subscriber(subscriber_id)
     if result.get("success"):

@@ -293,45 +293,53 @@
     }
 
     document.getElementById('subscriberForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const id = this.getAttribute('data-id');
-        const isNew = !id;
-        const method = isNew ? 'POST' : 'PUT';
-        const url = isNew ? '/subscribers' : `/subscribers/${id}`;
+    e.preventDefault();
+    const id = this.getAttribute('data-id');
+    const isNew = !id;
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '/subscribers' : `/subscribers/${id}`;
 
-        const formData = {
-            phone_number: document.getElementById('phoneNumber').value,
-            main_balance: parseFloat(document.getElementById('mainBalance').value),
-            expiration_date: document.getElementById('expirationDate').value,
-            customer_id: parseInt(document.getElementById('customerId').value),
-            subscriber_type: document.getElementById('subscriberType').value,
-            call_cost: parseFloat(document.getElementById('callCost').value),
-            sms_cost: parseFloat(document.getElementById('smsCost').value),
-            activation_date: document.getElementById('activationDate').value || null,
-            is_active: document.getElementById('isActive').value === 'true',
-            warning_date: document.getElementById('warningDate').value || null,
-            account_id: document.getElementById('accountId').value || null
-        };
+    const formData = {
+        phone_number: document.getElementById('phoneNumber').value,
+        main_balance: parseFloat(document.getElementById('mainBalance').value),
+        expiration_date: document.getElementById('expirationDate').value,
+        customer_id: parseInt(document.getElementById('customerId').value),
+        subscriber_type: document.getElementById('subscriberType').value,
+        call_cost: parseFloat(document.getElementById('callCost').value),
+        sms_cost: parseFloat(document.getElementById('smsCost').value),
+        activation_date: document.getElementById('activationDate').value || null,
+        is_active: document.getElementById('isActive').value === 'true',
+        warning_date: document.getElementById('warningDate').value || null,
+        account_id: document.getElementById('accountId').value || null
+    };
 
-        fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const result = await response.json();
-                    document.getElementById('formError').innerText = result.error || 'Đã có lỗi xảy ra.';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+        .then(async (response) => {
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                document.getElementById('formError').innerText = result.error || result.message || 'Đã có lỗi xảy ra.';
+            } else {
+                closeSubscriberModal();
+                if (isNew) {
+                    // Nếu thêm mới thành công thì thông báo và chuyển trang
+                    alert(result.message);
+                    window.location.href = `/contracts/add/${result.subscriber_id}`;
                 } else {
-                    closeSubscriberModal();
+                    // Nếu chỉnh sửa thì chỉ cần reload
                     location.reload();
                 }
-            })
-            .catch(error => {
-                document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
-                console.error('Lỗi:', error);
-            });
-    });
+            }
+        })
+        .catch(error => {
+            document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
+            console.error('Lỗi:', error);
+        });
+});
+
 </script>
 
 {% endblock %}
