@@ -123,7 +123,12 @@
         width: 24px;
         display: inline-block;
     }
-
+    .service {
+    display: flex;              /* Sử dụng flexbox để các phần tử con nằm trên cùng hàng */
+    align-items: center;        /* Căn giữa theo chiều dọc */
+    width: 100%;                /* Đảm bảo chiếm toàn bộ chiều rộng của container cha */
+    gap: 10px;                  /* Khoảng cách giữa .service-name và .actions */
+}   
     .service-name {
         flex-grow: 1;
         font-size: 1rem;
@@ -341,13 +346,16 @@
                     {% else %}
                     <span class="toggle-placeholder"></span>
                     {% endif %}
-                    <span class="service-name">{{ node.name }}</span>
+                    <span class="service" >
+                        <span class="service-name">{{ node.name }}</span>
                     <div class="actions">
                         <button class="btn-action btn-edit" onclick="openEditModal({{ node.id }})"><i
                                 class="fas fa-edit"></i></button>
                         <button class="btn-action btn-delete" onclick="removeService({{ node.id }})"><i
                                 class="fas fa-trash-alt"></i></button>
                     </div>
+                    </span>
+                    
                 </div>
                 {% if node.children %}
                 {{ render_tree(node.children) }}
@@ -431,136 +439,157 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('serviceModal').style.display = 'none';
-        document.getElementById('editServiceModal').style.display = 'none';
-        initToggleButtons();
+    // Ẩn modal ban đầu
+    document.getElementById('serviceModal').style.display = 'none';
+    document.getElementById('editServiceModal').style.display = 'none';
+
+    // Khởi tạo nút toggle
+    initToggleButtons();
+
+    // Đặt trạng thái hiển thị ban đầu cho tất cả dịch vụ
+    const serviceElements = document.querySelectorAll('.service-tree li .service');
+    serviceElements.forEach(serviceElement => {
+        serviceElement.style.display = ''; // Đảm bảo hiển thị tất cả
     });
 
-    function openModal(id) {
-        const modal = document.getElementById(id);
-        modal.style.display = 'flex';
+    // Xử lý sự kiện tìm kiếm
+    const searchBox = document.getElementById('search-box');
+    if (searchBox) {
+        searchBox.addEventListener('input', function () {
+            const term = this.value.trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Bỏ dấu và chữ thường
 
-        if (id === 'serviceModal') {
-            setTimeout(() => {
-                const input = document.getElementById('addServiceName');
-                if (input) input.focus();
-            }, 100); // đợi DOM render modal xong mới focus
-        }
+            serviceElements.forEach(serviceElement => {
+                const nameElement = serviceElement.querySelector('.service-name');
+                if (!nameElement) return;
+
+                const name = nameElement.textContent.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Bỏ dấu và chữ thường
+
+                const isMatch = !term || name.includes(term); // Hiển thị tất cả khi term rỗng
+                console.log(`Searching for "${term}" in "${name}": ${isMatch}`); // Debug
+
+                // Ẩn hoặc hiện toàn bộ <span class="service">
+                serviceElement.style.display = isMatch ? '' : 'none';
+            });
+        });
+    }
+});
+
+function openModal(id) {
+    const modal = document.getElementById(id);
+    modal.style.display = 'flex';
+
+    if (id === 'serviceModal') {
+        setTimeout(() => {
+            const input = document.getElementById('addServiceName');
+            if (input) input.focus();
+        }, 100); // đợi DOM render modal xong mới focus
+    }
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function saveAddService() {
+    const name = document.getElementById('addServiceName').value.trim();
+    if (!name) {
+        alert('Vui lòng nhập tên dịch vụ');
+        return;
     }
 
-
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-
-    function saveAddService() {
-        const name = document.getElementById('addServiceName').value.trim();
-        if (!name) {
-            alert('Vui lòng nhập tên dịch vụ');
-            return;
-        }
-
-        const parent_id = document.getElementById('addServiceParent').value || null;
-        const coverage = document.getElementById('addCoverageCheck').checked;
-        console.log({
+    const parent_id = document.getElementById('addServiceParent').value || null;
+    const coverage = document.getElementById('addCoverageCheck').checked;
+    console.log({
+        service_name: name,
+        parent_id: parent_id ? parseInt(parent_id) : null,
+        coverage: coverage ? 1 : 0
+    });
+    fetch('/services/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             service_name: name,
             parent_id: parent_id ? parseInt(parent_id) : null,
-            coverage: coverage ? 1 : 0
+            coverage_area: coverage ? 1 : 0
         })
-        fetch('/services/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                service_name: name,
-                parent_id: parent_id ? parseInt(parent_id) : null,
-                coverage_area: coverage ? 1 : 0
-            })
-        })
-            .then(async (response) => {
-                const data = await response.json(); // 👉 luôn xử lý JSON 1 lần duy nhất
-                console.log("data", data, response.ok)
-                if (response.ok && data.success) {
-                    alert(data.message || 'Thêm dịch vụ thành công!');
-                    location.reload();
-                } else {
-                    alert(data.message || data.error || 'Đã xảy ra lỗi khi thêm dịch vụ.');
-                }
-            })
-            .catch(error => {
-                // console.error('Lỗi kết nối:', error);
-                alert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
-            });
-    }
-
-
-    function openEditModal(id) {
-        fetch(`/services/${id}`).then(r => r.json()).then(data => {
-            document.getElementById('editServiceId').value = id;
-            document.getElementById('editServiceName').value = data.service_name;
-            document.getElementById('editCoverageCheck').checked = !!data.coverage;
-            document.getElementById('editServiceParent').value = data.parent_id ? String(data.parent_id) : '';
-            openModal('editServiceModal');
-        });
-    }
-
-    function saveEditService() {
-        const id = document.getElementById('editServiceId').value;
-        const name = document.getElementById('editServiceName').value.trim();
-        if (!name) { alert('Vui lòng nhập tên dịch vụ'); return; }
-        const parent_id = document.getElementById('editServiceParent').value || null;
-        const coverage = document.getElementById('editCoverageCheck').checked;
-        fetch(`/services/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service_name: name, parent_id: parent_id ? parseInt(parent_id) : null, coverage })
-        }).then(r => r.ok ? location.reload() : r.json().then(j => alert(j.error)));
-    }
-
-    function removeService(serviceId) {
-        if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
-        fetch(`/services/${serviceId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
-        }).then(response => {
-            if (response.ok) {
-                return response.json().then(data => {
-                    alert(data.message || 'Xóa thành công');
-                    location.reload();
-                });
+    })
+        .then(async (response) => {
+            const data = await response.json();
+            console.log("data", data, response.ok);
+            if (response.ok && data.success) {
+                alert(data.message || 'Thêm dịch vụ thành công!');
+                location.reload();
             } else {
-                return response.json().then(err => alert(err.error || 'Xóa không thành công'));
+                alert(data.message || data.error || 'Đã xảy ra lỗi khi thêm dịch vụ.');
             }
-        }).catch(err => {
-            console.error('Fetch failed:', err);
-            alert('Lỗi kết nối. Vui lòng kiểm tra mạng.');
+        })
+        .catch(error => {
+            alert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
         });
-    }
+}
 
-    function initToggleButtons() {
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const li = btn.closest('li');
-                const childUl = li.querySelector(':scope > ul');
-                if (!childUl) return;
-                const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-                childUl.style.display = isExpanded ? 'none' : '';
-                btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
-                const icon = btn.querySelector('i.fas');
-                if (icon) {
-                    icon.classList.toggle('fa-minus-square', !isExpanded);
-                    icon.classList.toggle('fa-plus-square', isExpanded);
-                }
-                btn.classList.toggle('closed', isExpanded);
+function openEditModal(id) {
+    fetch(`/services/${id}`).then(r => r.json()).then(data => {
+        document.getElementById('editServiceId').value = id;
+        document.getElementById('editServiceName').value = data.service_name;
+        document.getElementById('editCoverageCheck').checked = !!data.coverage;
+        document.getElementById('editServiceParent').value = data.parent_id ? String(data.parent_id) : '';
+        openModal('editServiceModal');
+    });
+}
+
+function saveEditService() {
+    const id = document.getElementById('editServiceId').value;
+    const name = document.getElementById('editServiceName').value.trim();
+    if (!name) { alert('Vui lòng nhập tên dịch vụ'); return; }
+    const parent_id = document.getElementById('editServiceParent').value || null;
+    const coverage = document.getElementById('editCoverageCheck').checked;
+    fetch(`/services/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service_name: name, parent_id: parent_id ? parseInt(parent_id) : null, coverage })
+    }).then(r => r.ok ? location.reload() : r.json().then(j => alert(j.error)));
+}
+
+function removeService(serviceId) {
+    if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
+    fetch(`/services/${serviceId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => {
+        if (response.ok) {
+            return response.json().then(data => {
+                alert(data.message || 'Xóa thành công');
+                location.reload();
             });
-        });
-    }
+        } else {
+            return response.json().then(err => alert(err.error || 'Xóa không thành công'));
+        }
+    }).catch(err => {
+        console.error('Fetch failed:', err);
+        alert('Lỗi kết nối. Vui lòng kiểm tra mạng.');
+    });
+}
 
-    document.getElementById('search-box').addEventListener('input', function () {
-        const term = this.value.trim().toLowerCase();
-        document.querySelectorAll('.service-tree li').forEach(li => {
-            const name = li.querySelector('.service-name').textContent.toLowerCase();
-            li.style.display = name.includes(term) ? '' : 'none';
+function initToggleButtons() {
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const li = btn.closest('li');
+            const childUl = li.querySelector(':scope > ul');
+            if (!childUl) return;
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            childUl.style.display = isExpanded ? 'none' : '';
+            btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+            const icon = btn.querySelector('i.fas');
+            if (icon) {
+                icon.classList.toggle('fa-minus-square', !isExpanded);
+                icon.classList.toggle('fa-plus-square', isExpanded);
+            }
+            btn.classList.toggle('closed', isExpanded);
         });
     });
+}
 </script>
 {% endblock %}
