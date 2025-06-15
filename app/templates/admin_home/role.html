@@ -490,43 +490,47 @@
         {% endfor %}
     </ul>
     {% endif %}
-    <div class="role-table ">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Mã Nhóm</th>
-                    <th>Tên Nhóm Quyền</th>
-                    <th>Số Nhân Viên</th>
-                    <th>Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for role in role_groups %}
-                <tr>
-                    <td>
-                        <button onclick="toggleRow('{{ role.id }}')" id="toggle-btn-{{ role.id }}" class="toggle-btn">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                    </td>
-                    <td>{{ role.id }}</td>
-                    <td class="font-semibold">{{ role.role_name }}</td>
-                    <td id="staff-count-{{ role.id }}">-</td>
-                    <td>
-                        <button onclick="openAddModal('{{ role.id }}')" class="btn-action btn-add-staff">Thêm</button>
-                        <button onclick="openPermissionModal('{{ role.id }}')" class="btn-action btn-manage-perms">Quản
-                            Lý Quyền</button>
-                    </td>
-                </tr>
-                <tr id="row{{ role.id }}" style="display: none;">
-                    <td colspan="5">
-                        <div id="staff-list-{{ role.id }}" class="text-gray-500 italic"></div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <div class="role-table">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Mã Nhóm</th>
+                <th>Tên Nhóm Quyền</th>
+                <th>Số Nhân Viên</th>
+                <th>Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role in role_groups %}
+            <tr>
+                <td>
+                    {% if role.id != 3 %}
+                    <button onclick="toggleRow('{{ role.id }}')" id="toggle-btn-{{ role.id }}" class="toggle-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    {% endif %}
+                </td>
+                <td>{{ role.id }}</td>
+                <td class="font-semibold">{{ role.role_name }}</td>
+                <td id="staff-count-{{ role.id }}">-</td>
+                <td>
+                    {% if role.id != 3 %}
+                    <button onclick="openAddModal('{{ role.id }}')" class="btn-action btn-add-staff">Thêm</button>
+                    {% endif %}
+                    <button onclick="openPermissionModal('{{ role.id }}')" class="btn-action btn-manage-perms">Quản Lý Quyền</button>
+                </td>
+            </tr>
+            {% if role.id != 3 %}
+            <tr id="row{{ role.id }}" style="display: none;">
+                <td colspan="5">
+                    <div id="staff-list-{{ role.id }}" class="text-gray-500 italic"></div>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <!-- Modal Thêm Nhân Viên -->

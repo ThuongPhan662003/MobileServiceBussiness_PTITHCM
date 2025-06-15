@@ -190,6 +190,7 @@ def deposit_execute():
 
             return redirect(url_for("payment_api_bp.deposit_result"))
 
+
     session["payment_result"] = {
         "status": "failure",
         "provider": "PayPal",
