@@ -55,55 +55,178 @@ def index_payment_api():
 
 
 @login_required
-@payment_api_bp.route("/vnpay_pay", methods=["POST", "GET"])
-@required
-def vnpay_pay():
-    form = PaymentForm(request.form)
-    if request.method == "POST" and form.validate():
-        order_type = form.order_type.data
-        order_id = form.order_id.data
-        amount = form.amount.data
-        order_desc = form.order_desc.data
-        bank_code = form.bank_code.data
-        language = form.language.data or "vn"
-        ipaddr = get_client_ip(request)
+@payment_api_bp.route("/deposit-index", methods=["POST"])
+# @required
+def deposit():
+    money = float(request.form.get("amount", 0))
+    return render_template("payments/user/deposit.html", money=money)
 
-        # ✅ Import đúng class
-        from app.utils.vnpay import VnPay
 
-        vnp = VnPay()
+@login_required
+@payment_api_bp.route("/deposit-pay", methods=["POST"])
+def deposit_pay():
+    try:
+        vnd_price = request.form.get("money", type=float)
+        if not vnd_price or vnd_price <= 0:
+            flash("Số tiền nạp không hợp lệ.", "danger")
+            return redirect(url_for("payment_api_bp.deposit"))
 
-        # ✅ Chuẩn bị dữ liệu để ký
-        vnp.requestData = {
-            "vnp_Version": "2.1.0",
-            "vnp_Command": "pay",
-            "vnp_TmnCode": current_app.config["VNPAY_TMN_CODE"],
-            "vnp_Amount": int(amount) * 100,  # Đơn vị là *100
-            "vnp_CurrCode": "VND",
-            "vnp_TxnRef": order_id,
-            "vnp_OrderInfo": order_desc,
-            "vnp_OrderType": order_type,
-            "vnp_Locale": language,
-            "vnp_ReturnUrl": current_app.config["VNPAY_RETURN_URL"],
-            "vnp_IpAddr": ipaddr,
-            "vnp_CreateDate": datetime.now().strftime("%Y%m%d%H%M%S"),
-        }
+        usd_price = round(vnd_price / 25000, 2)
 
-        # ✅ Thêm bank nếu có
-        if bank_code:
-            vnp.requestData["vnp_BankCode"] = bank_code
+        # Lưu session để dùng lại
+        session["vnd_price"] = vnd_price
+        session["usd_price"] = usd_price
+        session["item_name"] = f"Nạp {vnd_price:,.0f} VND"
 
-        # ✅ Tạo URL thanh toán
-        payment_url = vnp.get_payment_url(
-            current_app.config["VNPAY_URL"], current_app.config["VNPAY_HASH_SECRET"]
+        payment = paypalrestsdk.Payment(
+            {
+                "intent": "sale",
+                "payer": {"payment_method": "paypal"},
+                "redirect_urls": {
+                    "return_url": url_for(
+                        "payment_api_bp.deposit_execute", _external=True
+                    ),
+                    "cancel_url": url_for(
+                        "payment_api_bp.deposit_paypal_cancel", _external=True
+                    ),
+                },
+                "transactions": [
+                    {
+                        "item_list": {
+                            "items": [
+                                {
+                                    "name": "Nạp tiền",
+                                    "sku": "DEPOSIT",
+                                    "price": str(usd_price),
+                                    "currency": "USD",
+                                    "quantity": 1,
+                                }
+                            ]
+                        },
+                        "amount": {"total": str(usd_price), "currency": "USD"},
+                        "description": f"Nạp tiền vào ví (≈ {vnd_price:,.0f} VND)",
+                    }
+                ],
+            }
         )
 
-        # ✅ In để kiểm tra debug
-        print("VNPAY redirect URL:", payment_url)
+        if payment.create():
+            # Lưu Payment ID để xử lý execute sau này
+            session["payment_id"] = payment.id
+            for link in payment.links:
+                if link.method == "REDIRECT":
+                    return redirect(link.href)
 
-        return redirect(payment_url)
+        flash("Tạo yêu cầu thanh toán thất bại: " + payment.error["message"], "danger")
+        return redirect(url_for("payment_api_bp.deposit_result"))
 
-    return render_template("payments/user/payment.html", form=form, title="Thanh toán")
+    except Exception as e:
+        flash(f"Lỗi: {str(e)}", "danger")
+        return redirect(url_for("payment_api_bp.deposit"))
+
+
+@login_required
+@payment_api_bp.route("/deposit-execute", methods=["GET"])
+def deposit_execute():
+    payment_id = session.get("payment_id")
+    payer_id = request.args.get("PayerID")
+
+    if not payment_id or not payer_id:
+        session["payment_result"] = {
+            "status": "failure",
+            "provider": "PayPal",
+            "message": "Thiếu thông tin xác thực thanh toán.",
+        }
+        return redirect(url_for("payment_api_bp.deposit_result"))
+
+    payment = paypalrestsdk.Payment.find(payment_id)
+
+    if payment.execute({"payer_id": payer_id}):
+        amount = payment.transactions[0].amount.total
+        currency = payment.transactions[0].amount.currency
+        print("amountđ", amount, currency)
+        subscriber = SubscriberService.get_subscriber_by_id(session["subscriber_id"])
+        data = {
+            "phone_number": subscriber.phone_number,
+            "main_balance": subscriber.main_balance
+            + (Decimal(str(amount)) * Decimal("25000")),
+            "customer_id": subscriber.customer_id,
+            "account_id": subscriber.account_id,
+            "expiration_date": (
+                subscriber.expiration_date.strftime("%Y-%m-%d")
+                if subscriber.expiration_date
+                else None
+            ),
+            "warning_date": (
+                subscriber.warning_date.strftime("%Y-%m-%d")
+                if subscriber.warning_date
+                else None
+            ),
+            "is_active": str(subscriber.is_active).lower(),
+            "subscriber": subscriber.subscriber_type,
+        }
+        result = SubscriberService.update_subscriber(session["subscriber_id"], data)
+        if result.get("success"):
+
+            session["payment_result"] = {
+                "status": "success",
+                "provider": "PayPal",
+                "details": {
+                    "Payment ID": payment.id,
+                    "Status": payment.state,
+                    "Amount": f"{amount} {currency}",
+                },
+                "items": [
+                    {
+                        "name": item.name,
+                        "price": item.price,
+                        "currency": item.currency,
+                        "quantity": item.quantity,
+                    }
+                    for item in payment.transactions[0].item_list.items
+                ],
+                "message": "Thanh toán thành công!",
+            }
+
+            return redirect(url_for("payment_api_bp.deposit_result"))
+
+
+    session["payment_result"] = {
+        "status": "failure",
+        "provider": "PayPal",
+        "message": payment.error.get("message", "Đã có lỗi xảy ra."),
+    }
+    return redirect(url_for("payment_api_bp.deposit_result"))
+
+
+@login_required
+@payment_api_bp.route("/deposit-result")
+def deposit_result():
+    result = session.get("payment_result")
+    if not result:
+        flash("Không có dữ liệu thanh toán để hiển thị.", "danger")
+        return redirect(url_for("payment_api_bp.deposit"))
+
+    return render_template(
+        "payments/user/deposit_result.html",
+        status=result.get("status"),
+        provider=result.get("provider"),
+        details=result.get("details"),
+        items=result.get("items"),
+        message=result.get("message"),
+    )
+
+
+# 3. HỦY GIAO DỊCH
+@login_required
+@payment_api_bp.route("/cancel")
+def deposit_paypal_cancel():
+    session["payment_result"] = {
+        "status": "failure",
+        "provider": "PayPal",
+        "message": "Giao dịch đã bị huỷ bởi người dùng.",
+    }
+    return redirect(url_for("payment_api_bp.deposit_result"))
 
 
 @login_required

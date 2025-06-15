@@ -321,6 +321,7 @@
     }
 
     document.getElementById('subscriberForm').addEventListener('submit', function (e) {
+
         e.preventDefault();
         const id = this.getAttribute('data-id');
         const isNew = !id;
@@ -363,13 +364,16 @@
                             location.reload();
                         }, 1000);
                     }
+
                 }
-            })
-            .catch(error => {
-                document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
-                console.error('Lỗi:', error);
-            });
-    });
+            }
+        })
+        .catch(error => {
+            document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
+            console.error('Lỗi:', error);
+        });
+});
+
 </script>
 
 {% endblock %}

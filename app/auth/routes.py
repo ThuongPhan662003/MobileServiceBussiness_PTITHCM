@@ -102,6 +102,7 @@ def register():
 def view_subscriber(subscriber_id):
     # Lấy thông tin của subscriber, customer và subscription
     subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
+    print("subscriber---", subscriber)
     customer = CustomerService.get_customer_by_id(subscriber.customer_id)
     subscriptions = SubscriptionService.get_plan_exp(subscriber_id)
 
@@ -117,6 +118,8 @@ def view_subscriber(subscriber_id):
         customer=customer,
         subscriptions=subscriptions,
     )
+
+
 @auth.route("/forgot-password", methods=["GET", "POST"])
 @required
 def forgot_password():

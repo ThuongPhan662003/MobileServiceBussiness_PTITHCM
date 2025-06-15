@@ -22,11 +22,13 @@ class SubscriptionService:
     def create_subscription(subscriber_id: int, plan_id: int, confirm_override=False):
         try:
             subscriber = SubscriberRepository.get_by_id(subscriber_id)
+
             plans = PlanRepository.get_by_id(plan_id)
             created_at = datetime.now()
             plan = PlanDetailRepository.get_by_id(plan_id)
             if not plan:
                 return {"error": "Không tìm thấy gói cước."}
+
             active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
             active_service_ids_flat = {
                 service["service_id"]
@@ -74,15 +76,23 @@ class SubscriptionService:
             activation_date = datetime.now()
             if subscriber.subscriber_type == "TRATRUOC":
                 if plan.duration < 1:
-                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                    expiration_date = datetime.now() + timedelta(
+                        hours=plan.duration * 24
+                    )
                 else:
-                    today = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+                    today = datetime(
+                        datetime.now().year, datetime.now().month, datetime.now().day
+                    )
                     expiration_date = today + timedelta(days=int(plan.duration))
             else:
                 if plan.duration < 1:
-                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                    expiration_date = datetime.now() + timedelta(
+                        hours=plan.duration * 24
+                    )
                 elif 1 <= plan.duration <= 30:
-                    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                    today = datetime.now().replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    )
                     expiration_date = today + timedelta(days=int(plan.duration))
                 else:
                     now = datetime.now()
@@ -223,3 +233,4 @@ class SubscriptionService:
             except Exception as e:
                 print("exeption",str(e))
                 return {"error": str(e)}
+

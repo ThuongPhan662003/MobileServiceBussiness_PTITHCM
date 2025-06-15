@@ -1,51 +1,75 @@
-<!-- templates/subscriber/activity_log.html -->
 {% extends "base.html" %}
 
-{% block title %}Nhật ký hoạt động{% endblock %}
+{% block title %}Chi tiết hoạt động của thuê bao{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto py-8 px-4">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📑 Nhật ký hoạt động</h2>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-        <table class="min-w-full table-auto text-left border border-gray-200">
-            <thead class="bg-gray-100 text-gray-700">
-                <tr>
-                    <th class="px-4 py-3">#</th>
-                    <th class="px-4 py-3">Loại</th>
-                    <th class="px-4 py-3">Thời gian</th>
-                    <th class="px-4 py-3">Từ</th>
-                    <th class="px-4 py-3">Đến</th>
-                    <th class="px-4 py-3">Nội dung</th>
-                    <th class="px-4 py-3">Dữ liệu</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-600">
-                {% for log in logs %}
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ loop.index }}</td>
-                    <td class="px-4 py-2">
-                        {% if log.type == 'TINNHAN' %}
-                        📩 Tin nhắn
-                        {% elif log.type == 'CUOCGOI' %}
-                        📞 Cuộc gọi
-                        {% elif log.type == 'DULIEU' %}
-                        🌐 Dữ liệu
-                        {% else %}
-                        {{ log.type }}
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-sm">
-                        {{ log.start_date }}
-                    </td>
-                    <td class="px-4 py-2">{{ log.by_from }}</td>
-                    <td class="px-4 py-2">{{ log.to }}</td>
-                    <td class="px-4 py-2">{{ log.contents }}</td>
-                    <td class="px-4 py-2">{{ log.usage_value }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- Google Fonts: Roboto -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<div class="max-w-3xl mx-auto px-4 py-16" style="margin-top: 100px;">
+    <h2 class="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+        <i class="fas fa-user-circle text-indigo-600 text-3xl"></i>
+        <span>Chi tiết hoạt động của thuê bao {{ subscriber.phone_number }}</span>
+    </h2>
+
+    {% if logs %}
+    {% for log in logs %}
+    <div class="p-5 rounded-xl shadow-md border border-gray-300 bg-white 
+        flex gap-4 items-start hover:shadow-lg transition
+        {% if log.type == 'TINNHAN' %} border-l-[6px] border-pink-500
+        {% elif log.type == 'CUOCGOI' %} border-l-[6px] border-green-500
+        {% elif log.type == 'DULIEU' %} border-l-[6px] border-blue-500
+        {% else %} border-l-[6px] border-gray-400
+        {% endif %}
+        mt-4">
+
+        <div class="pt-1">
+            {% if log.type == 'TINNHAN' %}
+            <i class="fas fa-comment text-pink-500 text-xl"></i>
+            {% elif log.type == 'CUOCGOI' %}
+            <i class="fas fa-phone-alt text-green-500 text-xl"></i>
+            {% elif log.type == 'DULIEU' %}
+            <i class="fas fa-globe text-blue-500 text-xl"></i>
+            {% else %}
+            <i class="fas fa-info-circle text-gray-500 text-xl"></i>
+            {% endif %}
+        </div>
+
+        <div class="flex-1 text-sm text-gray-800 space-y-1">
+            <div class="flex justify-between items-center mb-1">
+                <p class="font-semibold text-base">
+                    {% if log.type == 'TINNHAN' %}Tin nhắn
+                    {% elif log.type == 'CUOCGOI' %}Cuộc gọi
+                    {% elif log.type == 'DULIEU' %}Dữ liệu
+                    {% else %}{{ log.type }}{% endif %}
+                </p>
+                <span class="text-xs text-gray-500">{{ log.start_date }}</span>
+            </div>
+            <p><strong>Từ:</strong> {{ log.by_from }}</p>
+            <p><strong>Đến:</strong> {{ log.to }}</p>
+            <p><strong>Nội dung:</strong> {{ log.contents or "Không có" }}</p>
+            <p><strong>Sử dụng:</strong>
+                {% if log.type == 'TINNHAN' %}
+                {{ log.usage_value }} SMS
+                {% elif log.type == 'CUOCGOI' %}
+                {{ log.usage_value }} phút
+                {% elif log.type == 'DULIEU' %}
+                {{ log.usage_value }} MB
+                {% else %}
+                {{ log.usage_value }}
+                {% endif %}
+            </p>
+        </div>
     </div>
+    {% endfor %}
+    {% else %}
+    <p class="text-center text-gray-500 italic">Không có hoạt động nào.</p>
+    {% endif %}
+
 </div>
 {% endblock %}
