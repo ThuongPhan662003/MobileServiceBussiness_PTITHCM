@@ -55,6 +55,15 @@ class UsageLogService:
     @staticmethod
     def add_usagelog(log_type: str, data: dict):
         try:
+            log_type = data.get("type")
+            subscriber_id = int(data.get("subscriber_id"))
+
+            # Bước 1: kiểm tra ưu đãi còn không
+            if not UsageLogService.check_promotion_available(subscriber_id, log_type):
+                return {
+                    "status_code": 400,
+                    "message": "Không còn ưu đãi cho hoạt động này",
+                }
             start_date = (
                 datetime.strptime(data.get("start_date"), "%Y-%m-%dT%H:%M")
                 if data.get("start_date")
@@ -84,18 +93,31 @@ class UsageLogService:
             )
 
             result = UsageLogRepository.insert(log)
+
             if result is True:
                 return {"success": True}
             else:
-                return {"error": result}
+                return {"success": False, "error": result}
+
         except Exception as e:
             print(f"Lỗi trong add_usagelog: {e}")
-            return {"error": str(e)}
+            return {"success": False, "error": str(e)}
 
     @staticmethod
     def get_usagelog_by_subscriber_id(subscriber_id):
         try:
             result = UsageLogRepository.get_by_subscriber_id(subscriber_id)
+            return result
+        except Exception as e:
+            print(f"Lỗi trong get_usagelog_by_id: {e}")
+            return None
+
+    @staticmethod
+    def check_promotion_available(subscriber_id: int, log_type: str):
+        try:
+            result = UsageLogRepository.check_promotion_available(
+                subscriber_id, log_type
+            )
             return result
         except Exception as e:
             print(f"Lỗi trong get_usagelog_by_id: {e}")

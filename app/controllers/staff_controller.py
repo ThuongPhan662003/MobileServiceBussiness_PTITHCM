@@ -144,7 +144,9 @@ def edit_staff(staff_id):
 
 
 @login_required
-@staff_bp.route("/accounts/edit/<int:staff_id>", methods=["POST"])
+@staff_bp.route(
+    "/accounts/edit/<int:staff_id>",
+)
 @required
 def edit_account_of_staff(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
