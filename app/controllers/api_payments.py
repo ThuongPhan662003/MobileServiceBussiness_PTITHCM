@@ -144,29 +144,52 @@ def deposit_execute():
     if payment.execute({"payer_id": payer_id}):
         amount = payment.transactions[0].amount.total
         currency = payment.transactions[0].amount.currency
-
-        session["payment_result"] = {
-            "status": "success",
-            "provider": "PayPal",
-            "details": {
-                "Payment ID": payment.id,
-                "Status": payment.state,
-                "Amount": f"{amount} {currency}",
-            },
-            "items": [
-                {
-                    "name": item.name,
-                    "price": item.price,
-                    "currency": item.currency,
-                    "quantity": item.quantity,
-                }
-                for item in payment.transactions[0].item_list.items
-            ],
-            "message": "Thanh toán thành công!",
+        print("amountđ", amount, currency)
+        subscriber = SubscriberService.get_subscriber_by_id(session["subscriber_id"])
+        data = {
+            "phone_number": subscriber.phone_number,
+            "main_balance": subscriber.main_balance
+            + (Decimal(str(amount)) * Decimal("25000")),
+            "customer_id": subscriber.customer_id,
+            "account_id": subscriber.account_id,
+            "expiration_date": (
+                subscriber.expiration_date.strftime("%Y-%m-%d")
+                if subscriber.expiration_date
+                else None
+            ),
+            "warning_date": (
+                subscriber.warning_date.strftime("%Y-%m-%d")
+                if subscriber.warning_date
+                else None
+            ),
+            "is_active": str(subscriber.is_active).lower(),
+            "subscriber": subscriber.subscriber_type,
         }
+        result = SubscriberService.update_subscriber(session["subscriber_id"], data)
+        if result.get("success"):
 
-        # TODO: Recharge vào ví ở đây nếu cần
-        return redirect(url_for("payment_api_bp.deposit_result"))
+            session["payment_result"] = {
+                "status": "success",
+                "provider": "PayPal",
+                "details": {
+                    "Payment ID": payment.id,
+                    "Status": payment.state,
+                    "Amount": f"{amount} {currency}",
+                },
+                "items": [
+                    {
+                        "name": item.name,
+                        "price": item.price,
+                        "currency": item.currency,
+                        "quantity": item.quantity,
+                    }
+                    for item in payment.transactions[0].item_list.items
+                ],
+                "message": "Thanh toán thành công!",
+            }
+
+            return redirect(url_for("payment_api_bp.deposit_result"))
+
 
     session["payment_result"] = {
         "status": "failure",
