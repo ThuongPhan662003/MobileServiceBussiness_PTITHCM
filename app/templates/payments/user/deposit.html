@@ -29,7 +29,7 @@
         </p>
 
         <!-- Nút hành động -->
-        <form method="POST" action="{{ url_for('payment_api_bp.deposit_paypal_execute') }}">
+        <form method="POST" action="{{ url_for('payment_api_bp.deposit_pay') }}">
             <input type="hidden" name="money" value="{{ money }}">
             <div class="flex justify-center gap-4 mt-8">
                 <a href="{{ url_for('payment_api_bp.deposit') }}"
