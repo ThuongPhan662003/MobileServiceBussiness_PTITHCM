@@ -2,6 +2,8 @@ import re
 from app.repositories.staff_repository import StaffRepository
 from app.models.staff import Staff
 from datetime import datetime
+from app.utils.email_sender import send_reset_email
+from app.utils.utils import generate_random_password, normalize_name
 from app.viewmodels.staff_view_model import StaffViewModel
 
 
@@ -31,8 +33,8 @@ class StaffService:
                 "birthday",
                 "gender",
                 "role_name",
-                "username",
-                "password",
+                # "username",
+                # "password",
             ]
 
             for field in required_fields:
@@ -42,7 +44,7 @@ class StaffService:
             card_id = data.get("card_id")
             phone = data.get("phone")
             email = data.get("email")
-            username = data.get("username")
+            username = normalize_name(data.get("full_name")) + "-" + data.get("card_id")
             birthday_str = data.get("birthday")
 
             birthday = (
@@ -90,14 +92,16 @@ class StaffService:
                 gender=data.get("gender"),
                 birthday=birthday,
             )
+            new_password = generate_random_password()
             staff = StaffViewModel(
                 staff_model,
                 role_name=data.get("role_name"),
                 username=data.get("username"),
-                password=data.get("password"),
+                password=new_password,
             )
             result = StaffRepository.insert(staff)
             if result is True:
+                send_reset_email(email, data.get("full_name"), new_password)
                 return {"success": True}
             else:
                 return {"error": result}

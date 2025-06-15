@@ -12,7 +12,8 @@ from app.services.account_service import AccountService
 from app.services.staff_service import StaffService
 from flask_login import login_required
 from app.utils.decorator import required
-from app.utils.email_sender import generate_random_password, send_reset_email
+from app.utils.email_sender import send_reset_email
+from app.utils.utils import generate_random_password
 
 staff_bp = Blueprint("staff", __name__, url_prefix="/staffs")
 

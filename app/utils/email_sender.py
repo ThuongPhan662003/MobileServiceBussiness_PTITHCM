@@ -12,8 +12,6 @@ from email.mime.text import MIMEText
 otp_storage = {}
 
 
-def generate_random_password(length=10):
-    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 from email.mime.multipart import MIMEMultipart
