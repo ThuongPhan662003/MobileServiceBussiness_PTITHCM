@@ -24,6 +24,11 @@
     .hover-scale:hover {
       transform: scale(1.05);
     }
+    .tab-active {
+      border-bottom: 2px solid #f43f5e;
+      color: #f43f5e;
+      font-weight: bold;
+    }
 
     .modal {
       transition: opacity 0.3s ease-in-out;
@@ -80,6 +85,7 @@
     </div>
   </div>
 
+
   <!-- Recharge Modal -->
   <div id="rechargeModal"
     class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center modal-hidden">
@@ -122,6 +128,7 @@
       </form>
     </div>
   </div>
+
 
   <!-- Subscriptions Section -->
   {% if subscriptions %}
