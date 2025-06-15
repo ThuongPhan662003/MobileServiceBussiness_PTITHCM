@@ -166,7 +166,7 @@ LIMIT 1;
         try:
             result = db_instance.execute(
                 """
-                CALL GetActiveSubscriptionDetailsBySubscriber(%s)
+                CALL sp_get_latest_promotions_by_service_group(%s)
                 """,
                 (subscriber_id,),
                 fetchall=True,
@@ -178,18 +178,20 @@ LIMIT 1;
                 result[0], list
             ):  # Kiểm tra kiểu dữ liệu của phần tử đầu tiên
                 subscriptions = []
-                for row in result[
-                    0
-                ]:  # Truy cập phần tử đầu tiên trong danh sách (mảng 2 chiều)
-                    subscription = {
-                        "subscription_id": row["subscription_id"],
-                        "plan_id": row["plan_id"],
-                        "plan_code": row["plan_code"],
-                        "free_data": row["free_data"],
-                        "cancel_at": row["cancel_at"],
-                        "expiration_date": row["expiration_date"],
-                    }
-                    subscriptions.append(subscription)
+
+                for result_set in result:
+                    for row in result_set:
+                        subscription = {
+                            "subscription_id": row["subscription_id"],
+                            "plan_id": row["plan_id"],
+                            "code": row["code"],
+                            "free_data": row["free_data"],
+                            "service_id":row["service_id"],
+                            "cancel_at":row["cancel_at"],
+                            "expiration_date": row["expiration_date"],
+                        }
+                        subscriptions.append(subscription)
+
                 return subscriptions
 
             return []

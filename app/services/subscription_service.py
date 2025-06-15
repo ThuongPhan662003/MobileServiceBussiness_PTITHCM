@@ -46,9 +46,8 @@ class SubscriptionService:
 
             if plans.service_id.id == 2:
                 if 2 in active_service_ids_flat:
-                    print("2222")
                     return { "success":True,
-                            "confirm": False,
+                            "confirm": True,
                         "message": "Bạn đã đăng kí gói cước chính."}
 
             # Trường hợp gói cước di động (cần xác nhận ghi đè)
