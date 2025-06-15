@@ -340,21 +340,28 @@
                 const packagePriceRaw = document.getElementById("packagePrice").textContent;
                 const packagePrice = parseFloat(packagePriceRaw.replace(/,/g, ''));
                 const packageName = document.getElementById("packageName").textContent;
-
+                const subscriptionResponse = await fetch(`/subscriptions/main1/${subscriberId}/${currentPlanId}`, {
+                method: "POST"
+            });
+            const subscriptionResult = await subscriptionResponse.json();
+            console.log(subscriptionResult);
+            if (!subscriptionResponse.ok) {
+                alert("Không thể đăng ký gói cước: " + (subscriptionResult.error || "Lỗi không xác định."));
+                return;
+            }
                 const url = new URL("/pay-process", window.location.origin);
                 url.searchParams.append("subscriber_id", subscriberId);
                 url.searchParams.append("plan_id", currentPlanId);
                 url.searchParams.append("price", packagePrice);
                 url.searchParams.append("plan_code", packageName);
-
                 window.location.href = url.toString();
-                return;
-            }
+                return;}
+
         }
 
         // Đăng ký gói
         try {
-            const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
+            const subscriptionResponse = await fetch(`/subscriptions/main/${subscriberId}/${currentPlanId}`, {
                 method: "POST"
             });
             const subscriptionResult = await subscriptionResponse.json();
