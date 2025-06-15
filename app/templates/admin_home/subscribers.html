@@ -202,11 +202,11 @@
             <label>Customer ID:</label>
             <input type="number" id="customerId" name="customer_id" required min="1">
 
-           <label>Loại Thuê Bao:</label>
-<select id="subscriberType" name="subscriber" required>
-    <option value="TRATRUOC">Trả trước</option>
-    <option value="TRASAU">Trả sau</option>
-</select>
+            <label>Loại Thuê Bao:</label>
+            <select id="subscriberType" name="subscriber" required>
+                <option value="TRATRUOC">Trả trước</option>
+                <option value="TRASAU">Trả sau</option>
+            </select>
 
 
             <label>Call Cost:</label>
@@ -355,24 +355,21 @@
                     closeSubscriberModal();
                     if (isNew) {
                         showNotification(result.message);
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
                     } else {
                         showNotification('Chỉnh sửa thuê bao thành công.');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
                     }
-
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 }
-            }
-        })
-        .catch(error => {
-            document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
-            console.error('Lỗi:', error);
-        });
-});
+            })
+            .catch(error => {
+                document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
+                console.error('Lỗi:', error);
+            });
+
+
+    });
 
 </script>
 
