@@ -31,13 +31,13 @@ def get_subscription_by_id(subscription_id):
 
 @login_required
 @subscription_bp.route("/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
-@required
+# @required
 def create_subscription(subscriber_id, plan_id):
-    result = SubscriptionService.create_subscription(subscriber_id, plan_id)
+    confirm_override = request.json.get("confirm_override", False)
+    result = SubscriptionService.create_subscription(subscriber_id, plan_id, confirm_override)
     if result.get("success"):
-        return jsonify({"message": "Subscription created successfully"}), 201
+        return jsonify(result), 201
     return jsonify({"error": result.get("error")}), 400
-
 
 @login_required
 @subscription_bp.route("/<int:subscription_id>", methods=["PUT"])
@@ -102,3 +102,13 @@ def deduct_balance(subscriber_id, plan_id):
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@login_required
+@subscription_bp.route("/qr/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
+# @required
+def create_subscription1(subscriber_id, plan_id):
+    confirm_override = request.json.get("confirm_override", False)
+    result = SubscriptionService.create_subscription1(subscriber_id, plan_id, confirm_override)
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify({"error": result.get("error")}), 400
