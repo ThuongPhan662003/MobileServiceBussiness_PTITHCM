@@ -49,19 +49,53 @@ def get_usagelog_by_id(log_id):
         return jsonify({"error": str(e)}), 500
 
 
-@login_required
 @usagelog_bp.route("/", methods=["POST"])
+@login_required
 @required
 def create_usagelog():
     try:
         data = request.get_json()
-        result = UsageLogService.create_usagelog(data)
+        log_type = data.get("type")
+        result = UsageLogService.add_usagelog(log_type, data)
+
         if result.get("success"):
-            return jsonify({"message": "Usage log created successfully"}), 201
-        return jsonify({"error": result.get("error")}), 400
+            return (
+                jsonify(
+                    {
+                        "status_code": 201,
+                        "data": None,
+                        "message": "Usage log created successfully",
+                        "error": None,
+                    }
+                ),
+                201,
+            )
+
+        return (
+            jsonify(
+                {
+                    "status_code": 400,
+                    "data": None,
+                    "message": "Failed to create usage log",
+                    "error": result.get("error"),
+                }
+            ),
+            400,
+        )
+
     except Exception as e:
         print(f"Lỗi trong create_usagelog: {e}")
-        return jsonify({"error": str(e)}), 500
+        return (
+            jsonify(
+                {
+                    "status_code": 500,
+                    "data": None,
+                    "message": "Server error occurred",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
 
 
 @login_required

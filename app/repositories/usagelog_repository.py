@@ -219,15 +219,17 @@ class UsageLogRepository:
                     data.contents,
                 ),
                 fetchone=True,
+                commit=True,
             )
 
             if result.get("error"):
                 print(f"Lỗi khi thêm usage log: {result['error']}")
                 return result["error"]
             return True
+
         except Exception as e:
             print(f"Lỗi khi thêm usage log: {e}")
-            return False
+            return str(e)
 
     @staticmethod
     def get_by_subscriber_id(subscriber_id):
@@ -253,3 +255,24 @@ class UsageLogRepository:
         except Exception as e:
             print(f"Lỗi khi lấy usage log theo ID: {e}")
             return None
+
+    @staticmethod
+    def check_promotion_available(subscriber_id: int, log_type: str) -> bool:
+        """
+        Kiểm tra xem thuê bao còn ưu đãi cho loại sử dụng hay không.
+        Gọi stored procedure `sp_check_promotion_available`.
+
+        :param subscriber_id: ID của thuê bao
+        :param log_type: Loại hoạt động ("TINNHAN", "CUOCGOI", "DULIEU")
+        :return: True nếu còn ưu đãi, False nếu không còn
+        """
+        try:
+            result = db_instance.execute(
+                "CALL sp_check_promotion_available(%s, %s)",
+                (subscriber_id, log_type),
+                fetchone=True,
+            )
+            return result and result.get("available") == 1
+        except Exception as e:
+            print(f"Lỗi khi kiểm tra ưu đãi: {e}")
+            return False
