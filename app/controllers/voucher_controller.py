@@ -15,7 +15,6 @@ voucher_bp = Blueprint("voucher", __name__, url_prefix="/vouchers")
 @required
 def voucher_list():
     all_vouchers = VoucherService.get_all_vouchers()
-    print("all_vouchers", all_vouchers)
     return render_template("vouchers/voucher_list.html", vouchers=all_vouchers)
 
 
