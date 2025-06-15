@@ -84,5 +84,8 @@ def delete_subscriber(subscriber_id):
 @subscriber_bp.route("/activity-log/<int:subscriber_id>", methods=["GET"])
 def activity_log(subscriber_id):
     logs = UsageLogService.get_usagelog_by_subscriber_id(subscriber_id)
+    subscriber = SubscriberService.get_subscriber_by_id(subscriber_id)
     print("vôvov")
-    return render_template("subscribers/activity_log.html", logs=logs)
+    return render_template(
+        "subscribers/activity_log.html", logs=logs, subscriber=subscriber
+    )
