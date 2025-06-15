@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Kết quả thanh toán{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- Google Fonts: Roboto -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<div class="max-w-xl mx-auto py-16 px-4 text-center">
+
+    <!-- Header -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-4">Kết quả thanh toán</h2>
+    {% if result.status == 'success' %}
+    <div class="text-green-600 text-5xl mb-2">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <p class="text-green-600 text-lg font-semibold mb-8">Thanh toán thành công!</p>
+    {% else %}
+    <div class="text-red-600 text-5xl mb-2">
+        <i class="fas fa-times-circle"></i>
+    </div>
+    <p class="text-red-600 text-lg font-semibold mb-8">Thanh toán thất bại!</p>
+    {% endif %}
+
+    <!-- Thông tin giao dịch -->
+    <div class="bg-white rounded-xl shadow-md p-6 text-left border border-gray-200">
+        <h3 class="text-lg font-semibold mb-4">Thông tin giao dịch</h3>
+        <div class="text-sm text-gray-700 space-y-2">
+            {% if result.details %}
+            <p><strong>Payment ID:</strong> {{ result.details['Payment ID'] }}</p>
+            <p><strong>Status:</strong>
+                <span class="px-2 py-1 rounded text-white text-xs font-medium
+            {% if result.details['Status'] == 'approved' %}
+              bg-green-500
+            {% else %}
+              bg-gray-400
+            {% endif %}
+          ">
+                    {{ result.details['Status'] }}
+                </span>
+            </p>
+            <p><strong>Amount:</strong> {{ result.details['Amount'] }}</p>
+            {% endif %}
+        </div>
+
+        {% if result.items %}
+        <hr class="my-4">
+        <h4 class="text-sm font-semibold mb-2">Các mặt hàng</h4>
+        <ul class="space-y-2 text-sm">
+            {% for item in result.items %}
+            <li class="flex justify-between items-center">
+                <div>
+                    <strong>{{ item.name }}</strong><br>
+                    <span class="text-gray-500">Số lượng: × {{ item.quantity }}</span>
+                </div>
+                <div class="text-right">
+                    {{ item.price }} {{ item.currency }}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Quay lại -->
+    <div class="mt-10">
+        <a href="{{ url_for('subscriber_bp.dashboard') }}"
+            class="inline-flex items-center bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition">
+            <i class="fas fa-arrow-left mr-2"></i> Quay về trang chủ
+        </a>
+    </div>
+</div>
+{% endblock %}
