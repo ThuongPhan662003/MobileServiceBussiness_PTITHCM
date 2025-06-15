@@ -62,44 +62,65 @@ def deposit():
     return render_template("payments/user/deposit.html", money=money)
 
 
+# 1. THỰC HIỆN THANH TOÁN THÀNH CÔNG TỪ PAYPAL
 @login_required
-@payment_api_bp.route("/execute", methods=["POST", "GET"])
-# @required
+@payment_api_bp.route("/execute", methods=["GET", "POST"])
 def deposit_paypal_execute():
-    money = request.form.get("money")
+    payment_id = request.args.get("paymentId")
+    payer_id = request.args.get("PayerID")
 
-    if not money:
+    if not payment_id or not payer_id:
         session["payment_result"] = {
             "status": "failure",
             "provider": "PayPal",
-            "message": "Thiếu thông tin xác thực thanh toán",
+            "message": "Thiếu thông tin xác thực thanh toán.",
         }
-        return redirect(url_for("payment_api_bp.payment_result"))
+        return redirect(url_for("payment_api_bp.deposit_result"))
 
-    payment = paypalrestsdk.Payment.find(session["subscriber_id"])
+    payment = paypalrestsdk.Payment.find(payment_id)
 
-    if payment.execute({"payer_id": session["subscriber_id"]}):
-        vnd_price = session.get("vnd_price", 0)
-        subscriber_data = SubscriberService.get_subscriber_by_id(
-            session["subscriber_id"]
-        )
+    if payment.execute({"payer_id": payer_id}):
+        amount = payment.transactions[0].amount.total
+        currency = payment.transactions[0].amount.currency
 
-        if subscriber_data:
-            subscriber_id = subscriber_data["subscriber_id"]
+        # Ghi log (hoặc xử lý logic hệ thống)
+        subscriber_data = SubscriberService.get_by_account_id(current_user.get_id())
 
-        return redirect(url_for("payment_api_bp.payment_result"))
+        session["payment_result"] = {
+            "status": "success",
+            "provider": "PayPal",
+            "details": {
+                "Payment ID": payment.id,
+                "Status": payment.state,
+                "Amount": f"{amount} {currency}",
+            },
+            "items": [
+                {
+                    "name": item.name,
+                    "price": item.price,
+                    "currency": item.currency,
+                    "quantity": item.quantity,
+                }
+                for item in payment.transactions[0].item_list.items
+            ],
+            "message": "Thanh toán thành công!",
+        }
 
+        # Ở đây bạn có thể gọi hàm recharge tiền cho thuê bao nếu cần
+        return redirect(url_for("payment_api_bp.deposit_result"))
+
+    # Nếu thất bại
     session["payment_result"] = {
         "status": "failure",
         "provider": "PayPal",
-        "message": payment.error.get("message", "Unknown error"),
+        "message": payment.error.get("message", "Đã có lỗi xảy ra."),
     }
     return redirect(url_for("payment_api_bp.deposit_result"))
 
 
+# 2. HIỂN THỊ KẾT QUẢ THANH TOÁN
 @login_required
 @payment_api_bp.route("/deposit-result")
-# @required
 def deposit_result():
     result = session.get("payment_result")
     if not result:
@@ -116,6 +137,7 @@ def deposit_result():
     )
 
 
+# 3. HỦY GIAO DỊCH
 @login_required
 @payment_api_bp.route("/cancel")
 def deposit_paypal_cancel():
@@ -124,7 +146,7 @@ def deposit_paypal_cancel():
         "provider": "PayPal",
         "message": "Giao dịch đã bị huỷ bởi người dùng.",
     }
-    return redirect(url_for("payment_api_bp.payment_result"))
+    return redirect(url_for("payment_api_bp.deposit_result"))
 
 
 @login_required
