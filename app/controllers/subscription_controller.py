@@ -112,3 +112,20 @@ def create_subscription1(subscriber_id, plan_id):
     if result.get("success"):
         return jsonify(result), 201
     return jsonify({"error": result.get("error")}), 400
+@login_required
+@subscription_bp.route("/main/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
+# @required
+def create_subscriptionmain(subscriber_id, plan_id):
+    result = SubscriptionService.create_subscriptionmain(subscriber_id, plan_id)
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify({"error": result.get("error")}), 400
+@login_required
+@subscription_bp.route("/main1/<int:subscriber_id>/<int:plan_id>", methods=["POST"])
+# @required
+def create_subscriptionmain1(subscriber_id, plan_id):
+    result = SubscriptionService.create_subscriptionmain1(subscriber_id, plan_id)
+    print("lỗi nhận được",result)
+    if result and result.get("success"):
+        return jsonify({"message": "Subscription created successfully"}), 201
+    return jsonify({"error": result.get("error") if result else "Lỗi không xác định"}), 400

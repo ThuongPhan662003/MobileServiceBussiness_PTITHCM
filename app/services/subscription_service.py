@@ -234,3 +234,104 @@ class SubscriptionService:
                 print("exeption",str(e))
                 return {"error": str(e)}
 
+    @staticmethod
+    def create_subscriptionmain(subscriber_id: int, plan_id: int):
+        try:
+            subscriber = SubscriberRepository.get_by_id(subscriber_id)
+
+            plans = PlanRepository.get_by_plan_id(plan_id)
+            print(f"Plans object: {plans.to_dict()}")  # In ra toàn bộ đối tượng plans
+            created_at = datetime.now()
+            plan = PlanDetailRepository.get_by_id(plan_id)
+
+            if not plan:
+                return {"error": "Không tìm thấy gói cước."}
+
+            active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
+
+            active_service_ids_flat = {service['service_id'] for sublist in active_service_ids_set for service in
+                                       sublist}
+
+            print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")  # In service_id của gói cước
+            print(f"Active Service IDs đã được xử lý: {active_service_ids_flat}")
+
+            # Kiểm tra gói cước muốn đăng ký
+            if plans.service_id.id == 2:
+                if 2 in active_service_ids_flat:
+                    return {"error": "Bạn đã đăng kí gói cước chính."}
+
+            elif plans.service_id.id in {3, 4, 5, 6}:
+                if any(service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat):
+                    return {
+                        "error": "Bạn đã đăng kí gói cước di động."
+                    }
+            activation_date = datetime.now()
+            if subscriber.subscriber_type == "TRATRUOC":
+                if plan.duration < 1:
+                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                else:
+                    today = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+                    expiration_date = today + timedelta(days=int(plan.duration))
+            else:
+                if plan.duration < 1:
+                    expiration_date = datetime.now() + timedelta(hours=plan.duration * 24)
+                elif 1 <= plan.duration <= 30:
+                    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                    expiration_date = today + timedelta(days=int(plan.duration))
+                else:
+                    now = datetime.now()
+                    months_to_add = int(plan.duration // 30)
+                    new_month = now.month + months_to_add
+                    new_year = now.year + (new_month - 1) // 12
+                    new_month = (new_month - 1) % 12 + 1
+                    expiration_date = datetime(new_year, new_month, 1, 0, 0, 0)
+
+            subscription = Subscription(
+                plan_id=plan_id,
+                subscriber_id=subscriber_id,
+                created_at=created_at,
+                expiration_date=expiration_date,
+                renewal_total=0,
+                is_renewal=True,
+                cancel_at=None,
+                activation_date=activation_date,
+            )
+
+            result = SubscriptionRepository.insert(subscription)
+
+            if isinstance(result, dict) and result.get("subscription_id"):
+                return {"success": True, "created": True, "subscription_id": result["subscription_id"]}
+            else:
+                return {"error": "Lỗi khi tạo subscription."}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def create_subscriptionmain1(subscriber_id: int, plan_id: int):
+        subscriber = SubscriberRepository.get_by_id(subscriber_id)
+        plans = PlanRepository.get_by_plan_id(plan_id)
+        print(f"Plans object: {plans.to_dict()}")
+        created_at = datetime.now()
+        plan = PlanDetailRepository.get_by_id(plan_id)
+
+        if not plan:
+            return {"error": "Không tìm thấy gói cước."}
+
+        active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
+        active_service_ids_flat = {service['service_id'] for sublist in active_service_ids_set for service in sublist}
+
+        print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")
+        print(f"Active Service IDs đã được xử lý: {active_service_ids_flat}")
+
+        if plans.service_id.id == 2:
+            if 2 in active_service_ids_flat:
+                return {"error": "Bạn đã đăng kí gói cước chính."}
+
+        # Nếu không bị lỗi, tiến hành đăng ký
+        try:
+            return {"success": True, "message": "Đăng ký gói cước thành công."}
+        except Exception as e:
+            return {"error1": f"Lỗi khi đăng ký: {str(e)}"}
+
+
