@@ -19,42 +19,60 @@ class SubscriptionService:
         return SubscriptionRepository.get_by_id(subscription_id)
 
     @staticmethod
-    def create_subscription(subscriber_id: int, plan_id: int):
+    def create_subscription(subscriber_id: int, plan_id: int, confirm_override=False):
         try:
             subscriber = SubscriberRepository.get_by_id(subscriber_id)
 
             plans = PlanRepository.get_by_id(plan_id)
             created_at = datetime.now()
             plan = PlanDetailRepository.get_by_id(plan_id)
-
             if not plan:
                 return {"error": "Không tìm thấy gói cước."}
 
-            active_service_ids_set = SubscriberRepository.get_active_service_ids(
-                subscriber_id
-            )
-
+            active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
             active_service_ids_flat = {
                 service["service_id"]
                 for sublist in active_service_ids_set
                 for service in sublist
             }
+            active_service_ids_flat1 = {
+                service["id"]
+                for sublist in active_service_ids_set
+                for service in sublist
+            }
 
-            print(
-                f"Plans Service ID muốn đăng ký: {plans.service_id.id}"
-            )  # In service_id của gói cước
-            print(f"Active Service IDs đã được xử lý: {active_service_ids_flat}")
+            print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")
+            print(f"Active Service IDs đã được xử lý: {active_service_ids_flat1}")
 
-            # Kiểm tra gói cước muốn đăng ký
             if plans.service_id.id == 2:
                 if 2 in active_service_ids_flat:
-                    return {"error": "Bạn đã đăng kí gói cước chính."}
+                    print("2222")
+                    return { "success":True,
+                            "confirm": False,
+                        "message": "Bạn đã đăng kí gói cước chính."}
 
+            # Trường hợp gói cước di động (cần xác nhận ghi đè)
             elif plans.service_id.id in {3, 4, 5, 6}:
-                if any(
-                    service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat
-                ):
-                    return {"error": "Bạn đã đăng kí gói cước di động."}
+                if any(service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat):
+                    if not confirm_override:
+
+                        return {
+                            "success":True,
+                            "confirm": True,
+                            "message": "Bạn đang đăng ký gói cước di động. Bạn có muốn đăng ký đè lên không?"
+                        }
+                    else:
+                        # Hủy tất cả các subscription có service_id 3,4,5,6
+                        ids_to_delete = [
+                            service["id"]
+                            for sublist in active_service_ids_set
+                            for service in sublist
+                            if service["service_id"] in {3, 4, 5, 6}
+                        ]
+
+                        for subscription_id in ids_to_delete:
+                            SubscriptionRepository.delete(subscription_id)
+
             activation_date = datetime.now()
             if subscriber.subscriber_type == "TRATRUOC":
                 if plan.duration < 1:
@@ -107,6 +125,7 @@ class SubscriptionService:
                 return {"error": "Lỗi khi tạo subscription."}
 
         except Exception as e:
+            print("exeption",str(e))
             return {"error": str(e)}
 
     @staticmethod
@@ -157,3 +176,61 @@ class SubscriptionService:
         except Exception as e:
             print(f"Lỗi khi lấy thông tin gói cước: {e}")
             return None
+    @staticmethod
+    def create_subscription1(subscriber_id: int, plan_id: int, confirm_override=False):
+            try:
+                subscriber = SubscriberRepository.get_by_id(subscriber_id)
+                plans = PlanRepository.get_by_id(plan_id)
+                created_at = datetime.now()
+                plan = PlanDetailRepository.get_by_id(plan_id)
+                if not plan:
+                    return {"error": "Không tìm thấy gói cước."}
+                active_service_ids_set = SubscriberRepository.get_active_service_ids(subscriber_id)
+                active_service_ids_flat = {
+                    service["service_id"]
+                    for sublist in active_service_ids_set
+                    for service in sublist
+                }
+                active_service_ids_flat1 = {
+                    service["id"]
+                    for sublist in active_service_ids_set
+                    for service in sublist
+                }
+
+                print(f"Plans Service ID muốn đăng ký: {plans.service_id.id}")
+                print(f"Active Service IDs đã được xử lý: {active_service_ids_flat1}")
+
+                if plans.service_id.id == 2:
+                    if 2 in active_service_ids_flat:
+                        print("2222")
+                        return { "success":True,
+                                "confirm": False,
+                            "message": "Bạn đã đăng kí gói cước chính."}
+
+                # Trường hợp gói cước di động (cần xác nhận ghi đè)
+                elif plans.service_id.id in {3, 4, 5, 6}:
+                    if any(service_id in {3, 4, 5, 6} for service_id in active_service_ids_flat):
+                        if not confirm_override:
+
+                            return {
+                                "success":True,
+                                "confirm": True,
+                                "message": "Bạn đang đăng ký gói cước di động. Bạn có muốn đăng ký đè lên không?"
+                            }
+                        else:
+                            # Hủy tất cả các subscription có service_id 3,4,5,6
+                            ids_to_delete = [
+                                service["id"]
+                                for sublist in active_service_ids_set
+                                for service in sublist
+                                if service["service_id"] in {3, 4, 5, 6}
+                            ]
+
+                            for subscription_id in ids_to_delete:
+                                SubscriptionRepository.delete(subscription_id)
+
+
+            except Exception as e:
+                print("exeption",str(e))
+                return {"error": str(e)}
+

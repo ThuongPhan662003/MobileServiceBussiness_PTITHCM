@@ -89,3 +89,4 @@ def activity_log(subscriber_id):
     return render_template(
         "subscribers/activity_log.html", logs=logs, subscriber=subscriber
     )
+

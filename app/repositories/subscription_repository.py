@@ -59,7 +59,7 @@ class SubscriptionRepository:
                     data.activation_date,
                 ),
                 fetchone=True,
-                commit=True,
+                commit=True
             )
             if not isinstance(result, dict):
                 print(f"Kết quả trả về không phải dictionary: {result}")

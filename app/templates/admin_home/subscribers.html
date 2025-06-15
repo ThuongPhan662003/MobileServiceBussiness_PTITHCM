@@ -114,10 +114,22 @@
         border-radius: 5px;
         border: 1px solid #ccc;
     }
+
+    #notification {
+        display: none;
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+    }
 </style>
 
 <div class="container">
     <h1 class="text-3xl font-bold mb-6 flex items-center">Quản lý Thuê Bao</h1>
+
+    <div id="notification"></div>
+
     <button class="btn btn-add" onclick="openAddSubscriberModal()">Thêm Thuê Bao</button>
 
     <table>
@@ -169,7 +181,6 @@
     </table>
 </div>
 
-<!-- Modal thêm/sửa thuê bao -->
 <div id="subscriberModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -191,11 +202,12 @@
             <label>Customer ID:</label>
             <input type="number" id="customerId" name="customer_id" required min="1">
 
-            <label>Loại Thuê Bao:</label>
-            <select id="subscriberType" name="subscriber_type" required>
-                <option value="Trả trước">Trả trước</option>
-                <option value="Trả sau">Trả sau</option>
-            </select>
+           <label>Loại Thuê Bao:</label>
+<select id="subscriberType" name="subscriber" required>
+    <option value="TRATRUOC">Trả trước</option>
+    <option value="TRASAU">Trả sau</option>
+</select>
+
 
             <label>Call Cost:</label>
             <input type="number" id="callCost" name="call_cost" required min="0">
@@ -226,6 +238,19 @@
 </div>
 
 <script>
+    function showNotification(message, isSuccess = true) {
+        const notification = document.getElementById('notification');
+        notification.style.display = 'block';
+        notification.style.backgroundColor = isSuccess ? '#d4edda' : '#f8d7da';
+        notification.style.color = isSuccess ? '#155724' : '#721c24';
+        notification.style.border = isSuccess ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+        notification.innerText = message;
+
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
     function toggleEditFields(show) {
         document.querySelectorAll('.edit-only').forEach(el => el.style.display = show ? 'block' : 'none');
     }
@@ -280,57 +305,66 @@
                 .then(async (response) => {
                     if (!response.ok) {
                         const result = await response.json();
-                        alert(result.error || 'Đã có lỗi xảy ra.');
+                        showNotification(result.error || 'Đã có lỗi xảy ra.', false);
                     } else {
-                        location.reload();
+                        showNotification('Khóa thuê bao thành công.');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
                     }
                 })
                 .catch(error => {
-                    alert('Lỗi kết nối máy chủ.');
+                    showNotification('Lỗi kết nối máy chủ.', false);
                     console.error('Lỗi:', error);
                 });
         }
     }
 
     document.getElementById('subscriberForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    const id = this.getAttribute('data-id');
-    const isNew = !id;
-    const method = isNew ? 'POST' : 'PUT';
-    const url = isNew ? '/subscribers' : `/subscribers/${id}`;
 
-    const formData = {
-        phone_number: document.getElementById('phoneNumber').value,
-        main_balance: parseFloat(document.getElementById('mainBalance').value),
-        expiration_date: document.getElementById('expirationDate').value,
-        customer_id: parseInt(document.getElementById('customerId').value),
-        subscriber_type: document.getElementById('subscriberType').value,
-        call_cost: parseFloat(document.getElementById('callCost').value),
-        sms_cost: parseFloat(document.getElementById('smsCost').value),
-        activation_date: document.getElementById('activationDate').value || null,
-        is_active: document.getElementById('isActive').value === 'true',
-        warning_date: document.getElementById('warningDate').value || null,
-        account_id: document.getElementById('accountId').value || null
-    };
+        e.preventDefault();
+        const id = this.getAttribute('data-id');
+        const isNew = !id;
+        const method = isNew ? 'POST' : 'PUT';
+        const url = isNew ? '/subscribers' : `/subscribers/${id}`;
 
-    fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-    })
-        .then(async (response) => {
-            const result = await response.json();
-            if (!response.ok || !result.success) {
-                document.getElementById('formError').innerText = result.error || result.message || 'Đã có lỗi xảy ra.';
-            } else {
-                closeSubscriberModal();
-                if (isNew) {
-                    // Nếu thêm mới thành công thì thông báo và chuyển trang
-                    alert(result.message);
-                    window.location.href = `/contracts/add/${result.subscriber_id}`;
+        const formData = {
+            phone_number: document.getElementById('phoneNumber').value,
+            main_balance: parseFloat(document.getElementById('mainBalance').value),
+            expiration_date: document.getElementById('expirationDate').value,
+            customer_id: parseInt(document.getElementById('customerId').value),
+            subscriber: document.getElementById('subscriberType').value,
+            call_cost: parseFloat(document.getElementById('callCost').value),
+            sms_cost: parseFloat(document.getElementById('smsCost').value),
+            activation_date: document.getElementById('activationDate').value || null,
+            is_active: document.getElementById('isActive').value === 'true',
+            warning_date: document.getElementById('warningDate').value || null,
+            account_id: document.getElementById('accountId').value || null
+        };
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+            .then(async (response) => {
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    document.getElementById('formError').innerText = result.error || result.message || 'Đã có lỗi xảy ra.';
                 } else {
-                    // Nếu chỉnh sửa thì chỉ cần reload
-                    location.reload();
+                    closeSubscriberModal();
+                    if (isNew) {
+                        showNotification(result.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showNotification('Chỉnh sửa thuê bao thành công.');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+
                 }
             }
         })

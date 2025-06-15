@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cd81daad-da3e-41af-a2ca-808c9b42fa3f" name="Changes" comment="3" />
+
+    <list default="true" id="cd81daad-da3e-41af-a2ca-808c9b42fa3f" name="Changes" comment="3">
+      <change afterPath="$PROJECT_DIR$/.idea/MobileServiceBussiness_PTITHCM.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/subscription_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/subscription_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/repositories/subscription_repository.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/repositories/subscription_repository.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/subscriber_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/subscriber_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/subscription_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/subscription_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/Plan_customer/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/Plan_customer/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/admin_home/subscribers.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/admin_home/subscribers.html" afterDir="false" />
+    </list>
+
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,7 +28,9 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+
+        <entry key="$PROJECT_DIR$" value="dong126" />
+
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -36,7 +53,8 @@
     "Python.subscriber_service.executor": "Run",
     "Python.subscription_service.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Rebasing dong126",
+    "git-widget-placeholder": "dong156",
+
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
