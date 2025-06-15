@@ -23,3 +23,16 @@ def check_session_expired():
         session.clear()
         flash("Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.", "warning")
         return redirect(url_for("auth.login"))
+# @exceptions.before_request
+# def check_session_expired():
+#     # Nếu user đã login
+#     if current_user.get_id():
+#         # Nếu không có flag _permanent hoặc bị reset, thì coi như phiên đã hết
+#         if not session.get("_permanent"):
+#             logout_user()
+#             session.clear()
+#             flash("Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.", "warning")
+#             return redirect(url_for("auth.login"))
+#         # Reset lại session mỗi lần request nếu cần:
+#         session.permanent = True
+#         app.permanent_session_lifetime = timedelta(minutes=1) 
