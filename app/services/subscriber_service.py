@@ -129,46 +129,99 @@ class SubscriberService:
     @staticmethod
     def update_subscriber(subscriber_id, data: dict):
         try:
+            # Kiểm tra số điện thoại
             phone_number = data.get("phone_number")
-            if not phone_number or not phone_number.isdigit():
+            if not phone_number:
+                return {"error": "Số điện thoại không được để trống"}
+            if not phone_number.isdigit() or not (10 <= len(phone_number) <= 11):
                 return {"error": "Số điện thoại không hợp lệ"}
-            main_balance = Decimal(data.get("main_balance", 0))
-            customer_id = int(data.get("customer_id"))
-            account_id = int(data.get("account_id"))
 
+            # Kiểm tra số dư chính
+            try:
+                main_balance = Decimal(data.get("main_balance", 0))
+                if main_balance < 0:
+                    return {"error": "Số dư chính không được nhỏ hơn 0"}
+            except:
+                return {"error": "Số dư chính không hợp lệ"}
+
+            # Kiểm tra customer_id
+            try:
+                customer_id = int(data.get("customer_id"))
+                if customer_id <= 0:
+                    return {"error": "Customer ID phải lớn hơn 0"}
+            except:
+                return {"error": "Customer ID không hợp lệ"}
+
+            # Kiểm tra account_id
+            try:
+                account_id = int(data.get("account_id"))
+                if account_id <= 0:
+                    return {"error": "Account ID phải lớn hơn 0"}
+            except:
+                return {"error": "Account ID không hợp lệ"}
+
+            # Kiểm tra expiration_date (chỉ kiểm tra định dạng, không kiểm tra ngày lớn hơn hiện tại)
             expiration_date_str = data.get("expiration_date")
-            expiration_date = (
-                datetime.strptime(expiration_date_str, "%Y-%m-%d").date()
-                if expiration_date_str
-                else None
-            )
+            expiration_date = None
+            if expiration_date_str:
+                try:
+                    expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d").date()
+                except:
+                    return {"error": "Định dạng ngày hết hạn không hợp lệ"}
 
+            # Kiểm tra warning_date
             warning_date_str = data.get("warning_date")
-            warning_date = (
-                datetime.strptime(warning_date_str, "%Y-%m-%d")
-                if warning_date_str
-                else None
-            )
+            warning_date = None
+            if warning_date_str:
+                try:
+                    warning_date = datetime.strptime(warning_date_str, "%Y-%m-%d")
+                except:
+                    return {"error": "Định dạng ngày cảnh báo không hợp lệ"}
 
+            # Kiểm tra trạng thái hoạt động
             is_active = str(data.get("is_active", "true")).lower() == "true"
 
-            subscriber_type = data.get("subscriber", "TRATRUOC").strip()
+            # Kiểm tra loại thuê bao
+            subscriber_type_str = str(data.get("subscriber", "TRATRUOC")).strip()
+            if subscriber_type_str not in ["TRATRUOC", "TRASAU"]:
+                return {"error": "Loại thuê bao không hợp lệ"}
+
+            # Kiểm tra chi phí cuộc gọi
+            try:
+                call_cost = float(data.get("ON_a_call_cost", 0))
+                if call_cost < 0:
+                    return {"error": "Chi phí cuộc gọi không được nhỏ hơn 0"}
+            except:
+                return {"error": "Chi phí cuộc gọi không hợp lệ"}
+
+            # Kiểm tra chi phí SMS
+            try:
+                sms_cost = float(data.get("ON_SMS_cost", 0))
+                if sms_cost < 0:
+                    return {"error": "Chi phí SMS không được nhỏ hơn 0"}
+            except:
+                return {"error": "Chi phí SMS không hợp lệ"}
 
             # Tạo đối tượng subscriber để update
             subscriber = Subscriber(
                 phone_number=phone_number,
                 main_balance=main_balance,
-                activation_date=None,  # Không thay đổi
+                activation_date=None,  # Không được cập nhật
                 expiration_date=expiration_date,
                 is_active=is_active,
                 customer_id=customer_id,
-                subscriber=subscriber_type,
+                subscriber=subscriber_type_str,
                 warning_date=warning_date,
                 account_id=account_id,
+                ON_a_call_cost=call_cost,
+                ON_SMS_cost=sms_cost,
             )
 
             result = SubscriberRepository.update(subscriber_id, subscriber)
-            return {"success": True} if result is True else {"error": result}
+            if result is True:
+                return {"success": True}
+            else:
+                return {"error": result}
 
         except Exception as e:
             return {"error": str(e)}

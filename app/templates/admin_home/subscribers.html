@@ -124,7 +124,6 @@
         font-weight: bold;
     }
 </style>
-
 <div class="container">
     <h1 class="text-3xl font-bold mb-6 flex items-center">Quản lý Thuê Bao</h1>
 
@@ -208,7 +207,6 @@
                 <option value="TRASAU">Trả sau</option>
             </select>
 
-
             <label>Call Cost:</label>
             <input type="number" id="callCost" name="call_cost" required min="0">
 
@@ -248,7 +246,7 @@
 
         setTimeout(() => {
             notification.style.display = 'none';
-        }, 3000);
+        }, 3000); // Notification visible for 3 seconds
     }
 
     function toggleEditFields(show) {
@@ -268,7 +266,7 @@
         document.getElementById('isActive').value = 'true';
         document.getElementById('warningDate').value = '';
         document.getElementById('accountId').value = '';
-        document.getElementById('subscriberType').value = 'Trả trước';
+        document.getElementById('subscriberType').value = 'TRATRUOC';
     }
 
     function closeSubscriberModal() {
@@ -296,6 +294,10 @@
                 document.getElementById('warningDate').value = data.warning_date || '';
                 document.getElementById('isActive').value = data.is_active ? 'true' : 'false';
                 document.getElementById('accountId').value = data.account_id;
+            })
+            .catch(error => {
+                showNotification('Lỗi khi tải thông tin thuê bao.', false);
+                console.error('Lỗi:', error);
             });
     }
 
@@ -310,7 +312,7 @@
                         showNotification('Khóa thuê bao thành công.');
                         setTimeout(() => {
                             location.reload();
-                        }, 1000);
+                        }, 3000); // Match notification duration
                     }
                 })
                 .catch(error => {
@@ -321,7 +323,6 @@
     }
 
     document.getElementById('subscriberForm').addEventListener('submit', function (e) {
-
         e.preventDefault();
         const id = this.getAttribute('data-id');
         const isNew = !id;
@@ -353,24 +354,20 @@
                     document.getElementById('formError').innerText = result.error || result.message || 'Đã có lỗi xảy ra.';
                 } else {
                     closeSubscriberModal();
-                    if (isNew) {
-                        showNotification(result.message);
-                    } else {
-                        showNotification('Chỉnh sửa thuê bao thành công.');
-                    }
+                    showNotification(
+                        isNew ? 'Thêm thuê bao thành công.' : 'Cập nhật thuê bao thành công.'
+                    );
                     setTimeout(() => {
                         location.reload();
-                    }, 1000);
+                    }, 3000); // Increased delay to 3 seconds to match notification
                 }
             })
             .catch(error => {
                 document.getElementById('formError').innerText = 'Lỗi kết nối máy chủ.';
+                showNotification('Lỗi kết nối máy chủ.', false);
                 console.error('Lỗi:', error);
             });
-
-
     });
-
 </script>
 
 {% endblock %}
