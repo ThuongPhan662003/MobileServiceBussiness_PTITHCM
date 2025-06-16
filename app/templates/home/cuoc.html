@@ -103,7 +103,7 @@
   {% for sub in subscriptions if sub.service_id != 2 %}
   <div class="bg-white p-8 rounded-xl shadow-lg mb-6 flex items-center space-x-6 hover-scale">
     <div class="gradient-bg text-white px-6 py-3 rounded-lg">
-      <p class="text-lg font-bold">{{ sub.plan_code }}</p>
+      <p class="text-lg font-bold">{{ sub.code }}</p>
     </div>
     <div class="flex-1">
       <p class="text-gray-600">
@@ -137,7 +137,7 @@
   {% for sub in subscriptions if sub.service_id == 2 %}
   <div class="bg-white p-8 rounded-xl shadow-lg mb-6 flex items-center space-x-6 hover-scale">
     <div class="gradient-bg text-white px-6 py-3 rounded-lg">
-      <p class="text-lg font-bold">{{ sub.plan_code }}</p>
+      <p class="text-lg font-bold">{{ sub.code }}</p>
     </div>
     <div class="flex-1">
       <p class="text-gray-600">

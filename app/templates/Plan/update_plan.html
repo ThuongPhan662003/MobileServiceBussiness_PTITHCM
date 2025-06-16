@@ -120,11 +120,11 @@
         </div>
         <div class="form-group">
             <label for="service_id" class="required">ID Dịch vụ</label>
-            <input type="number" id="service_id" name="service_id" value="{{ plan['service_id'] if plan['service_id'] else '' }}" min="1" required>
+            <input type="number" id="service_id" name="service_id" value="{{ plan['service_id'].id if plan['service_id'] else '' }}" min="1" required>
         </div>
         <div class="form-group">
             <label for="staff_id">ID Nhân viên</label>
-            <input type="number" id="staff_id" name="staff_id" value="{{ plan['staff_id'] if plan['staff_id'] else '' }}" min="1">
+            <input type="number" id="staff_id" name="staff_id" value="{{ plan['staff_id'].id if plan['staff_id'] else '' }}" min="1">
         </div>
         <button type="submit" class="btn btn-submit">Cập nhật</button>
         <a href="{{ url_for('plan.get_all_plans') }}" class="btn btn-cancel">Hủy</a>

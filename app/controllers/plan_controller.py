@@ -190,14 +190,14 @@ def create_plan():
 @plan_bp.route("/update/<int:plan_id>", methods=["GET", "POST"])
 @required
 def update_plan(plan_id):
-    plan = PlanService.get_plan_by_id(plan_id)
+    plan = PlanService.get_plan_by_id1(plan_id)
     if not plan:
         flash("Gói cước không tồn tại!", "error")
         return redirect(url_for("plan.get_all_plans")), 404
 
     if request.method == "GET":
         return render_template(
-            "Plan/update_plan.html", plan=plan.to_dict(), plan_id=plan_id
+            "Plan/update_plan.html", plan=plan, plan_id=plan_id
         )
 
     if request.method == "POST":

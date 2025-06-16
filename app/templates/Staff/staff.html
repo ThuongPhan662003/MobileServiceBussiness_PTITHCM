@@ -679,54 +679,55 @@
     }
     // Gửi form cập nhật nhân viên
     async function submitUpdateForm(event) {
-        event.preventDefault(); // Ngừng hành động mặc định (không chuyển trang)
-        const form = document.getElementById("staffUpdateForm");
-        const formData = new FormData(form);
+    event.preventDefault(); // Ngăn chặn submit mặc định
+    const form = document.getElementById("staffUpdateForm");
+    form.setAttribute("action", `/staffs/update/${currentEditingStaffId}`); // Gán action đúng
 
-        // Xóa các thông báo lỗi cũ
-        document.querySelectorAll('.error-message').forEach(el => el.innerText = "");
+    const formData = new FormData(form);
 
+    // Xóa các thông báo lỗi cũ
+    document.querySelectorAll('.error-message').forEach(el => el.innerText = "");
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        let data;
         try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData
-            });
-
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                throw new Error("Phản hồi không hợp lệ từ server.");
-            }
-
-            if (response.ok) {
-                if (data.message) {
-                    alert('Cập nhật nhân viên thành công!');
-                    closeUpdateModal();
-                    location.reload(); // Làm mới trang để cập nhật danh sách
-                }
-            } else {
-                if (data.error) {
-                    if (data.error.includes("Số điện thoại")) {
-                        const el = document.getElementById("update_phone-error");
-                        if (el) el.innerText = data.error;
-                    } else if (data.error.includes("Email")) {
-                        const el = document.getElementById("update_email-error");
-                        if (el) el.innerText = data.error;
-                    } else if (data.error.includes("Ngày sinh")) {
-                        const el = document.getElementById("update_birthday-error");
-                        if (el) el.innerText = data.error;
-                    } else {
-                        alert(data.error); // fallback lỗi chung
-                    }
-                }
-            }
-        } catch (error) {
-            // ✅ In ra đúng lỗi thật sự
-            alert(error.message || "Đã xảy ra lỗi không xác định.");
-            console.error("Lỗi khi fetch:", error);
+            data = await response.json();
+        } catch (e) {
+            throw new Error("Phản hồi không hợp lệ từ server.");
         }
+
+        if (response.ok) {
+            if (data.message) {
+                alert('Cập nhật nhân viên thành công!');
+                closeUpdateModal();
+                location.reload(); // Làm mới trang
+            }
+        } else {
+            if (data.error) {
+                if (data.error.includes("Số điện thoại")) {
+                    const el = document.getElementById("update_phone-error");
+                    if (el) el.innerText = data.error;
+                } else if (data.error.includes("Email")) {
+                    const el = document.getElementById("update_email-error");
+                    if (el) el.innerText = data.error;
+                } else if (data.error.includes("Ngày sinh")) {
+                    const el = document.getElementById("update_birthday-error");
+                    if (el) el.innerText = data.error;
+                } else {
+                    alert(data.error); // fallback lỗi chung
+                }
+            }
+        }
+    } catch (error) {
+        alert(error.message || "Đã xảy ra lỗi không xác định.");
+        console.error("Lỗi khi fetch:", error);
     }
+}
 </script>
 
 

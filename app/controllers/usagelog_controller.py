@@ -9,7 +9,7 @@ usagelog_bp = Blueprint("usagelog", __name__, url_prefix="/usagelogs")
 
 @login_required
 @usagelog_bp.route("/", methods=["GET"])
-@required
+# @required
 def get_all_usagelogs():
     try:
         tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
@@ -37,7 +37,7 @@ def get_all_usagelogs():
 
 @login_required
 @usagelog_bp.route("/<int:log_id>", methods=["GET"])
-@required
+# @required
 def get_usagelog_by_id(log_id):
     try:
         usagelog = UsageLogService.get_usagelog_by_id(log_id)
@@ -51,7 +51,7 @@ def get_usagelog_by_id(log_id):
 
 @usagelog_bp.route("/", methods=["POST"])
 @login_required
-@required
+# @required
 def create_usagelog():
     try:
         data = request.get_json()
@@ -100,7 +100,7 @@ def create_usagelog():
 
 @login_required
 @usagelog_bp.route("/history", methods=["GET"])
-@required
+# @required
 def usage_log_history():
     try:
         tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
@@ -128,7 +128,7 @@ def usage_log_history():
 
 @login_required
 @usagelog_bp.route("/search/<string:log_type>", methods=["POST"])
-@required
+# @required
 def search_usagelogs(log_type):
     try:
         data = request.form
@@ -174,7 +174,7 @@ def search_usagelogs(log_type):
 
 @login_required
 @usagelog_bp.route("/add/<string:log_type>", methods=["POST"])
-@required
+# @required
 def add_usagelog(log_type):
     try:
         data = request.form
@@ -208,7 +208,7 @@ def add_usagelog(log_type):
 
 @login_required
 @usagelog_bp.route("/reset/<string:log_type>", methods=["GET"])
-@required
+# @required
 def reset_usagelogs(log_type):
     try:
         tinnhan_logs = UsageLogService.get_logs_by_type("TINNHAN")
@@ -232,3 +232,22 @@ def reset_usagelogs(log_type):
             ),
             500,
         )
+@login_required
+@usagelog_bp.get("/promotions/<int:subscriber_id>")
+# @required
+def get_latest_promotions(subscriber_id: int):
+    result = UsageLogService.get_latest_promotions(subscriber_id)
+    if result["status_code"] == 200:
+        return {"status_code": 200, "data": result["data"]}
+    else:
+        return {"status_code": 500, "error": result["error"]}
+
+
+@usagelog_bp.get("/check-phone/<phone_number>")
+@login_required
+def check_phone_in_subscribers(phone_number: str):
+    result = UsageLogService.check_phone_belongs_to_subscriber(phone_number)
+    if result["status_code"] == 200:
+        return jsonify(result)
+    else:
+        return jsonify({"status_code": 500, "error": result["error"]})

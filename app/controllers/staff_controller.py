@@ -20,7 +20,7 @@ staff_bp = Blueprint("staff", __name__, url_prefix="/staffs")
 
 @login_required
 @staff_bp.route("/", methods=["GET"])
-@required
+# @required
 def get_all_staffs():
     # Kiểm tra xem có tham số tìm kiếm không
     if any(
@@ -49,7 +49,7 @@ def get_staff_by_id(staff_id):
 
 @login_required
 @staff_bp.route("/create", methods=["POST"])
-@required
+# @required
 def create_staff():
     data = request.form.to_dict()
     result = StaffService.create_staff(data)
@@ -61,7 +61,7 @@ def create_staff():
 
 @login_required
 @staff_bp.route("/update/<int:staff_id>", methods=["POST"])
-@required
+# @required
 def update_staff(staff_id):
     data = request.form.to_dict()
     result = StaffService.update_staff(staff_id, data)
@@ -73,7 +73,7 @@ def update_staff(staff_id):
 
 @login_required
 @staff_bp.route("/lock/<int:staff_id>", methods=["POST"])
-@required
+# @required
 def lock_staff(staff_id):
     result = StaffService.delete_staff(staff_id)
     if result.get("success"):
@@ -83,7 +83,7 @@ def lock_staff(staff_id):
 
 @login_required
 @staff_bp.route("/detail/<int:staff_id>", methods=["GET"])
-@required
+# @required
 def staff_detail(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     print("dữ liệu", staff)
@@ -94,7 +94,6 @@ def staff_detail(staff_id):
 
 @login_required
 @staff_bp.route("/edit/<int:staff_id>", methods=["GET", "POST"])
-@required
 def edit_staff(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     print("meo")
@@ -145,9 +144,9 @@ def edit_staff(staff_id):
 
 @login_required
 @staff_bp.route(
-    "/accounts/edit/<int:staff_id>",
+    "/accounts/edit/<int:staff_id>",methods=["POST"]
 )
-@required
+# @required
 def edit_account_of_staff(staff_id):
     staff = StaffService.get_staff_by_id(staff_id)
     account = AccountService.get_account_by_id(staff["account_id"]["id"])

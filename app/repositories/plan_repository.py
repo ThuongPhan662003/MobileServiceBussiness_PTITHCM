@@ -40,6 +40,7 @@ class PlanRepository:
             result = db_instance.execute(
                 "CALL GetPlanById(%s)", (plan_id,), fetchone=True
             )
+            print("haas",result)
             if result:
                 plan = Plan()
                 # for key in result:
@@ -430,3 +431,72 @@ class PlanRepository:
             print("lỗi in ra gói cước", str(e))
             # logging.error(f"Lỗi khi lấy danh sách plan: {e}")
             return []
+
+
+    @staticmethod
+    def get_by_id1(plan_id):
+        try:
+            result = db_instance.execute(
+                "CALL GetPlanById(%s)", (plan_id,), fetchone=True
+            )
+            print("haas",result)
+            if result:
+                plan = Plan()
+                # for key in result:
+                #     if key in ("is_active", "auto_renew"):
+                #         value = result[key]
+                #         setattr(
+                #             plan, key, bool(int(value)) if value is not None else False
+                #         )
+                #     elif key in ("ON_SMS_cost", "ON_a_call_cost", "price"):
+                #         value = result[key]
+                #         setattr(plan, key, float(value) if value is not None else None)
+                #     elif key in ("service_id"):
+                #         value = ServiceRepository.get_by_id(result[key])
+                #         setattr(plan, key, value if value else None)
+                #     elif key in ("staff_id"):
+                #         value = StaffRepository.get_by_id(result[key])
+                #         setattr(plan, key, value if value else None)
+                #     else:
+                #         setattr(plan, key, result[key])
+                plan.id = result.get("id")
+                print("plan_id", plan.id)
+                plan.code = result.get("code")
+                plan.price = result.get("price")
+                plan.description = result.get("description")
+                service_id = result.get("service_id")
+                if service_id:
+                    service = ServiceRepository.get_by_id(service_id)
+                    plan.service_id = service if service else None
+                else:
+                    plan.service_id = None
+                plan.is_active = True if result.get("is_active") else False
+                plan.renewal_syntax = result.get("renewal_syntax")
+                plan.registration_syntax = result.get("registration_syntax")
+                plan.cancel_syntax = result.get("cancel_syntax")
+                plan.free_data = result.get("free_data")
+                plan.free_on_network_a_call = result.get("free_on_network_a_call")
+                plan.free_on_network_call = result.get("free_on_network_call")
+                plan.free_on_network_SMS = result.get("free_on_network_SMS")
+                plan.free_off_network_a_call = result.get("free_off_network_a_call")
+                plan.free_off_network_call = result.get("free_off_network_call")
+                plan.free_off_network_SMS = result.get("free_off_network_SMS")
+                plan.auto_renew = True if result.get("auto_renew") else False
+
+                staff_id = result.get("staff_id")
+                if staff_id:
+                    staff = StaffRepository.get_object_by_id(staff_id)
+                    plan.staff_id = staff if staff else None
+                else:
+                    plan.staff_id = None
+                plan.created_at = result.get("created_at")
+                plan.updated_at = result.get("updated_at")
+                plan.maximum_on_network_call = result.get("maximum_on_network_call")
+                plan.ON_SMS_cost = result.get("ON_SMS_cost")
+                plan.ON_a_call_cost = result.get("ON_a_call_cost")
+                return plan.to_dict_plan(duration = result.get("duration"),object_type=result.get("object_type"))
+            return None
+        except Exception as e:
+            print("lỗi chi tiết")
+            # logging.error(f"Lỗi khi lấy plan theo ID: {e}")
+            return None

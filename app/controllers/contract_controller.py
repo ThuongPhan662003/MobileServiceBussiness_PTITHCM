@@ -10,7 +10,7 @@ contract_bp = Blueprint("contract", __name__, url_prefix="/contracts")
 
 @login_required
 @contract_bp.route("/", methods=["GET"])
-@required
+# @required
 def index_contracts():
     print("hi")
     return render_template("contracts/contracts.html")
@@ -18,7 +18,7 @@ def index_contracts():
 
 @login_required
 @contract_bp.route("/get-subscribers", methods=["GET"])
-@required
+# @required
 def get_all_subscribers():
     subscribers = SubscriberService.get_all_subscribers()
     return jsonify(subscribers), 200
@@ -26,7 +26,7 @@ def get_all_subscribers():
 
 @login_required
 @contract_bp.route("/get-all", methods=["GET"])
-@required
+# @required
 def get_all_contracts():
     contracts = ContractService.get_all_contracts()
     return jsonify(contracts), 200
@@ -34,7 +34,7 @@ def get_all_contracts():
 
 @login_required
 @contract_bp.route("/<int:contract_id>", methods=["GET"])
-@required
+# @required
 def get_contract_by_id(contract_id):
     contract = ContractService.get_contract_by_id(contract_id)
     if contract:
@@ -44,7 +44,7 @@ def get_contract_by_id(contract_id):
 
 @login_required
 @contract_bp.route("/", methods=["POST"])
-@required
+# @required
 def create_contract():
     data = request.get_json()
     print("---------------------", data)
@@ -62,7 +62,7 @@ def create_contract():
 
 @login_required
 @contract_bp.route("/<int:contract_id>", methods=["PUT"])
-@required
+# @required
 def update_contract(contract_id):
     data = request.get_json()
     result = ContractService.update_contract(contract_id, data)
@@ -73,7 +73,7 @@ def update_contract(contract_id):
 
 @login_required
 @contract_bp.route("/<int:contract_id>", methods=["DELETE"])
-@required
+# @required
 def delete_contract(contract_id):
     result = ContractService.delete_contract(contract_id)
     if result.get("success"):

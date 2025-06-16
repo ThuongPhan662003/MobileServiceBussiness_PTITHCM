@@ -43,6 +43,9 @@ class PlanService:
         return PlanRepository.get_by_id(plan_id)
 
     @staticmethod
+    def get_plan_by_id1(plan_id):
+        return PlanRepository.get_by_id1(plan_id)
+    @staticmethod
     def get_plan_by_code(code):
         return PlanRepository.get_by_code(code)
 

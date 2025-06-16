@@ -1,11 +1,11 @@
 from typing import Optional
 from datetime import datetime
 from datetime import datetime, date
-
+from decimal import ROUND_HALF_UP, Decimal
 class UsageLog:
     __id: Optional[int]
     __type: Optional[str]
-    __usage_value: Optional[int]
+    __usage_value: Optional[Decimal]
     __subscriber_id: Optional["Subscriber"]
     __start_date: Optional[datetime]
     __end_date: Optional[datetime]
@@ -61,8 +61,8 @@ class UsageLog:
 
     @usage_value.setter
     def usage_value(self, value):
-        if value is not None and not isinstance(value, int):
-            raise ValueError("usage_value must be an integer")
+        if value is not None and not isinstance(value, Decimal):
+            raise ValueError("usage_value must be an Decimal")
         self.__usage_value = value
 
     @property
