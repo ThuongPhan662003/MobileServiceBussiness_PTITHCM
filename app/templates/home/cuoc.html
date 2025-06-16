@@ -23,7 +23,12 @@
     .hover-scale:hover {
       transform: scale(1.05);
     }
-
+    .btn-disabled {
+  background-color: #d1d5db; /* Màu xám */
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
     .tab-active {
       border-bottom: 2px solid #f43f5e;
       color: #f43f5e;
@@ -212,10 +217,10 @@
             class="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
             Hủy
           </button>
-          <button type="submit" class="gradient-bg text-white px-4 py-2 rounded-lg hover-scale" id="submitBtn" disabled>
+         <button type="submit" class="px-4 py-2 rounded-lg hover-scale btn-disabled" id="submitBtn" disabled>
+  Xác nhận nạp tiền
+</button>
 
-            Xác nhận nạp tiền
-          </button>
         </div>
       </form>
     </div>
@@ -237,25 +242,33 @@
     resetAmountButtons();
   }
 
-  function selectAmount(amount) {
-    const input = document.getElementById('amount');
-    input.value = amount;
-    const buttons = document.querySelectorAll('.amount-btn');
-    buttons.forEach(btn => {
-      btn.classList.remove('selected');
-      if (parseInt(btn.getAttribute('onclick').match(/\d+/)[0]) === amount) {
-        btn.classList.add('selected');
-      }
-    });
-       document.getElementById('submitBtn').disabled = false;
-  }
+ function selectAmount(amount) {
+  const input = document.getElementById('amount');
+  input.value = amount;
+  const buttons = document.querySelectorAll('.amount-btn');
+  buttons.forEach(btn => {
+    btn.classList.remove('selected');
+    if (parseInt(btn.getAttribute('onclick').match(/\d+/)[0]) === amount) {
+      btn.classList.add('selected');
+    }
+  });
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = false;
+  submitBtn.classList.remove('btn-disabled');
+  submitBtn.classList.add('gradient-bg');
+}
 
   function resetAmountButtons() {
-    const buttons = document.querySelectorAll('.amount-btn');
-    buttons.forEach(btn => btn.classList.remove('selected'));
-    document.getElementById('amount').value = '';
-    document.getElementById('submitBtn').disabled = true;
-  }
+  const buttons = document.querySelectorAll('.amount-btn');
+  buttons.forEach(btn => btn.classList.remove('selected'));
+  document.getElementById('amount').value = '';
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.classList.remove('gradient-bg');
+  submitBtn.classList.add('btn-disabled');
+}
+
 
   function deleteSubscription(subscriptionId, buttonElement) {
     if (confirm('Bạn có chắc muốn hủy subscription này không?')) {
