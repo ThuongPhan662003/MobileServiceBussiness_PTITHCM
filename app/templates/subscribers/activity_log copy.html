@@ -103,7 +103,8 @@
 
             {% if log.type == 'CUOCGOI' %}
             <p><strong>Sử dụng:</strong>
-                {{ log.usage_value}} phút </p>
+                {{ log.usage_value }} phút
+            </p>
 
             {% elif log.type == 'DULIEU' %}
             <p><strong>Sử dụng:</strong>
@@ -126,16 +127,6 @@
         <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4"></h3>
 
         <form id="actionForm">
-            <div id="timerControls" class="hidden mt-4 flex justify-between items-center text-sm text-gray-600">
-                <span id="timerDisplay" class="font-semibold text-indigo-600 text-xl">Thời gian: 0 giây</span>
-                <div class="space-x-2">
-                    <button type="button" id="startTimerBtn"
-                        class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Bắt đầu</button>
-                    <button type="button" id="stopTimerBtn"
-                        class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" disabled>Kết thúc</button>
-                </div>
-            </div>
-
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Số điện thoại đích</label>
                 <input type="text" id="targetPhone" name="phone" required
@@ -165,27 +156,7 @@
     let promotionGroupA = null;
     let promotionGroupB = null;
     let promotions_json = [];
-    // Khai báo biến toàn cục
-    let startTimerBtn, stopTimerBtn, timerControls, timerDisplay;
-    let timerInterval = null;
-    let timerSeconds = 0;
-    let main_balance = 0;
-    let ON_SMS_cost = 0.0;
-    let ON_a_call_cost = 0.0;
     document.addEventListener("DOMContentLoaded", () => {
-        // Gán biến DOM
-        startTimerBtn = document.getElementById("startTimerBtn");
-        stopTimerBtn = document.getElementById("stopTimerBtn");
-        timerControls = document.getElementById("timerControls");
-        timerDisplay = document.getElementById("timerDisplay");
-
-        // Gán sự kiện
-        startTimerBtn.addEventListener("click", startTimer);
-        stopTimerBtn.addEventListener("click", stopTimer);
-
-        window.startTimer = startTimer;
-        window.stopTimer = stopTimer;
-        window.resetTimer = resetTimer;
         fetch(`/usagelogs/promotions/${subscriber.id}`)
             .then(res => res.json())
             .then(data => {
@@ -230,40 +201,7 @@
 
             })
             .catch(err => console.error("Không thể tải ưu đãi:", err));
-        fetch(`/subscribers/${subscriber.id}`)
-            .then(res => res.json())
-            .then(data => {
-                main_balance = data.main_balance;
-                ON_SMS_cost = data.ON_SMS_cost;
-                ON_a_call_cost = data.ON_a_call_cost;
-            })
-            .catch(err => console.error("Không thể tải ưu đãi:", err));
-        // Định nghĩa hàm ở ngoài để dùng được
-        function startTimer() {
-            startTimerBtn.disabled = true;
-            stopTimerBtn.disabled = false;
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                timerDisplay.textContent = `Thời gian: ${timerSeconds} giây`;
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            stopTimerBtn.disabled = true;
-            startTimerBtn.disabled = false;
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerSeconds = 0;
-            timerDisplay.textContent = "Thời gian: 0 giây";
-            startTimerBtn.disabled = false;
-            stopTimerBtn.disabled = true;
-        }
     });
-
-
     function openUsageModal(type) {
         currentLogType = type;
         const modalTitle = document.getElementById('modalTitle');
@@ -274,32 +212,18 @@
         phoneInput.value = '';
         document.getElementById('smsContent').value = '';
         smsGroup.classList.add('hidden');
-        timerControls.classList.add('hidden');
-        resetTimer();
 
         if (type === "TINNHAN") {
             modalTitle.innerText = "Gửi tin nhắn";
             smsGroup.classList.remove('hidden');
         } else if (type === "CUOCGOI") {
             modalTitle.innerText = "Gọi điện thoại";
-            timerControls.classList.remove('hidden');
         } else if (type === "DULIEU") {
             modalTitle.innerText = "Xác nhận sử dụng dữ liệu";
-            timerControls.classList.remove('hidden');
         }
 
         const newForm = form.cloneNode(true);
         form.parentNode.replaceChild(newForm, form);
-        // Gán lại DOM của nút sau khi thay form
-        startTimerBtn = document.getElementById("startTimerBtn");
-        stopTimerBtn = document.getElementById("stopTimerBtn");
-        timerDisplay = document.getElementById("timerDisplay");
-        timerControls = document.getElementById("timerControls");
-
-        // Gán lại sự kiện
-        startTimerBtn.addEventListener("click", startTimer);
-        stopTimerBtn.addEventListener("click", stopTimer);
-
         newForm.addEventListener("submit", handleSubmitUsageLog, { once: true });
         showModal();
     }
@@ -315,80 +239,57 @@
             return;
         }
         // Gán usage_value tương ứng
-        // const usage_value = currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5;
-        // Kiểm tra có đủ ưu đãi không trước khi gửi
-        fetch(`/usagelogs/check-phone/${phone}`)
+        const usage_value = currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5;
+
+        // Trừ ưu đãi theo thứ tự B trước rồi đến A (nếu cả 2 có)
+        promotions_json = []; // reset lại
+
+
+        if (promotionGroupB) {
+            promotions_json.push(
+                subtractBenefit(promotionGroupB, currentLogType, usage_value)
+            );
+        }
+        if (promotionGroupA) {
+            promotions_json.push(
+                subtractBenefit(promotionGroupA, currentLogType, usage_value)
+            );
+        }
+        console.log("tin nhắn", promotions_json)
+        const payload = {
+            type: currentLogType,
+            subscriber_id: subscriber.id,
+            by_from: subscriber.phone_number,
+            to: currentLogType !== "DULIEU" ? phone : null,
+            contents: currentLogType === "TINNHAN" ? content : null,
+            usage_value: currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5,
+            start_date: new Date().toISOString().slice(0, 16),
+            promotions_json: promotions_json
+        };
+
+        fetch("/usagelogs/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
             .then(res => res.json())
-            .then(resp => {
-                console.log("liui", resp)
-                const isInternal = resp.exists === true; // true nếu là thuê bao nội mạng
-
-                // const usage_value = currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5;
-                let usage_value = 1;
-
-                if (currentLogType === "DULIEU") {
-                    usage_value = parseFloat((timerSeconds / 60).toFixed(2));  // Giữ nguyên số phút dùng (có thể là 0.75 MB)
-                } else if (currentLogType === "CUOCGOI") {
-                    usage_value = parseFloat((timerSeconds / 60).toFixed(2));  // Giữ nguyên số phút gọi (ví dụ: 1.25 phút)
-                } else if (currentLogType === "TINNHAN") {
-                    usage_value = 1;  // Tin nhắn vẫn = 1
+            .then(data => {
+                if (data.status_code === 201) {
+                    alert("✅ Nhật ký đã ghi thành công!");
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert("❌ Lỗi: " + (data.error || data.message));
                 }
-                // Kiểm tra có đủ ưu đãi
-                if (
-                    (currentLogType === "TINNHAN" && !checkSmsBenefit(isInternal)) ||
-                    (currentLogType === "CUOCGOI" && !checkCallBenefit(isInternal)) ||
-                    (currentLogType === "DULIEU" && !checkDataBenefit())
-                ) {
-                    alert("❌ Không đủ ưu đãi để thực hiện thao tác này.");
-                    return;
-                }
-
-                // Trừ ưu đãi
-                promotions_json = [];
-                if (promotionGroupB) {
-                    promotions_json.push(subtractBenefit(promotionGroupB, currentLogType, usage_value, isInternal));
-                }
-                if (promotionGroupA) {
-                    promotions_json.push(subtractBenefit(promotionGroupA, currentLogType, usage_value, isInternal));
-                }
-
-                const payload = {
-                    type: currentLogType,
-                    subscriber_id: subscriber.id,
-                    by_from: subscriber.phone_number,
-                    to: currentLogType !== "DULIEU" ? phone : null,
-                    contents: currentLogType === "TINNHAN" ? content : null,
-                    usage_value: usage_value,
-                    start_date: new Date().toISOString().slice(0, 16),
-                    main_balance: main_balance,
-                    promotions_json: promotions_json
-                };
-                console.log("dữ liệu", payload)
-                fetch("/usagelogs/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log("lala", data);
-                        if (data.status_code === 201) {
-                            alert("✅ Nhật ký đã ghi thành công!");
-                            closeModal();
-                            location.reload();
-                        } else {
-                            alert("❌ Lỗi: " + (data.error || data.message));
-                        }
-                    })
-                    .catch(err => {
-                        alert("❌ Lỗi kết nối đến server.");
-                        console.error(err);
-                    });
+            })
+            .catch(err => {
+                alert("❌ Lỗi kết nối đến server.");
+                console.error(err);
             });
+    }
 
-    };
     function showModal() {
         document.getElementById('actionModal').classList.remove('hidden');
         document.getElementById('actionModal').classList.add('flex');
@@ -398,80 +299,42 @@
         document.getElementById('actionModal').classList.add('hidden');
         document.getElementById('actionModal').classList.remove('flex');
     }
-    function checkSmsBenefit(isInternal) {
-        if (isInternal) {
-            if (promotionGroupB?.free_ON_SMS > 0) return true;
-            if (promotionGroupA?.free_ON_SMS > 0) return true;
-        } else {
-            if (promotionGroupB?.free_OffN_SMS > 0) return true;
-            if (promotionGroupA?.free_OffN_SMS > 0) return true;
-        }
-        if (main_balance >= ON_SMS_cost) {
-            main_balance = main_balance - ON_SMS_cost;
-            return true;
-        }
+    function checkSmsBenefit() {
+        if (promotionGroupB && promotionGroupB.free_ON_SMS > 0) return true;
+        if (promotionGroupA && promotionGroupA.free_ON_SMS > 0) return true;
         return false;
     }
 
-    function checkCallBenefit(isInternal) {
-        if (isInternal) {
-            if (promotionGroupB?.free_ON_call > 0 || promotionGroupA?.free_ON_call > 0) return true;
-        } else {
-            if (promotionGroupB?.free_OffN_call > 0 || promotionGroupA?.free_OffN_call > 0) return true;
-        }
+    function checkCallBenefit() {
+        if ((promotionGroupB?.free_ON_call ?? 0) > 0 || (promotionGroupB?.free_OffN_call ?? 0) > 0) return true;
+        if ((promotionGroupA?.free_ON_call ?? 0) > 0 || (promotionGroupA?.free_OffN_call ?? 0) > 0) return true;
         return false;
     }
 
     function checkDataBenefit() {
-        return (promotionGroupB?.free_data > 0 || promotionGroupA?.free_data > 0);
+        if ((promotionGroupB?.free_data ?? 0) > 0) return true;
+        if ((promotionGroupA?.free_data ?? 0) > 0) return true;
+        return false;
     }
 
 
 
-    function subtractBenefit(promo, type, usage, isInternal = true) {
-        const clone = { ...promo };
+    function subtractBenefit(promo, type, usage) {
+        const clone = { ...promo }; // copy tránh thay đổi object gốc
 
         if (type === "TINNHAN") {
-            if (isInternal) {
-                // Nội mạng
-                clone.free_ON_SMS = Math.max(0, clone.free_ON_SMS - usage);
-            } else {
-                // Ngoại mạng
-                clone.free_OffN_SMS = Math.max(0, clone.free_OffN_SMS - usage);
-            }
+            if (clone.free_ON_SMS >= usage) clone.free_ON_SMS -= usage;
+            else clone.free_ON_SMS = 0;
         } else if (type === "CUOCGOI") {
             if (clone.free_ON_call >= usage) clone.free_ON_call -= usage;
             else if (clone.free_OffN_call >= usage) clone.free_OffN_call -= usage;
         } else if (type === "DULIEU") {
-            clone.free_data = Math.max(0, clone.free_data - usage);
+            if (clone.free_data >= usage) clone.free_data -= usage;
+            else clone.free_data = 0;
         }
 
         return clone;
     }
-    // function startTimer() {
-    //     startTimerBtn.disabled = true;
-    //     stopTimerBtn.disabled = false;
-
-    //     timerInterval = setInterval(() => {
-    //         timerSeconds++;
-    //         timerDisplay.textContent = `Thời gian: ${timerSeconds} giây`;
-    //     }, 1000);
-    // }
-
-    // function stopTimer() {
-    //     clearInterval(timerInterval);
-    //     stopTimerBtn.disabled = true;
-    //     startTimerBtn.disabled = false;
-    // }
-
-    // function resetTimer() {
-    //     clearInterval(timerInterval);
-    //     timerSeconds = 0;
-    //     timerDisplay.textContent = "Thời gian: 0 giây";
-    //     startTimerBtn.disabled = false;
-    //     stopTimerBtn.disabled = true;
-    // }
-
 
 </script>
 

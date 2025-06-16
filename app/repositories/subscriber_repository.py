@@ -138,14 +138,11 @@ class SubscriberRepository:
             )
 
             if result and result.get("success"):
-                return {
-                    "success": True,
-                    "message": result.get("message")
-                }
+                return {"success": True, "message": result.get("message")}
             else:
                 return {
                     "success": False,
-                    "message": result.get("message", "Có lỗi xảy ra")
+                    "message": result.get("message", "Có lỗi xảy ra"),
                 }
 
         except Exception as e:
@@ -163,9 +160,9 @@ class SubscriberRepository:
                     subscriber_id,
                     data.phone_number,
                     float(data.main_balance or 0),
-                    data.expiration_date,
+                    data.expiration_date if data.expiration_date is not None else None,
                     data.is_active,
-                    data.warning_date,
+                    data.warning_date if data.warning_date is not None else None,
                     data.subscriber,
                     data.customer_id,
                     data.account_id,
@@ -175,11 +172,12 @@ class SubscriberRepository:
                 fetchone=True,
                 commit=True,
             )
+            print("kesds", result)
             if result and not result.get("success"):
                 return result.get("message", "Cập nhật thất bại")
             return True
         except Exception as e:
-            print(f"Lỗi khi cập nhật subscriber: {e}")
+            print(f"Lỗi khi cập nhật subscriber: {str(e)}")
             return False
 
     @staticmethod
