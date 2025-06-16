@@ -46,9 +46,8 @@ class SubscriptionService:
 
             if plans.service_id.id == 2:
                 if 2 in active_service_ids_flat:
-                    print("2222")
                     return { "success":True,
-                            "confirm": False,
+                            "confirm": True,
                         "message": "Bạn đã đăng kí gói cước chính."}
 
             # Trường hợp gói cước di động (cần xác nhận ghi đè)
@@ -72,7 +71,7 @@ class SubscriptionService:
 
                         for subscription_id in ids_to_delete:
                             SubscriptionRepository.delete(subscription_id)
-
+            is_renew=plans.auto_renew
             activation_date = datetime.now()
             if subscriber.subscriber_type == "TRATRUOC":
                 if plan.duration < 1:
@@ -108,7 +107,7 @@ class SubscriptionService:
                 created_at=created_at,
                 expiration_date=expiration_date,
                 renewal_total=0,
-                is_renewal=True,
+                is_renewal= is_renew,
                 cancel_at=None,
                 activation_date=activation_date,
             )

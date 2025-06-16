@@ -105,6 +105,7 @@ class UsageLogService:
                     subscriber = SubscriberRepository.get_by_id(
                         session["subscriber_id"]
                     )
+
                     subscriber.main_balance = main_balance
                     # data = {
                     #     "phone_number": subscriber.phone_number,
@@ -116,6 +117,7 @@ class UsageLogService:
                     #     "is_active": str(subscriber.is_active).lower(),
                     #     "subscriber": subscriber.subscriber_type,
                     # }
+
                     print(
                         "sessssion",
                         session["subscriber_id"],
@@ -125,6 +127,7 @@ class UsageLogService:
                     )
                     print("logsus", result1)
                     if result1:
+
                         return {"success": True, "message": result.get("message")}
                     return {
                         "success": False,

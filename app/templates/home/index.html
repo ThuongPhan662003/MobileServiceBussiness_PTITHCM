@@ -37,7 +37,6 @@
     .plan-detail-link {
         text-decoration: none !important;
         color: #dc3545 !important;
-        /* Màu giống btn-outline-danger */
         border: 1px solid #dc3545;
         border-radius: 4px;
         padding: 6px 12px;
@@ -51,13 +50,110 @@
         color: #fff !important;
         text-decoration: none;
     }
+
+    /* Modal styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .close-button {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        font-size: 1.5rem;
+        color: #888;
+        cursor: pointer;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+    }
+
+    .modal-buttons button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+    }
+
+    .confirm-btn {
+        background-color: #d32f2f;
+        color: #fff;
+    }
+
+    .confirm-btn:hover {
+        background-color: #b71c1c;
+    }
+
+    .note {
+        color: #e53935;
+        font-size: 0.9rem;
+        margin: 10px 0;
+        border: 1px dashed #e57373;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .radio-group {
+        text-align: left;
+        margin-top: 15px;
+    }
+
+    .radio-group label {
+        font-size: 0.95rem;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .text-danger {
+        color: #d32f2f;
+        font-size: 0.9rem;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
 </style>
-Hero Section
+
+<!-- Hero Section -->
 <section class="hero">
     <div class="container-hero">
         <h1>Flask Mobile Services</h1>
         <p>Your reliable mobile network with modern plans & high-speed internet.</p>
-
     </div>
 </section>
 
@@ -104,8 +200,70 @@ Hero Section
     </div>
 </section>
 
+{% if session['subscriber_type'] == 'TRATRUOC' %}
+<!-- Modal for Prepaid Subscribers -->
+<div id="registerModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">×</span>
+        <h2>XÁC NHẬN ĐĂNG KÝ</h2>
+        <p>
+            Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá
+            <strong id="packagePrice"></strong> đồng?
+        </p>
+        <div class="note">Vui lòng chọn phương thức đăng ký:</div>
+        <div class="radio-group">
+            <label><input type="radio" name="method" value="account" /> Đăng ký qua tài khoản gốc điện thoại</label><br />
+            <label><input type="radio" name="method" value="qr" /> Đăng ký qua QR code</label>
+        </div>
+        <div id="methodError" class="text-danger mt-2" style="display: none">
+            Vui lòng chọn phương thức đăng ký.
+        </div>
+        <div class="modal-buttons mt-3">
+            <button onclick="closeModal()">ĐÓNG</button>
+            <button class="confirm-btn" onclick="confirmRegister()">ĐỒNG Ý</button>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Modal for Other Subscribers -->
+<div id="registerModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">×</span>
+        <h2>XÁC NHẬN ĐĂNG KÝ</h2>
+        <p>
+            Bạn xác nhận đăng ký gói <strong id="packageName"></strong> với giá
+            <strong id="packagePrice"></strong> đồng?
+        </p>
+        <div class="modal-buttons mt-3">
+            <button onclick="closeModal()">ĐÓNG</button>
+            <button class="confirm-btn" onclick="confirmRegister()">ĐỒNG Ý</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Override Confirmation Modal -->
+<div id="overrideModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeOverrideModal()">×</span>
+        <h2>XÁC NHẬN ĐĂNG KÝ GÓI DỊCH VỤ DI ĐỘNG</h2>
+        <p id="overrideMessage"></p>
+        <div class="modal-buttons mt-3">
+            <button onclick="closeOverrideModal()">HỦY</button>
+            <button id="confirmOverrideButton" class="confirm-btn" onclick="confirmOverride()">ĐỒNG Ý</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Tải toàn bộ gói cước khi trang được tải
+    // Variables for subscription handling
+    const subscriberId = {{ session['subscriber_id'] | default(0) }};
+    const subscriberType = "{{ session['subscriber_type'] | default('') }}";
+    let currentPlanId = null;
+    let currentPackageName = null;
+    let currentPackagePrice = null;
+
+    // Fetch all plans
     document.addEventListener("DOMContentLoaded", function () {
         fetchAllPlans();
     });
@@ -122,14 +280,13 @@ Hero Section
                     const duration = plan.duration || 30;
                     const dataPerDay = plan.free_data ? (plan.free_data / duration).toFixed(1) : 0;
 
-                    // Tạo nội dung động tuỳ theo giá trị
                     let content = `
                     <div class="plan-card" style="overflow: hidden; border-radius: 12px;">
                         <div style="background: #f2274e; color: white; padding: 10px 15px; font-weight: bold; font-size: 1.1rem;">
                             ${plan.code} - ${duration} ngày
                         </div>
                         <div style="padding: 16px; background: #fff; text-align: left;">
-                `;
+                    `;
 
                     if (plan.free_data && plan.free_data > 0) {
                         content += `<p><i class="fas fa-wifi"></i> Data: <strong>${dataPerDay}GB/ngày</strong></p>`;
@@ -153,11 +310,11 @@ Hero Section
                         <p style="font-size: 1.2rem; font-weight: bold; color: #f2274e;">${priceFormatted}</p>
                         </div>
                         <div style="background: #f9f9f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
-                            <button class="btn btn-outline-danger" onclick="registerPlan('${plan.code}')">Đăng ký</button>
+                            <button class="btn btn-outline-danger" onclick="openModal('${plan.code}', '${priceFormatted}', '${plan.id}')">Đăng ký</button>
                             <a href="/customer_plan/plans/${plan.id}" class="btn btn-outline-danger plan-detail-link">Xem chi tiết</a>
                         </div>
                     </div>
-                `;
+                    `;
 
                     return content;
                 }).join('');
@@ -166,12 +323,219 @@ Hero Section
                 console.error("Lỗi khi tải gói cước:", err);
             });
     }
-</script>
 
-<script>
+    function openModal(packageName, packagePrice, planId) {
+        document.getElementById('packageName').textContent = packageName;
+        document.getElementById('packagePrice').textContent = packagePrice;
+        currentPlanId = planId;
+        currentPackageName = packageName;
+        currentPackagePrice = packagePrice;
+        document.getElementById('registerModal').classList.remove('hidden');
+        if (document.getElementById('methodError')) {
+            document.getElementById('methodError').style.display = 'none';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('registerModal').classList.add('hidden');
+    }
+
+    function openOverrideModal(message, method) {
+        document.getElementById('overrideMessage').textContent = message;
+        const button = document.getElementById('confirmOverrideButton');
+        button.setAttribute('data-method', method);
+        document.getElementById('overrideModal').classList.remove('hidden');
+    }
+
+    function closeOverrideModal() {
+        document.getElementById('overrideModal').classList.add('hidden');
+    }
+
+    async function confirmRegister(confirmOverride = false) {
+        let method = 'account';
+
+        if (subscriberType === 'TRATRUOC') {
+            const selectedMethod = document.querySelector('input[name="method"]:checked');
+            if (!selectedMethod) {
+                document.getElementById('methodError').style.display = 'block';
+                return;
+            }
+            method = selectedMethod.value;
+
+            if (method === 'account') {
+                try {
+                    const balanceResponse = await fetch(`/subscribers/${subscriberId}`);
+                    const balanceData = await balanceResponse.json();
+
+                    if (!balanceResponse.ok) {
+                        alert("Không thể lấy số dư tài khoản.");
+                        return;
+                    }
+
+                    const packagePriceRaw = document.getElementById("packagePrice").textContent;
+                    const packagePrice = parseFloat(packagePriceRaw.replace(/[^0-9]/g, ''));
+                    const balance = parseFloat(balanceData.main_balance);
+
+                    if (balance < packagePrice) {
+                        alert("Số dư tài khoản không đủ để đăng ký gói này.");
+                        return;
+                    }
+                } catch (err) {
+                    alert("Lỗi kiểm tra số dư: " + err.message);
+                    return;
+                }
+            }
+
+            if (method === 'qr') {
+                await handleQRSubscription(confirmOverride);
+                return;
+            }
+        }
+
+        await handleSubscription(confirmOverride, method);
+    }
+
+    async function handleQRSubscription(confirmOverride) {
+        const packagePriceRaw = document.getElementById("packagePrice").textContent;
+        const packagePrice = parseFloat(packagePriceRaw.replace(/[^0-9]/g, ''));
+        const packageName = document.getElementById("packageName").textContent;
+
+        const subscriptionResponse = await fetch(`/subscriptions/qr/${subscriberId}/${currentPlanId}`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ confirm_override: confirmOverride })
+        });
+
+        const subscriptionResult = await subscriptionResponse.json();
+        console.log('Kết quả QR:', subscriptionResult);
+
+        if (subscriptionResult) {
+            if (subscriptionResult.confirm) {
+                closeModal();
+                openOverrideModal(subscriptionResult.message, 'qr');
+                return;
+            }
+
+            if (subscriptionResult.success) {
+                redirectToPayment(packagePrice, packageName, confirmOverride);
+                return;
+            }
+
+            if (subscriptionResult.error) {
+                alert("Không thể đăng ký gói cước: " + subscriptionResult.error);
+                return;
+            }
+        }
+
+        alert("Đã xảy ra lỗi không xác định.");
+    }
+
+    async function handleSubscription(confirmOverride, method) {
+        try {
+            const subscriptionResponse = await fetch(`/subscriptions/${subscriberId}/${currentPlanId}`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirm_override: confirmOverride })
+            });
+
+            const subscriptionResult = await subscriptionResponse.json();
+            console.log('Kết quả:', subscriptionResult);
+
+            if (subscriptionResult) {
+                if (subscriptionResult.confirm) {
+                    closeModal();
+                    openOverrideModal(subscriptionResult.message, method);
+                    return;
+                }
+
+                if (subscriptionResult.success) {
+                    if (subscriberType === 'TRATRUOC' && method === 'account') {
+                        const deductResponse = await fetch(`/subscriptions/deduct/${subscriberId}/${currentPlanId}`, { method: "POST" });
+                        const deductResult = await deductResponse.json();
+
+                        if (!deductResponse.ok || !deductResult.success) {
+                            alert("Lỗi khi trừ tiền tài khoản: " + (deductResult.error || "Lỗi không xác định."));
+                            return;
+                        }
+                    }
+
+                    await createPayment(method);
+                    alert("Đăng ký gói cước thành công!");
+                    closeModal();
+                    return;
+                }
+
+                if (subscriptionResult.error) {
+                    alert("Không thể đăng ký gói cước: " + subscriptionResult.error);
+                    return;
+                }
+            }
+
+            alert("Đã xảy ra lỗi không xác định.");
+        } catch (error) {
+            alert("Lỗi xảy ra: " + error.message);
+        }
+    }
+
+    async function createPayment(method) {
+        const dueDate = new Date();
+        const paymentResponse = await fetch(`/payments/${subscriberId}/${currentPlanId}`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                payment_method: subscriberType === 'TRATRUOC' ? method : 'postpaid',
+                is_paid: subscriberType === 'TRATRUOC',
+                due_date: dueDate.toISOString()
+            })
+        });
+
+        if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json();
+            const idPayment = paymentData.id_payment;
+
+            const paymentDetailResponse = await fetch(`/payment-details/${idPayment}/${currentPlanId}`, { method: "POST" });
+
+            if (paymentDetailResponse.ok) {
+                console.log("Thanh toán và chi tiết đã được lưu.");
+            } else {
+                const paymentDetailResult = await paymentDetailResponse.json();
+                alert("Lỗi khi thêm chi tiết thanh toán: " + (paymentDetailResult.error || "Lỗi không xác định."));
+            }
+        } else {
+            alert("Lỗi khi tạo bản ghi thanh toán.");
+        }
+    }
+
+    function redirectToPayment(packagePrice, packageName, confirmOverride) {
+        const url = new URL("/pay-process", window.location.origin);
+        url.searchParams.append("subscriber_id", subscriberId);
+        url.searchParams.append("plan_id", currentPlanId);
+        url.searchParams.append("price", packagePrice);
+        url.searchParams.append("plan_code", packageName);
+        url.searchParams.append("confirm_override", confirmOverride);
+
+        window.location.href = url.toString();
+    }
+
+    async function confirmOverride() {
+        const button = document.getElementById('confirmOverrideButton');
+        const method = button.getAttribute('data-method');
+        closeOverrideModal();
+
+        if (method === 'qr') {
+            const packagePriceRaw = document.getElementById("packagePrice").textContent;
+            const packagePrice = parseFloat(packagePriceRaw.replace(/[^0-9]/g, ''));
+            const packageName = document.getElementById("packageName").textContent;
+
+            redirectToPayment(packagePrice, packageName, true);
+        } else {
+            await confirmRegister(true);
+        }
+    }
+
     function showTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => tab.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
     }

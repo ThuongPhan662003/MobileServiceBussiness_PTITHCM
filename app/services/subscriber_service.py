@@ -67,9 +67,9 @@ class SubscriberService:
 
             # Kiểm tra loại thuê bao
             subscriber_type_str = str(data.get("subscriber", "Trả trước")).strip()
-            if subscriber_type_str == "Trả sau":
+            if subscriber_type_str == "TRATRUOC":
                 subscriber = "Trả sau"
-            elif subscriber_type_str == "Trả trước":
+            elif subscriber_type_str == "TRATRUOC":
                 subscriber = "Trả trước"
             else:
                 return {"success": False, "message": "Loại thuê bao không hợp lệ"}
