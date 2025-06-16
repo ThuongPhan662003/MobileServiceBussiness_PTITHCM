@@ -30,7 +30,10 @@ class SubscriberService:
             phone_number = data.get("phone_number")
             print(phone_number)
             if not phone_number:
-                return {"success": False, "message": "Số điện thoại không được để trống"}
+                return {
+                    "success": False,
+                    "message": "Số điện thoại không được để trống",
+                }
             if not phone_number.isdigit() or not (10 <= len(phone_number) <= 11):
                 return {"success": False, "message": "Số điện thoại không hợp lệ"}
 
@@ -38,7 +41,10 @@ class SubscriberService:
             try:
                 main_balance = Decimal(data.get("main_balance", 0))
                 if main_balance < 0:
-                    return {"success": False, "message": "Số dư chính không được nhỏ hơn 0"}
+                    return {
+                        "success": False,
+                        "message": "Số dư chính không được nhỏ hơn 0",
+                    }
             except:
                 return {"success": False, "message": "Số dư chính không hợp lệ"}
 
@@ -49,9 +55,15 @@ class SubscriberService:
                 try:
                     expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d")
                     if expiration_date < datetime.now():
-                        return {"success": False, "message": "Ngày hết hạn phải lớn hơn hoặc bằng ngày hiện tại"}
+                        return {
+                            "success": False,
+                            "message": "Ngày hết hạn phải lớn hơn hoặc bằng ngày hiện tại",
+                        }
                 except:
-                    return {"success": False, "message": "Định dạng ngày hết hạn không hợp lệ"}
+                    return {
+                        "success": False,
+                        "message": "Định dạng ngày hết hạn không hợp lệ",
+                    }
 
             # Kiểm tra loại thuê bao
             subscriber_type_str = str(data.get("subscriber", "Trả trước")).strip()
@@ -74,7 +86,10 @@ class SubscriberService:
             try:
                 call_cost = float(data.get("ON_a_call_cost", 0))
                 if call_cost < 0:
-                    return {"success": False, "message": "Chi phí cuộc gọi không được nhỏ hơn 0"}
+                    return {
+                        "success": False,
+                        "message": "Chi phí cuộc gọi không được nhỏ hơn 0",
+                    }
             except:
                 return {"success": False, "message": "Chi phí cuộc gọi không hợp lệ"}
 
@@ -82,7 +97,10 @@ class SubscriberService:
             try:
                 sms_cost = float(data.get("ON_SMS_cost", 0))
                 if sms_cost < 0:
-                    return {"success": False, "message": "Chi phí SMS không được nhỏ hơn 0"}
+                    return {
+                        "success": False,
+                        "message": "Chi phí SMS không được nhỏ hơn 0",
+                    }
             except:
                 return {"success": False, "message": "Chi phí SMS không hợp lệ"}
 
@@ -94,7 +112,7 @@ class SubscriberService:
                 subscriber=subscriber,
                 customer_id=customer_id,
                 ON_a_call_cost=call_cost,
-                ON_SMS_cost=sms_cost
+                ON_SMS_cost=sms_cost,
             )
 
             # Gọi repository để lưu subscriber vào CSDL
@@ -119,10 +137,18 @@ class SubscriberService:
             account_id = int(data.get("account_id"))
 
             expiration_date_str = data.get("expiration_date")
-            expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d").date() if expiration_date_str else None
+            expiration_date = (
+                datetime.strptime(expiration_date_str, "%Y-%m-%d").date()
+                if expiration_date_str
+                else None
+            )
 
             warning_date_str = data.get("warning_date")
-            warning_date = datetime.strptime(warning_date_str, "%Y-%m-%d") if warning_date_str else None
+            warning_date = (
+                datetime.strptime(warning_date_str, "%Y-%m-%d")
+                if warning_date_str
+                else None
+            )
 
             is_active = str(data.get("is_active", "true")).lower() == "true"
 
@@ -138,8 +164,7 @@ class SubscriberService:
                 customer_id=customer_id,
                 subscriber=subscriber_type,
                 warning_date=warning_date,
-                account_id=account_id
-
+                account_id=account_id,
             )
 
             result = SubscriberRepository.update(subscriber_id, subscriber)

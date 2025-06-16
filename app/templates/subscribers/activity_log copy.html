@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết hoạt động của thuê bao{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- Google Fonts: Roboto -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<div class="max-w-3xl mx-auto px-4 py-16" style="margin-top: 100px;">
+    <h2 class="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+        <i class="fas fa-user-circle text-indigo-600 text-3xl"></i>
+        <span>Chi tiết hoạt động của thuê bao {{ subscriber.phone_number }}</span>
+    </h2>
+    <script>
+        const subscriber = {
+            id: {{ subscriber.id }},
+        phone_number: "{{ subscriber.phone_number }}"
+            };
+
+
+    </script>
+
+    <div class="max-w-6xl mx-auto p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <i class="fas fa-mobile-alt text-purple-600 text-3xl"></i>
+            <span>Thao tác thuê bao: <span class="text-black font-extrabold">{{ subscriber.phone_number }}</span></span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between h-full">
+                <div class="flex flex-col items-center text-center flex-1">
+                    <i class="fas fa-sms text-pink-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gửi tin nhắn</h3>
+                    <p class="text-gray-600 mb-6">Soạn và gửi tin nhắn đến số khác.</p>
+                </div>
+                <button onclick="openUsageModal('TINNHAN')"
+                    class="bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition w-full">Gửi
+                    SMS</button>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between h-full">
+                <div class="flex flex-col items-center text-center flex-1">
+                    <i class="fas fa-phone-alt text-green-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gọi điện</h3>
+                    <p class="text-gray-600 mb-6">Thực hiện cuộc gọi tới một số khác.</p>
+                </div>
+                <button onclick="openUsageModal('CUOCGOI')"
+                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition w-full">Gọi
+                    ngay</button>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between h-full">
+                <div class="flex flex-col items-center text-center flex-1">
+                    <i class="fas fa-globe text-blue-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Dữ liệu di động</h3>
+                    <p class="text-gray-600 mb-6">Bắt đầu sử dụng internet trên điện thoại.</p>
+                </div>
+                <button onclick="openUsageModal('DULIEU')"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition w-full">Dùng dữ
+                    liệu</button>
+            </div>
+        </div>
+    </div>
+    {% if logs %}
+    {% for log in logs|sort(attribute='start_date', reverse=True) %}
+    <div class="p-5 rounded-xl shadow-md border border-gray-300 bg-white 
+        flex gap-4 items-start hover:shadow-lg transition
+        {% if log.type == 'TINNHAN' %} border-l-[6px] border-pink-500
+        {% elif log.type == 'CUOCGOI' %} border-l-[6px] border-green-500
+        {% elif log.type == 'DULIEU' %} border-l-[6px] border-blue-500
+        {% else %} border-l-[6px] border-gray-400
+        {% endif %}
+        mt-4">
+
+        <div class="pt-1">
+            {% if log.type == 'TINNHAN' %}
+            <i class="fas fa-comment text-pink-500 text-xl"></i>
+            {% elif log.type == 'CUOCGOI' %}
+            <i class="fas fa-phone-alt text-green-500 text-xl"></i>
+            {% elif log.type == 'DULIEU' %}
+            <i class="fas fa-globe text-blue-500 text-xl"></i>
+            {% else %}
+            <i class="fas fa-info-circle text-gray-500 text-xl"></i>
+            {% endif %}
+        </div>
+
+        <div class="flex-1 text-sm text-gray-800 space-y-1">
+            <div class="flex justify-between items-center mb-1">
+                <p class="font-semibold text-base">
+                    {% if log.type == 'TINNHAN' %}Tin nhắn
+                    {% elif log.type == 'CUOCGOI' %}Cuộc gọi
+                    {% elif log.type == 'DULIEU' %}Dữ liệu
+                    {% else %}{{ log.type }}{% endif %}
+                </p>
+                <span class="text-xs text-gray-500">
+                    {{ log.start_date.strftime('%d/%m/%Y %H:%M') if log.start_date }} </span>
+            </div>
+            <p><strong>Từ:</strong> {{ log.by_from }}</p>
+            <p><strong>Đến:</strong> {{ log.to }}</p>
+            <p><strong>Nội dung:</strong> {{ log.contents or "Không có" }}</p>
+
+            {% if log.type == 'CUOCGOI' %}
+            <p><strong>Sử dụng:</strong>
+                {{ log.usage_value }} phút
+            </p>
+
+            {% elif log.type == 'DULIEU' %}
+            <p><strong>Sử dụng:</strong>
+                {{ log.usage_value }} MB
+            </p>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="text-center text-gray-500 italic">Không có hoạt động nào.</p>
+    {% endif %}
+
+</div>
+<!-- Modal overlay -->
+<div id="actionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <!-- Modal content -->
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4"></h3>
+
+        <form id="actionForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Số điện thoại đích</label>
+                <input type="text" id="targetPhone" name="phone" required
+                    class="w-full mt-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300" />
+            </div>
+            <div id="smsContentGroup" class="mb-4 hidden">
+                <label class="block text-sm font-medium text-gray-700">Nội dung tin nhắn</label>
+                <textarea id="smsContent" name="content"
+                    class="w-full mt-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-pink-300"></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeModal()"
+                    class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Hủy</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xác
+                    nhận</button>
+            </div>
+        </form>
+
+        <!-- Close icon -->
+        <button class="absolute top-3 right-3 text-gray-500 hover:text-black" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+<script>
+    let currentLogType = null;
+    let promotionGroupA = null;
+    let promotionGroupB = null;
+    let promotions_json = [];
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch(`/usagelogs/promotions/${subscriber.id}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("data", data.data[0][0])
+                console.log("data1", data.data[1][0])
+                promotionGroupA = data.data[0][0];
+                promotionGroupB = data.data[1][0];
+
+                if (promotionGroupA) {
+                    promotions_json.push({
+                        payment_id: promotionGroupA.payment_id,
+                        free_data: promotionGroupA.free_data,
+                        free_ON_a_call: promotionGroupA.free_ON_a_call,
+                        free_ON_call: promotionGroupA.free_ON_call,
+                        free_OffN_a_call: promotionGroupA.free_OffN_a_call,
+                        free_OffN_call: promotionGroupA.free_OffN_call,
+                        free_ON_SMS: promotionGroupA.free_ON_SMS,
+                        free_OffN_SMS: promotionGroupA.free_OffN_SMS,
+                        ON_a_call_cost: promotionGroupA.ON_a_call_cost,
+                        ON_SMS_cost: promotionGroupA.ON_SMS_cost,
+                        code: promotionGroupA.code,
+                        expiration_date: promotionGroupA.expiration_date
+                    });
+                }
+
+                if (promotionGroupB) {
+                    promotions_json.push({
+                        payment_id: promotionGroupB.payment_id,
+                        free_data: promotionGroupB.free_data,
+                        free_ON_a_call: promotionGroupB.free_ON_a_call,
+                        free_ON_call: promotionGroupB.free_ON_call,
+                        free_OffN_a_call: promotionGroupB.free_OffN_a_call,
+                        free_OffN_call: promotionGroupB.free_OffN_call,
+                        free_ON_SMS: promotionGroupB.free_ON_SMS,
+                        free_OffN_SMS: promotionGroupB.free_OffN_SMS,
+                        ON_a_call_cost: promotionGroupB.ON_a_call_cost,
+                        ON_SMS_cost: promotionGroupB.ON_SMS_cost,
+                        code: promotionGroupB.code,
+                        expiration_date: promotionGroupB.expiration_date
+                    });
+                }
+
+            })
+            .catch(err => console.error("Không thể tải ưu đãi:", err));
+    });
+    function openUsageModal(type) {
+        currentLogType = type;
+        const modalTitle = document.getElementById('modalTitle');
+        const smsGroup = document.getElementById('smsContentGroup');
+        const phoneInput = document.getElementById('targetPhone');
+        const form = document.getElementById("actionForm");
+
+        phoneInput.value = '';
+        document.getElementById('smsContent').value = '';
+        smsGroup.classList.add('hidden');
+
+        if (type === "TINNHAN") {
+            modalTitle.innerText = "Gửi tin nhắn";
+            smsGroup.classList.remove('hidden');
+        } else if (type === "CUOCGOI") {
+            modalTitle.innerText = "Gọi điện thoại";
+        } else if (type === "DULIEU") {
+            modalTitle.innerText = "Xác nhận sử dụng dữ liệu";
+        }
+
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        newForm.addEventListener("submit", handleSubmitUsageLog, { once: true });
+        showModal();
+    }
+
+    function handleSubmitUsageLog(e) {
+        e.preventDefault();
+
+        const phone = document.getElementById('targetPhone').value.trim();
+        const content = document.getElementById('smsContent').value.trim();
+
+        if ((currentLogType === "TINNHAN" || currentLogType === "CUOCGOI") && !phone) {
+            alert("Vui lòng nhập số điện thoại đích.");
+            return;
+        }
+        // Gán usage_value tương ứng
+        const usage_value = currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5;
+
+        // Trừ ưu đãi theo thứ tự B trước rồi đến A (nếu cả 2 có)
+        promotions_json = []; // reset lại
+
+
+        if (promotionGroupB) {
+            promotions_json.push(
+                subtractBenefit(promotionGroupB, currentLogType, usage_value)
+            );
+        }
+        if (promotionGroupA) {
+            promotions_json.push(
+                subtractBenefit(promotionGroupA, currentLogType, usage_value)
+            );
+        }
+        console.log("tin nhắn", promotions_json)
+        const payload = {
+            type: currentLogType,
+            subscriber_id: subscriber.id,
+            by_from: subscriber.phone_number,
+            to: currentLogType !== "DULIEU" ? phone : null,
+            contents: currentLogType === "TINNHAN" ? content : null,
+            usage_value: currentLogType === "TINNHAN" ? 1 : currentLogType === "CUOCGOI" ? 1 : 5,
+            start_date: new Date().toISOString().slice(0, 16),
+            promotions_json: promotions_json
+        };
+
+        fetch("/usagelogs/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status_code === 201) {
+                    alert("✅ Nhật ký đã ghi thành công!");
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert("❌ Lỗi: " + (data.error || data.message));
+                }
+            })
+            .catch(err => {
+                alert("❌ Lỗi kết nối đến server.");
+                console.error(err);
+            });
+    }
+
+    function showModal() {
+        document.getElementById('actionModal').classList.remove('hidden');
+        document.getElementById('actionModal').classList.add('flex');
+    }
+
+    function closeModal() {
+        document.getElementById('actionModal').classList.add('hidden');
+        document.getElementById('actionModal').classList.remove('flex');
+    }
+    function checkSmsBenefit() {
+        if (promotionGroupB && promotionGroupB.free_ON_SMS > 0) return true;
+        if (promotionGroupA && promotionGroupA.free_ON_SMS > 0) return true;
+        return false;
+    }
+
+    function checkCallBenefit() {
+        if ((promotionGroupB?.free_ON_call ?? 0) > 0 || (promotionGroupB?.free_OffN_call ?? 0) > 0) return true;
+        if ((promotionGroupA?.free_ON_call ?? 0) > 0 || (promotionGroupA?.free_OffN_call ?? 0) > 0) return true;
+        return false;
+    }
+
+    function checkDataBenefit() {
+        if ((promotionGroupB?.free_data ?? 0) > 0) return true;
+        if ((promotionGroupA?.free_data ?? 0) > 0) return true;
+        return false;
+    }
+
+
+
+    function subtractBenefit(promo, type, usage) {
+        const clone = { ...promo }; // copy tránh thay đổi object gốc
+
+        if (type === "TINNHAN") {
+            if (clone.free_ON_SMS >= usage) clone.free_ON_SMS -= usage;
+            else clone.free_ON_SMS = 0;
+        } else if (type === "CUOCGOI") {
+            if (clone.free_ON_call >= usage) clone.free_ON_call -= usage;
+            else if (clone.free_OffN_call >= usage) clone.free_OffN_call -= usage;
+        } else if (type === "DULIEU") {
+            if (clone.free_data >= usage) clone.free_data -= usage;
+            else clone.free_data = 0;
+        }
+
+        return clone;
+    }
+
+</script>
+
+{% endblock %}

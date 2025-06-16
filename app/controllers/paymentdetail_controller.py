@@ -64,3 +64,5 @@ def delete_payment_detail(payment_detail_id):
     if result.get("success"):
         return jsonify({"message": "Payment detail deleted successfully"}), 200
     return jsonify({"error": result.get("error")}), 400
+
+
