@@ -413,6 +413,7 @@
         return false;
     }
 
+
     function checkCallBenefit(isInternal, usage_value) {
         if (isInternal) {
             if (promotionGroupB?.free_ON_call > 0 || promotionGroupA?.free_ON_call > 0) return true;
@@ -423,6 +424,7 @@
         }
         if (main_balance >= usage_value * ON_a_call_cost) return true;
         if (main_balance >= usage_value * clone.ON_a_call_cost) return true;
+
         return false;
     }
 
@@ -522,6 +524,7 @@
 
                 }
             }
+
         } else if (type === "DULIEU") {
             clone.free_data = Math.max(0, clone.free_data - usage);
         }
