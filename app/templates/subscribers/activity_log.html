@@ -373,6 +373,7 @@
                 })
                     .then(res => res.json())
                     .then(data => {
+                        console.log("lala", data);
                         if (data.status_code === 201) {
                             alert("✅ Nhật ký đã ghi thành công!");
                             closeModal();

@@ -51,7 +51,7 @@ def get_usagelog_by_id(log_id):
 
 @usagelog_bp.route("/", methods=["POST"])
 @login_required
-@required
+# @required
 def create_usagelog():
     try:
         data = request.get_json()

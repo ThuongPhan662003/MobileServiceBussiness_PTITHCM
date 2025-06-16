@@ -2,6 +2,7 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
 from flask import json, session
+from app.repositories.subscriber_repository import SubscriberRepository
 from app.repositories.usagelog_repository import UsageLogRepository
 from app.models.usagelog import UsageLog
 from app.services.subscriber_service import SubscriberService
@@ -101,7 +102,7 @@ class UsageLogService:
             main_balance = data.get("main_balance")
             if result and result.get("success"):
                 if main_balance:
-                    subscriber = SubscriberService.get_subscriber_by_id(
+                    subscriber = SubscriberRepository.get_by_id(
                         session["subscriber_id"]
                     )
                     data = {
@@ -114,10 +115,15 @@ class UsageLogService:
                         "is_active": str(subscriber.is_active).lower(),
                         "subscriber": subscriber.subscriber_type,
                     }
-                    result = SubscriberService.update_subscriber(
+                    print(
+                        "sessssion",
+                        session["subscriber_id"],
+                    )
+                    result1 = SubscriberRepository.update(
                         session["subscriber_id"], data
                     )
-                    if result.get("success"):
+                    print("logsus", result1)
+                    if result1.get("success"):
                         return {"success": True, "message": result.get("message")}
                     return {
                         "success": False,
