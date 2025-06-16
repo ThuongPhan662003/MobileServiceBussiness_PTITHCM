@@ -23,7 +23,12 @@
     .hover-scale:hover {
       transform: scale(1.05);
     }
-
+    .btn-disabled {
+  background-color: #d1d5db; /* Màu xám */
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
     .tab-active {
       border-bottom: 2px solid #f43f5e;
       color: #f43f5e;
@@ -98,10 +103,72 @@
       <button class="tab-btn py-2 px-4 text-gray-600 hover:text-gray-900" data-tab="messages">Tin nhắn</button>
     </div>
     <div id="mobile-services" class="tab-content mt-4">
-      <p class="text-gray-600">Nội dung cho Gói dịch vụ di động (Placeholder).</p>
+      {% if subscriptions %}
+
+  {% for sub in subscriptions if sub.service_id != 2 %}
+  <div class="bg-white p-8 rounded-xl shadow-lg mb-6 flex items-center space-x-6 hover-scale">
+    <div class="gradient-bg text-white px-6 py-3 rounded-lg">
+      <p class="text-lg font-bold">{{ sub.plan_code }}</p>
+    </div>
+    <div class="flex-1">
+      <p class="text-gray-600">
+        Lưu lượng còn lại: <span class="font-bold text-gray-900">{{ sub.free_data }} MB</span>
+      </p>
+      <p class="text-gray-600 mt-1">
+        Ngày hết hạn: <span class="font-bold">{{ sub.expiration_date.strftime('%H:%M:%S %d/%m/%Y') }}</span>
+      </p>
+      <div class="flex space-x-4 mt-4">
+        {% if sub.cancel_at %}
+        <button class="text-gray-500 font-medium cursor-not-allowed" disabled>
+          Đã hủy
+        </button>
+        {% else %}
+        <button class="text-red-600 font-medium hover:underline"
+          onclick="deleteSubscription({{ sub.subscription_id }}, this)">
+          Hủy
+        </button>
+        {% endif %}
+        <a href="{{ url_for('customer_plan.plan_details', plan_id=sub.plan_id) }}"
+          class="text-gray-600 font-medium hover:underline">Chi tiết</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
     </div>
     <div id="main-services" class="tab-content mt-4 hidden">
-      <p class="text-gray-600">Nội dung cho Gói dịch vụ cước chính (Placeholder).</p>
+      {% if subscriptions %}
+
+  {% for sub in subscriptions if sub.service_id == 2 %}
+  <div class="bg-white p-8 rounded-xl shadow-lg mb-6 flex items-center space-x-6 hover-scale">
+    <div class="gradient-bg text-white px-6 py-3 rounded-lg">
+      <p class="text-lg font-bold">{{ sub.plan_code }}</p>
+    </div>
+    <div class="flex-1">
+      <p class="text-gray-600">
+        Lưu lượng còn lại: <span class="font-bold text-gray-900">{{ sub.free_data }} MB</span>
+      </p>
+      <p class="text-gray-600 mt-1">
+        Ngày hết hạn: <span class="font-bold">{{ sub.expiration_date.strftime('%H:%M:%S %d/%m/%Y') }}</span>
+      </p>
+      <div class="flex space-x-4 mt-4">
+        {% if sub.cancel_at %}
+        <button class="text-gray-500 font-medium cursor-not-allowed" disabled>
+          Đã hủy
+        </button>
+        {% else %}
+        <button class="text-red-600 font-medium hover:underline"
+          onclick="deleteSubscription({{ sub.subscription_id }}, this)">
+          Hủy
+        </button>
+        {% endif %}
+        <a href="{{ url_for('customer_plan.plan_details', plan_id=sub.plan_id) }}"
+          class="text-gray-600 font-medium hover:underline">Chi tiết</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
     </div>
     <div id="messages" class="tab-content mt-4 hidden">
       <p class="text-gray-600">Nội dung tin nhắn (không hiển thị vì chuyển hướng).</p>
@@ -150,48 +217,17 @@
             class="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
             Hủy
           </button>
-          <button type="submit" class="gradient-bg text-white px-4 py-2 rounded-lg hover-scale" id="submitBtn">
+         <button type="submit" class="px-4 py-2 rounded-lg hover-scale btn-disabled" id="submitBtn" disabled>
+  Xác nhận nạp tiền
+</button>
 
-            Xác nhận nạp tiền
-          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Subscriptions Section -->
-  {% if subscriptions %}
 
-  {% for sub in subscriptions %}
-  <div class="bg-white p-8 rounded-xl shadow-lg mb-6 flex items-center space-x-6 hover-scale">
-    <div class="gradient-bg text-white px-6 py-3 rounded-lg">
-      <p class="text-lg font-bold">{{ sub.plan_code }}</p>
-    </div>
-    <div class="flex-1">
-      <p class="text-gray-600">
-        Lưu lượng còn lại: <span class="font-bold text-gray-900">{{ sub.free_data }} MB</span>
-      </p>
-      <p class="text-gray-600 mt-1">
-        Ngày hết hạn: <span class="font-bold">{{ sub.expiration_date.strftime('%H:%M:%S %d/%m/%Y') }}</span>
-      </p>
-      <div class="flex space-x-4 mt-4">
-        {% if sub.cancel_at %}
-        <button class="text-gray-500 font-medium cursor-not-allowed" disabled>
-          Đã hủy
-        </button>
-        {% else %}
-        <button class="text-red-600 font-medium hover:underline"
-          onclick="deleteSubscription({{ sub.subscription_id }}, this)">
-          Hủy
-        </button>
-        {% endif %}
-        <a href="{{ url_for('customer_plan.plan_details', plan_id=sub.plan_id) }}"
-          class="text-gray-600 font-medium hover:underline">Chi tiết</a>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-  {% endif %}
 </main>
 <script>
   function openRechargeModal() {
@@ -206,25 +242,33 @@
     resetAmountButtons();
   }
 
-  function selectAmount(amount) {
-    const input = document.getElementById('amount');
-    input.value = amount;
-    const buttons = document.querySelectorAll('.amount-btn');
-    buttons.forEach(btn => {
-      btn.classList.remove('selected');
-      if (parseInt(btn.getAttribute('onclick').match(/\d+/)[0]) === amount) {
-        btn.classList.add('selected');
-      }
-    });
-       document.getElementById('submitBtn').disabled = false;
-  }
+ function selectAmount(amount) {
+  const input = document.getElementById('amount');
+  input.value = amount;
+  const buttons = document.querySelectorAll('.amount-btn');
+  buttons.forEach(btn => {
+    btn.classList.remove('selected');
+    if (parseInt(btn.getAttribute('onclick').match(/\d+/)[0]) === amount) {
+      btn.classList.add('selected');
+    }
+  });
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = false;
+  submitBtn.classList.remove('btn-disabled');
+  submitBtn.classList.add('gradient-bg');
+}
 
   function resetAmountButtons() {
-    const buttons = document.querySelectorAll('.amount-btn');
-    buttons.forEach(btn => btn.classList.remove('selected'));
-    document.getElementById('amount').value = '';
-    document.getElementById('submitBtn').disabled = true;
-  }
+  const buttons = document.querySelectorAll('.amount-btn');
+  buttons.forEach(btn => btn.classList.remove('selected'));
+  document.getElementById('amount').value = '';
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.classList.remove('gradient-bg');
+  submitBtn.classList.add('btn-disabled');
+}
+
 
   function deleteSubscription(subscriptionId, buttonElement) {
     if (confirm('Bạn có chắc muốn hủy subscription này không?')) {

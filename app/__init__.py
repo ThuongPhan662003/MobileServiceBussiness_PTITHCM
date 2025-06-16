@@ -65,7 +65,7 @@ def create_app():
     app.register_blueprint(exceptions)
     app.register_blueprint(auth)
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
-
+    app.config['SESSION_PERMANENT'] = True
     # Cấu hình Login Manager
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
