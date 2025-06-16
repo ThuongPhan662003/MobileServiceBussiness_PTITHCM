@@ -107,7 +107,17 @@ class UsageLogService:
                     )
 
                     subscriber.main_balance = main_balance
-     
+                    # data = {
+                    #     "phone_number": subscriber.phone_number,
+                    #     "main_balance": main_balance,
+                    #     "customer_id": subscriber.customer_id,
+                    #     "account_id": subscriber.account_id,
+                    #     "expiration_date": None,
+                    #     "warning_date": None,
+                    #     "is_active": str(subscriber.is_active).lower(),
+                    #     "subscriber": subscriber.subscriber_type,
+                    # }
+
                     print(
                         "sessssion",
                         session["subscriber_id"],
