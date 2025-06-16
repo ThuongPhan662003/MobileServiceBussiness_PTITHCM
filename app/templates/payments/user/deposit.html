@@ -32,10 +32,11 @@
         <form method="POST" action="{{ url_for('payment_api_bp.deposit_pay') }}">
             <input type="hidden" name="money" value="{{ money }}">
             <div class="flex justify-center gap-4 mt-8">
-                <a href="{{ url_for('payment_api_bp.deposit') }}"
-                    class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
-                    Quay lại
-                </a>
+               <a href="javascript:history.back()"
+   class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
+   Quay lại
+</a>
+
                 <button type="submit"
                     class="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
                     Xác nhận thanh toán
