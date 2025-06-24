@@ -121,7 +121,7 @@ def view_subscriber(subscriber_id):
 
 
 @auth.route("/forgot-password", methods=["GET", "POST"])
-@required
+# @required
 def forgot_password():
     step = int(request.args.get("step", 1))
     email_or_phone = request.args.get("email", "")
