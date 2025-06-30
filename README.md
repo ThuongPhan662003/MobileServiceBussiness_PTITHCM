@@ -93,26 +93,25 @@ pip install -r [requirements.txt](http://_vscodecontentref_/2)
 ```bash
 FLASK_APP=run.py
 FLASK_ENV=development
-SECRET_KEY=your_secret_key_here
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=thuong
-DB_NAME=mobileservice_n7
+SECRET_KEY=
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
 SECRET_KEY=supersecret
 FLASK_ENV=development
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
 # MAIL_USE_SSL=False
-MAIL_USERNAME=phanthuong2468@gmail.com
-# MAIL_PASSWORD=crazyscientist(hawk)
-MAIL_PASSWORD=huyg yjon pmqv vgvs
-MAIL_DEFAULT_SENDER=phanthuong2468@gmail.com
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_DEFAULT_SENDER=
 ADMINS=your_email@gmail.com
-VNPAY_URL = https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-VNPAY_TMNCODE = VNPAY_TMN_CODE
-VNPAY_SECRET_KEY = sRRRSC223@@#sdSD1225DS4F2SF_@
-VNPAY_HASHSECRET = VNPARRSC223@@###sdS__ET
+VNPAY_URL = 
+VNPAY_TMNCODE = 
+VNPAY_SECRET_KEY = 
+VNPAY_HASHSECRET = 
 ```
 
 ## Chạy ứng dụng Flask:
