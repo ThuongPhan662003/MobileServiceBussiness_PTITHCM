@@ -1,8 +1,8 @@
-# Quản Lý Nhà Hàng - Flask Project
+# Kinh doanh dịch vụ di động
 
 ## Mô tả
 
-Dự án **Quản Lý Nhà Hàng** được xây dựng bằng Flask, cung cấp các chức năng cơ bản như:
+Dự án **Kinh doanh dịch vụ di động** được xây dựng bằng Flask, cung cấp các chức năng cơ bản như:
 
 - Đăng nhập, đăng ký, và đăng xuất người dùng.
 - Hiển thị trang chủ.
